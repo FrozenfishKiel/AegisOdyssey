@@ -4,6 +4,7 @@
 #include "AOExtPawnComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "AegisOdyssey/AOGameplayTags.h"
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AOExtPawnComponent)
 
 const FName UAOExtPawnComponent::NAME_ActorFeatureName("PawnExtension");
 
@@ -34,6 +35,7 @@ bool UAOExtPawnComponent::CanChangeInitState(UGameFrameworkComponentManager* Man
 		}
 	}
 	//若当前状态等于Actor/组件已生成但未初始化，且目标状态为所有数据已加载或复制完成，可开始初始化
+	//检查PawnData，Controller是否Possess，满足则进入DataAvailiable
 	if (CurrentState == AOGameplayTags::InitState_Spawned && DesiredState == AOGameplayTags::InitState_DataAvailable)
 	{
 		const bool bHasAuthority = Pawn->HasAuthority();
@@ -51,9 +53,9 @@ bool UAOExtPawnComponent::CanChangeInitState(UGameFrameworkComponentManager* Man
 	//如果当前状态为所需数据已加载或复制完成，可开始初始化且目标状态为数据已初始化但尚未准备好参与核心游戏玩法时
 	else if (CurrentState == AOGameplayTags::InitState_DataAvailable && DesiredState == AOGameplayTags::InitState_DataInitialized)
 	{
-		// Transition to initialize if all features have their data available
 		return Manager->HaveAllFeaturesReachedInitState(Pawn, AOGameplayTags::InitState_DataAvailable);
-		//这个函数用于检查指定Actor的所有功能组件是否都已达到所需的初始化状态(所有数据已完成复制可开始初始化)，并可排除特定功能
+		//这个函数用于检查指定Actor的所有继承IGameFrameworkInitStateInterface的
+		//组件是否都已达到所需的初始化状态(所有数据已完成复制可开始初始化)，并可排除特定功能 //目的是等待其他组件初始化进行，此组件的状态才会继续
 	}
 	else if (CurrentState == AOGameplayTags::InitState_DataInitialized && DesiredState == AOGameplayTags::InitState_GameplayReady)
 	{
@@ -71,9 +73,8 @@ void UAOExtPawnComponent::HandleChangeInitState(UGameFrameworkComponentManager* 
 //用BindOnActorInitStateChanged()绑定的回调
 void UAOExtPawnComponent::OnActorInitStateChanged(const FActorInitStateChangedParams& Params)
 {
-	if (Params.FeatureName == NAME_ActorFeatureName)
+	if (Params.FeatureName != NAME_ActorFeatureName)
 	{
-		//如果FeatureState仍处于可开始初始化状态，则继续推进状态
 		if (Params.FeatureState == AOGameplayTags::InitState_DataAvailable)
 		{
 			CheckDefaultInitialization();
@@ -119,6 +120,53 @@ void UAOExtPawnComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void UAOExtPawnComponent::HandleControllerChange()
 {
+	if (AbilitySystemComponent && (AbilitySystemComponent->GetAvatarActor() == GetPawnChecked<APawn>()))
+	{
+		ensure(AbilitySystemComponent->AbilityActorInfo->OwnerActor == AbilitySystemComponent->GetOwnerActor());
+		if (AbilitySystemComponent->GetOwnerActor() == nullptr)
+		{
+			//UninitializeAbilitySystem();  //如果ASC的owner(控制器)不一致且为空则卸载当前的ASC
+		}
+		else
+		{
+			AbilitySystemComponent->RefreshAbilityActorInfo();  //刷新ASC的Actor信息
+		}
+	}
 	CheckDefaultInitialization();
+}
+
+void UAOExtPawnComponent::HandlePlayerStateReplicated()
+{
+	CheckDefaultInitialization();
+}
+
+void UAOExtPawnComponent::InitializeAbilitySystem(UAOAbilitySystem* InASC, AActor* InActor)
+{
+	check(InASC);
+	check(InActor);
+
+	if (AbilitySystemComponent == InASC)
+	{
+		return;
+	}
+
+	if (AbilitySystemComponent)
+	{
+		UninitializeAbilitySystem();
+	}
+
+	APawn* Pawn = GetPawn<APawn>();
+	AActor* ExistingAvatar = InASC->GetAvatarActor();
+
+	AbilitySystemComponent = InASC;
+
+	AbilitySystemComponent->InitAbilityActorInfo(InActor, Pawn);
+}
+
+//卸载ASC
+void UAOExtPawnComponent::UninitializeAbilitySystem()
+{
+	if (!AbilitySystemComponent) return;
+	AbilitySystemComponent = nullptr;
 }
 

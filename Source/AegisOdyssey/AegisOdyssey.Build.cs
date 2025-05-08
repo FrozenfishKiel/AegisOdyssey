@@ -8,7 +8,7 @@ public class AegisOdyssey : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore","ModularGameplay" , "GameplayTags","GameplayAbilities","GameplayTasks" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore","ModularGameplay" , "GameplayTags","GameplayAbilities","GameplayTasks" , "ModularGameplayActors" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "ModularGameplay","UMG" });
 

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AegisOdyssey/AbilitySystem/AOAbilitySystem.h"
 #include "Components/GameFrameworkInitStateInterface.h"
 #include "Components/PawnComponent.h"
 #include "AOExtPawnComponent.generated.h"
@@ -10,7 +11,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable, Meta=(BlueprintSpawnableComponent))
 class AEGISODYSSEY_API UAOExtPawnComponent : public UPawnComponent , public IGameFrameworkInitStateInterface
 {
 	GENERATED_BODY()
@@ -22,13 +23,19 @@ public:
 	virtual void HandleChangeInitState(UGameFrameworkComponentManager* Manager, FGameplayTag CurrentState, FGameplayTag DesiredState) override;
 	virtual void OnActorInitStateChanged(const FActorInitStateChangedParams& Params) override;
 	virtual void CheckDefaultInitialization() override;
-	
+	static UAOExtPawnComponent* FindAOExtPawnComponent(const AActor* Actor){return Actor ? Actor->FindComponentByClass<UAOExtPawnComponent>() : nullptr;}
 
 	/** Should be called by the owning pawn when the input component is setup. */
 	void SetupPlayerInputComponent();
 	void HandleControllerChange();
+	void HandlePlayerStateReplicated();
+	void InitializeAbilitySystem(UAOAbilitySystem* InASC, AActor* InActor);
+	void UninitializeAbilitySystem(); //卸载 ASC
 protected:
 	virtual void OnRegister() override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+protected:
+	UPROPERTY()
+	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 };

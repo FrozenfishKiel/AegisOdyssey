@@ -2,7 +2,6 @@
 
 
 #include "AOCharacter.h"
-#include "AbilitySystemComponent.h"
 #include "Components/CapsuleComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AOCharacter)
@@ -26,4 +25,53 @@ AAOCharacter::AAOCharacter(const FObjectInitializer& ObjectInitializer)
 
 	/*CreateDefaultPawnExtComp*/
 	AOExtPawnComp = CreateDefaultSubobject<UAOExtPawnComponent>(TEXT("AOExtPawnComponent"));
+
+	AOSourceASC = CreateDefaultSubobject<UAOAbilitySystem>(TEXT("AOAbilitySystem"));
+	AOSourceASC->SetIsReplicated(true);
+	AOSourceASC->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
+	SetNetUpdateFrequency(90.f);
+
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = true;
+	bUseControllerRotationRoll = false;
+}
+
+UAbilitySystemComponent* AAOCharacter::GetAbilitySystemComponent() const
+{
+	return AOSourceASC ? AOSourceASC : nullptr;
+}
+
+
+void AAOCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+	if (!AOExtPawnComp) return;
+	AOExtPawnComp->HandleControllerChange();
+}
+
+void AAOCharacter::UnPossessed()
+{
+	Super::UnPossessed();
+	
+	AOExtPawnComp->HandleControllerChange();  //刷新ExtComp中的ASC信息
+}
+
+void AAOCharacter::OnRep_Controller()
+{
+	Super::OnRep_Controller();
+	if (!AOExtPawnComp) return;
+	AOExtPawnComp->HandleControllerChange();
+}
+
+void AAOCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+	if (!AOExtPawnComp) return;
+	AOExtPawnComp->HandlePlayerStateReplicated();
+}
+
+void AAOCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	AOExtPawnComp->CheckDefaultInitialization();
 }
