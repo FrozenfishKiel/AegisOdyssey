@@ -12,7 +12,8 @@
 				"Engine",
 				"ModularGameplay",
 				"GameplayAbilities",
-				"ModularGameplayActors"
+				"ModularGameplayActors",
+				"GameFeatures"
 			]
 		}
 	],
@@ -30,10 +31,6 @@
 		},
 		{
 			"Name": "ModularGameplay",
-			"Enabled": true
-		},
-		{
-			"Name": "AOFeatures",
 			"Enabled": true
 		},
 		{
