@@ -5,26 +5,28 @@
 #include "CoreMinimal.h"
 #include "GameFeatureAction_WordActionBase.h"
 #include "UObject/SoftObjectPtr.h"
+#include "GameFrameworkComponent.generated.h"
 #include "GF_AddInputMapping.generated.h"
 
 /**
  * 
  */
+struct FComponentRequestHandle;
 class UInputMappingContext;
 USTRUCT()
 struct FInputMappingContextAndPriority
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, Category="Input", meta=(AssetBundles="Client,Server"))
-	TSoftObjectPtr<UInputMappingContext> InputMapping;
+	UPROPERTY(EditDefaultsOnly, Category="Input", meta=(AssetBundles="Client,Server"))
+	TObjectPtr<UInputMappingContext> InputMapping;
 
 	// Higher priority input mappings will be prioritized over mappings with a lower priority.
-	UPROPERTY(EditAnywhere, Category="Input")
+	UPROPERTY(EditDefaultsOnly, Category="Input")
 	int32 Priority = 0;
 	
 	/** If true, then this mapping context will be registered with the settings when this game feature action is registered. */
-	UPROPERTY(EditAnywhere, Category="Input")
+	UPROPERTY(EditDefaultsOnly, Category="Input")
 	bool bRegisterWithSettings = true;
 };
 UCLASS(MinimalAPI, meta = (DisplayName = "Add Input Mapping"))
@@ -42,6 +44,14 @@ public:
 	UPROPERTY(EditAnywhere, Category="Input")
 	TArray<FInputMappingContextAndPriority> InputMappings;
 private:
+	struct FPerContextData
+	{
+		TArray<TSharedPtr<FComponentRequestHandle>> ExtensionRequestHandles;
+		TArray<TWeakObjectPtr<APlayerController>> ControllersAddedTo;
+	};
+
+	TMap<FGameFeatureStateChangeContext, FPerContextData> ContextData;
+	
 	FDelegateHandle RegisterInputContextMappingsForGameInstanceHandle;  //用于注册IMC于GameInstance的委托句柄
 	void RegisterInputMappingContexts();
 	void RegisterInputContextMappingsForGameInstance(UGameInstance* GameInstance);
@@ -52,6 +62,11 @@ private:
 	void UnregisterInputContextMappingsForGameInstance(UGameInstance* GameInstance);
 
 	void UnregisterInputMappingContextsForLocalPlayer(ULocalPlayer* LocalPlayer);
+
+	void Reset(FPerContextData& ActiveData);
+
+	void RemoveInputMapping(APlayerController* PlayerController, FPerContextData& ActiveData);
 };
+
 
 
