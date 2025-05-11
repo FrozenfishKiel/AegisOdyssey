@@ -20,6 +20,7 @@ public:
 	UFUNCTION(BlueprintPure,Category = "AOHero")
 	static UAOHeroComponent* FindHeroComponent(const AActor* Actor){return (Actor ? Actor->FindComponentByClass<UAOHeroComponent>() : nullptr);}
 	static const FName NAME_ActorFeatureName;
+	static const FName NAME_BindInputsNow;
 	virtual FName GetFeatureName() const override { return NAME_ActorFeatureName; }
 	virtual bool CanChangeInitState(UGameFrameworkComponentManager* Manager, FGameplayTag CurrentState, FGameplayTag DesiredState) const override;
 	virtual void HandleChangeInitState(UGameFrameworkComponentManager* Manager, FGameplayTag CurrentState, FGameplayTag DesiredState) override;
@@ -30,5 +31,7 @@ protected:
 	virtual void OnRegister() override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-	
+
+
+	virtual void InitializePlayerInput(UInputComponent* PlayerInputComponent);
 };

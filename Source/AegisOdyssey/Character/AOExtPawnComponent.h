@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AOPawnData.h"
 #include "AegisOdyssey/AbilitySystem/AOAbilitySystem.h"
 #include "Components/GameFrameworkInitStateInterface.h"
 #include "Components/PawnComponent.h"
@@ -31,6 +32,10 @@ public:
 	void HandlePlayerStateReplicated();
 	void InitializeAbilitySystem(UAOAbilitySystem* InASC, AActor* InActor);
 	void UninitializeAbilitySystem(); //卸载 ASC
+
+	//返回创建的对应类的PawnData
+	template <class T>
+	const T* GetPawnData() const { return Cast<T>(PawnData); }
 protected:
 	virtual void OnRegister() override;
 	virtual void BeginPlay() override;
@@ -38,4 +43,10 @@ protected:
 protected:
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
+	UPROPERTY(EditInstanceOnly, ReplicatedUsing = OnRep_PawnData, Category = "Lyra|Pawn")
+	TObjectPtr<const UAOPawnData> PawnData;
+	UFUNCTION()
+	void OnRep_PawnData();
+private:
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 };

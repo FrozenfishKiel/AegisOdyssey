@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFeatureAction_WordActionBase.h"
 #include "UObject/SoftObjectPtr.h"
-#include "GameFrameworkComponent.generated.h"
 #include "GF_AddInputMapping.generated.h"
 
 /**
@@ -39,6 +38,7 @@ public:
 	virtual void OnGameFeatureActivating(FGameFeatureActivatingContext& Context) override;
 	virtual void OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context) override;
 	virtual void OnGameFeatureUnregistering() override;
+	virtual void AddToWorld(const FWorldContext& WorldContext, const FGameFeatureStateChangeContext& ChangeContext) override;
 	//~End of UGameFeatureAction interface
 
 	UPROPERTY(EditAnywhere, Category="Input")
@@ -63,10 +63,13 @@ private:
 
 	void UnregisterInputMappingContextsForLocalPlayer(ULocalPlayer* LocalPlayer);
 
+	void HandleControllerExtension(AActor* Actor, FName EventName, FGameFeatureStateChangeContext ChangeContext);
 	void Reset(FPerContextData& ActiveData);
 
+	void AddInputMappingForPlayer(UPlayer* Player, FPerContextData& ActiveData);
 	void RemoveInputMapping(APlayerController* PlayerController, FPerContextData& ActiveData);
 };
+
 
 
 

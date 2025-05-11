@@ -4,9 +4,12 @@
 #include "AOExtPawnComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "AegisOdyssey/AOGameplayTags.h"
+#include "Net/UnrealNetwork.h"
+
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AOExtPawnComponent)
 
 const FName UAOExtPawnComponent::NAME_ActorFeatureName("PawnExtension");
+
 
 void UAOExtPawnComponent::CheckDefaultInitialization()
 {
@@ -116,6 +119,17 @@ void UAOExtPawnComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 	UnregisterInitStateFeature();
+}
+
+void UAOExtPawnComponent::OnRep_PawnData()
+{
+	CheckDefaultInitialization();
+}
+
+void UAOExtPawnComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UAOExtPawnComponent, PawnData);
 }
 
 void UAOExtPawnComponent::HandleControllerChange()

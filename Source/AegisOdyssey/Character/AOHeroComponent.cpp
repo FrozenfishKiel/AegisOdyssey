@@ -5,12 +5,16 @@
 
 #include "AOCharacter.h"
 #include "AOExtPawnComponent.h"
+#include "AOPawnData.h"
+#include "EnhancedInputSubsystems.h"
 #include "AegisOdyssey/AOGameplayTags.h"
+#include "AegisOdyssey/Input/AOEnhancedInputComponent.h"
 #include "AegisOdyssey/Player/AOPlayerController.h"
 #include "AegisOdyssey/Player/AOPlayerState.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "GameFramework/PlayerState.h"
 const FName UAOHeroComponent::NAME_ActorFeatureName("Hero");
+const FName UAOHeroComponent::NAME_BindInputsNow("BindInputsNow");
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AOHeroComponent)
 UAOHeroComponent::UAOHeroComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -142,4 +146,39 @@ void UAOHeroComponent::CheckDefaultInitialization()
 
 	// This will try to progress from spawned (which is only set in BeginPlay) through the data initialization stages until it gets to gameplay ready
 	ContinueInitStateChain(StateChain);
+}
+
+void UAOHeroComponent::InitializePlayerInput(UInputComponent* PlayerInputComponent)
+{
+	check(PlayerInputComponent);
+
+	const APawn* Pawn = GetPawn<APawn>();
+
+	if (!Pawn) return;
+
+	const APlayerController* PC = GetController<APlayerController>();
+	check(PC);
+
+	const ULocalPlayer* LP = PC->GetLocalPlayer();
+	check(LP);
+
+	UEnhancedInputLocalPlayerSubsystem* SubSystem = LP->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+	check(SubSystem);
+
+	UAOEnhancedInputComponent* AOIC = Cast<UAOEnhancedInputComponent>(PlayerInputComponent);
+
+	const UAOExtPawnComponent* PawnExtComp = UAOExtPawnComponent::FindAOExtPawnComponent(Pawn);
+	if (!PawnExtComp) return;
+
+	const UAOPawnData* PawnData = PawnExtComp->GetPawnData<UAOPawnData>();
+	if (!PawnData) return;
+
+	const UAOInputConfig* InputConfig = PawnData->InputConfig;
+	
+	if (AOIC)
+	{
+		TArray<uint32> BindHandles;
+
+		
+	}
 }
