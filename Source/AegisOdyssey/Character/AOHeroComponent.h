@@ -10,6 +10,7 @@
 /**
  * 
  */
+struct FInputMappingContextAndPriority;
 struct FInputActionValue;
 UCLASS(Blueprintable , meta = (BlueprintSpawnableComponent))
 class AEGISODYSSEY_API UAOHeroComponent : public UPawnComponent , public IGameFrameworkInitStateInterface
@@ -40,5 +41,8 @@ protected:
 	void LookUp(const struct FInputActionValue&InputActionValue);
 
 	virtual void InitializePlayerInput(UInputComponent* PlayerInputComponent);
+protected:
+	UPROPERTY(EditDefaultsOnly , Category="Config")
+	TArray<FInputMappingContextAndPriority> DefaultInputMappings;
 };
 

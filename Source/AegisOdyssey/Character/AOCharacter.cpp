@@ -3,6 +3,7 @@
 
 #include "AOCharacter.h"
 
+#include "AOCharacterMovementComponent.h"
 #include "AegisOdyssey/Camera/AOCameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -41,6 +42,20 @@ AAOCharacter::AAOCharacter(const FObjectInitializer& ObjectInitializer)
 	AOCameraComponent->SetRelativeLocation(FVector(-300.0f, 0.0f, 75.0f));
 	AOCameraComponent->bUsePawnControlRotation = true;
 
+	
+	GetCharacterMovement()->GravityScale = 1.0f;
+	GetCharacterMovement()->MaxAcceleration = 2400.0f;
+	GetCharacterMovement()->BrakingFrictionFactor = 1.0f;
+	GetCharacterMovement()->BrakingFriction = 6.0f;
+	GetCharacterMovement()->GroundFriction = 8.0f;
+	GetCharacterMovement()->BrakingDecelerationWalking = 1400.0f;
+	GetCharacterMovement()->bUseControllerDesiredRotation = false;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
+	GetCharacterMovement()->bAllowPhysicsRotationDuringAnimRootMotion = false;
+	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
+	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;
+	GetCharacterMovement()->SetCrouchedHalfHeight(65.0f);
 
 	/*CreateDefaultAbilitySystemComponent*/
 	AOSourceASC = CreateDefaultSubobject<UAOAbilitySystem>(TEXT("AOAbilitySystem"));

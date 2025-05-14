@@ -5,6 +5,8 @@
 #include "AOGameFeatureDefinition.h"
 #include "GameFeatureAction.h"
 #include "GameFeaturesSubsystem.h"
+#include "AegisOdyssey/Character/AOExtPawnComponent.h"
+
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AOGameMode)
 void AAOGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
@@ -14,7 +16,27 @@ void AAOGameMode::InitGame(const FString& MapName, const FString& Options, FStri
 
 APawn* AAOGameMode::SpawnDefaultPawnAtTransform_Implementation(AController* NewPlayer, const FTransform& SpawnTransform)
 {
-	return Super::SpawnDefaultPawnAtTransform_Implementation(NewPlayer, SpawnTransform);
+	FActorSpawnParameters SpawnInfo;
+	SpawnInfo.Instigator = GetInstigator();
+	SpawnInfo.ObjectFlags |= RF_Transient;	// Never save the default player pawns into a map.
+	SpawnInfo.bDeferConstruction = true;
+
+	if (UClass* PawnClass = GetDefaultPawnClassForController(NewPlayer))
+	{
+		if (APawn* Spawned = GetWorld()->SpawnActor<APawn>(PawnClass, SpawnTransform,SpawnInfo))
+		{
+			if (UAOExtPawnComponent* PawnExtComp = UAOExtPawnComponent::FindAOExtPawnComponent(Spawned))
+			{
+				PawnExtComp->CheckDefaultInitialization();
+			}
+
+			Spawned->FinishSpawning(SpawnTransform);
+
+			return Spawned;
+		}
+	}
+
+	return nullptr;
 }
 
 void AAOGameMode::HandleGameInitialize()

@@ -8,11 +8,13 @@
 #include "AOPawnData.h"
 #include "EnhancedInputSubsystems.h"
 #include "AegisOdyssey/AOGameplayTags.h"
+#include "AegisOdyssey/GameFeatures/GF_AddInputMapping.h"
 #include "AegisOdyssey/Input/AOEnhancedInputComponent.h"
 #include "AegisOdyssey/Player/AOPlayerController.h"
 #include "AegisOdyssey/Player/AOPlayerState.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "GameFramework/PlayerState.h"
+#include "UserSettings/EnhancedInputUserSettings.h"
 const FName UAOHeroComponent::NAME_ActorFeatureName("Hero");
 const FName UAOHeroComponent::NAME_BindInputsNow("BindInputsNow");
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AOHeroComponent)
@@ -171,28 +173,48 @@ void UAOHeroComponent::InitializePlayerInput(UInputComponent* PlayerInputCompone
 
 	UEnhancedInputLocalPlayerSubsystem* SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
 	check(SubSystem);
-	
 
-	UAOEnhancedInputComponent* AOIC = CastChecked<UAOEnhancedInputComponent>(PlayerInputComponent);
+	SubSystem->ClearAllMappings();
 
-	const UAOExtPawnComponent* PawnExtComp = UAOExtPawnComponent::FindAOExtPawnComponent(Pawn);
-	if (!PawnExtComp) return;
-
-	const UAOPawnData* PawnData = PawnExtComp->GetPawnData<UAOPawnData>();
-	if (!PawnData) return;
-
-	const UAOInputConfig* InputConfig = PawnData->InputConfig;
-	
-	if (ensureMsgf(AOIC, TEXT("Unexpected Input Component class! The Gameplay Abilities will not be bound to their inputs. Change the input component to ULyraInputComponent or a subclass of it.")))
-
+	if (const UAOExtPawnComponent* AOExtPawn = UAOExtPawnComponent::FindAOExtPawnComponent(Pawn))
 	{
-		TArray<uint32> BindHandles;
+		if (const UAOPawnData* PawnData = AOExtPawn->GetPawnData<UAOPawnData>())
+		{
+			if (const UAOInputConfig* InputConfig = PawnData->InputConfig)
+			{
+				for (const FInputMappingContextAndPriority& Mapping : DefaultInputMappings)
+				{
+					if (UInputMappingContext* IMC = Mapping.InputMapping.Get())
+					{
+						if (Mapping.bRegisterWithSettings)
+						{
+							if (UEnhancedInputUserSettings* Settings = SubSystem->GetUserSettings())
+							{
+								Settings->RegisterInputMappingContext(IMC);
+							}
+							FModifyContextOptions Options = {};
+							Options.bIgnoreAllPressedKeysUntilRelease = false;
+							// Actually add the config to the local player							
+							SubSystem->AddMappingContext(IMC, Mapping.Priority, Options);
+						}
+					}
+				}
+				
+				UAOEnhancedInputComponent* AOIC = CastChecked<UAOEnhancedInputComponent>(PlayerInputComponent);
+				
+				if (ensureMsgf(AOIC, TEXT("Unexpected Input Component class! The Gameplay Abilities will not be bound to their inputs. Change the input component to ULyraInputComponent or a subclass of it.")))
+				{
+					TArray<uint32> BindHandles;
 
-		AOIC->BindAbilityActions(InputConfig,this,&ThisClass::Input_AbilityInputTagPressed,&ThisClass::Input_AbilityInputTagReleased,BindHandles);
+					AOIC->BindAbilityActions(InputConfig,this,&ThisClass::Input_AbilityInputTagPressed,&ThisClass::Input_AbilityInputTagReleased,BindHandles);
 
-		AOIC->BindNativeAction(InputConfig,AOGameplayTags::Input_Move,ETriggerEvent::Triggered,this,&ThisClass::Input_Move,false);
-		AOIC->BindNativeAction(InputConfig,AOGameplayTags::Input_LookUp,ETriggerEvent::Triggered,this,&ThisClass::LookUp,false);
+					AOIC->BindNativeAction(InputConfig,AOGameplayTags::Input_Move,ETriggerEvent::Triggered,this,&ThisClass::Input_Move,false);
+					AOIC->BindNativeAction(InputConfig,AOGameplayTags::Input_LookUp,ETriggerEvent::Triggered,this,&ThisClass::LookUp,false);
+				}
+			}
+		}
 	}
+
 
 
 
