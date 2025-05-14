@@ -19,10 +19,10 @@ struct FAOInputAction
 public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TObjectPtr<const UInputAction> InputAction = nullptr;
+	TObjectPtr<const UInputAction> InputAction = nullptr;  //输入的实际Action
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (Categories = "InputTag"))
-	FGameplayTag InputTag;
+	FGameplayTag InputTag; //与输入相关联的Tag
 };
 UCLASS()
 class AEGISODYSSEY_API UAOInputConfig : public UDataAsset

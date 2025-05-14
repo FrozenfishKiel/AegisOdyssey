@@ -25,7 +25,7 @@ void UGF_AddInputMapping::OnGameFeatureActivating(FGameFeatureActivatingContext&
 	
 	FPerContextData& ActivateData = ContextData.FindOrAdd(Context);
 	//储存器不为空
-	if (!ensure(ActivateData.ExtensionRequestHandles.IsEmpty()) || !ensure(ActivateData.ControllersAddedTo.IsEmpty()))
+	if (!(ActivateData.ExtensionRequestHandles.IsEmpty()) || !(ActivateData.ControllersAddedTo.IsEmpty()))
 	{
 		Reset(ActivateData);
 	}
@@ -123,10 +123,12 @@ void UGF_AddInputMapping::AddToWorld(const FWorldContext& WorldContext,
 		if (UGameFrameworkComponentManager* ComponentManager = UGameInstance::GetSubsystem<UGameFrameworkComponentManager>(GameInstance))
 		{
 			//创建一个扩展句柄委托的实例，他会绑定一个回调函数
+			//当有SendGameFrameworkComponentExtensionEvent发送对应的Static Name的时候，会触发该回调(Func::HandleControllerExtension)
 			UGameFrameworkComponentManager::FExtensionHandlerDelegate AddAbilitiesDelegate =
 				UGameFrameworkComponentManager::FExtensionHandlerDelegate::CreateUObject(this,&ThisClass::HandleControllerExtension,ChangeContext);
 
 			//共享一个扩展需求句柄，如果它被销毁，绑定的委托会被移除
+			//AddExtensionHandler添加的时候，此时该AddAbilitiesDelegate发送一个事件，并标记为"NAME_ExtensionAdded"
 			TSharedPtr<FComponentRequestHandle> ExtensionRequestHandle =
 				ComponentManager->AddExtensionHandler(APlayerController::StaticClass(),AddAbilitiesDelegate);
 

@@ -2,7 +2,7 @@
 
 
 #include "AOHeroComponent.h"
-
+#include "GameFramework/Controller.h"
 #include "AOCharacter.h"
 #include "AOExtPawnComponent.h"
 #include "AOPawnData.h"
@@ -70,7 +70,7 @@ bool UAOHeroComponent::CanChangeInitState(UGameFrameworkComponentManager* Manage
 	{
 		AAOPlayerState* AOPS = GetPlayerState<AAOPlayerState>();
 		//确保并等待PawnExtComp的初始化状态提前于当前this的状态
-		return AOPS && Manager->HasFeatureReachedInitState(Pawn,UAOExtPawnComponent::NAME_ActorFeatureName,AOGameplayTags::InitState_DataInitialized);
+		return AOPS || Manager->HasFeatureReachedInitState(Pawn,UAOExtPawnComponent::NAME_ActorFeatureName,AOGameplayTags::InitState_DataInitialized);
 	}
 	else if (CurrentState == AOGameplayTags::InitState_DataInitialized && DesiredState == AOGameplayTags::InitState_GameplayReady)
 	{
@@ -83,7 +83,6 @@ bool UAOHeroComponent::CanChangeInitState(UGameFrameworkComponentManager* Manage
 void UAOHeroComponent::HandleChangeInitState(UGameFrameworkComponentManager* Manager, FGameplayTag CurrentState,
 	FGameplayTag DesiredState)
 {
-	IGameFrameworkInitStateInterface::HandleChangeInitState(Manager, CurrentState, DesiredState);
 	if (CurrentState == AOGameplayTags::InitState_DataAvailable && DesiredState == AOGameplayTags::InitState_DataInitialized)
 	{
 		APawn* Pawn = GetPawn<APawn>();
@@ -97,6 +96,14 @@ void UAOHeroComponent::HandleChangeInitState(UGameFrameworkComponentManager* Man
 		if (UAOExtPawnComponent* ExtPawn = UAOExtPawnComponent::FindAOExtPawnComponent(Pawn))
 		{
 			ExtPawn->InitializeAbilitySystem(CurrentCharacter->GetSourceASC(),AOPC);
+		}
+
+		if (AAOPlayerController* PC = GetController<AAOPlayerController>())
+		{
+			if (Pawn->InputComponent != nullptr)
+			{
+				InitializePlayerInput(Pawn->InputComponent);
+			}
 		}
 	}
 }
@@ -139,6 +146,8 @@ void UAOHeroComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
+
+
 void UAOHeroComponent::CheckDefaultInitialization()
 {
 	static const TArray<FGameplayTag> StateChain = { AOGameplayTags::InitState_Spawned, AOGameplayTags::InitState_DataAvailable,
@@ -158,14 +167,13 @@ void UAOHeroComponent::InitializePlayerInput(UInputComponent* PlayerInputCompone
 
 	const APlayerController* PC = GetController<APlayerController>();
 	check(PC);
+	
 
-	const ULocalPlayer* LP = PC->GetLocalPlayer();
-	check(LP);
-
-	UEnhancedInputLocalPlayerSubsystem* SubSystem = LP->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+	UEnhancedInputLocalPlayerSubsystem* SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
 	check(SubSystem);
+	
 
-	UAOEnhancedInputComponent* AOIC = Cast<UAOEnhancedInputComponent>(PlayerInputComponent);
+	UAOEnhancedInputComponent* AOIC = CastChecked<UAOEnhancedInputComponent>(PlayerInputComponent);
 
 	const UAOExtPawnComponent* PawnExtComp = UAOExtPawnComponent::FindAOExtPawnComponent(Pawn);
 	if (!PawnExtComp) return;
@@ -175,10 +183,60 @@ void UAOHeroComponent::InitializePlayerInput(UInputComponent* PlayerInputCompone
 
 	const UAOInputConfig* InputConfig = PawnData->InputConfig;
 	
-	if (AOIC)
+	if (ensureMsgf(AOIC, TEXT("Unexpected Input Component class! The Gameplay Abilities will not be bound to their inputs. Change the input component to ULyraInputComponent or a subclass of it.")))
+
 	{
 		TArray<uint32> BindHandles;
 
-		
+		AOIC->BindAbilityActions(InputConfig,this,&ThisClass::Input_AbilityInputTagPressed,&ThisClass::Input_AbilityInputTagReleased,BindHandles);
+
+		AOIC->BindNativeAction(InputConfig,AOGameplayTags::Input_Move,ETriggerEvent::Triggered,this,&ThisClass::Input_Move,false);
+		AOIC->BindNativeAction(InputConfig,AOGameplayTags::Input_LookUp,ETriggerEvent::Triggered,this,&ThisClass::LookUp,false);
 	}
+
+
+
+	UGameFrameworkComponentManager::SendGameFrameworkComponentExtensionEvent(const_cast<APlayerController*>(PC), NAME_BindInputsNow);
+	UGameFrameworkComponentManager::SendGameFrameworkComponentExtensionEvent(const_cast<APawn*>(Pawn), NAME_BindInputsNow);
+}
+
+
+void UAOHeroComponent::Input_Move(const FInputActionValue& InputActionValue)
+{
+	AAOPlayerController* PC = GetController<AAOPlayerController>();
+	const FVector2D InputAxisVector = InputActionValue.Get<FVector2D>();
+	const FRotator Rotation = PC->GetControlRotation();
+	const FRotator YawRotation(0.f,Rotation.Yaw,0.f);
+
+	/*获取角色向量在平面方向的坐标*/
+	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	const FVector RightDirection =FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Input X: %f, Y: %f"), InputAxisVector.X, InputAxisVector.Y));
+
+	
+	if(APawn*MyPawn = GetPawn<APawn>())
+	{
+		/*添加移动输入操作*/
+		MyPawn->AddMovementInput(ForwardDirection,InputAxisVector.Y);
+		MyPawn->AddMovementInput(RightDirection,InputAxisVector.X);
+	}
+}
+
+void UAOHeroComponent::LookUp(const struct FInputActionValue& InputActionValue)
+{
+	FVector2D LookAxisVector = InputActionValue.Get<FVector2D>();  //获取数据传入的2D向量
+	AAOCharacter *OwingCharacter = Cast<AAOCharacter>(GetPawn<APawn>());
+	check(OwingCharacter);
+	OwingCharacter->AddControllerYawInput(LookAxisVector.X);
+	OwingCharacter->AddControllerPitchInput(-(LookAxisVector.Y));
+}
+
+void UAOHeroComponent::Input_AbilityInputTagPressed(FGameplayTag InputTag)
+{
+	
+}
+
+void UAOHeroComponent::Input_AbilityInputTagReleased(FGameplayTag InputTag)
+{
+	
 }

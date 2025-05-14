@@ -18,6 +18,7 @@ class AEGISODYSSEY_API UAOExtPawnComponent : public UPawnComponent , public IGam
 	GENERATED_BODY()
 public:
 	static const FName NAME_ActorFeatureName;
+	UAOExtPawnComponent(const FObjectInitializer& ObjectInitializer);
 
 	virtual FName GetFeatureName() const override { return NAME_ActorFeatureName; }
 	virtual bool CanChangeInitState(UGameFrameworkComponentManager* Manager, FGameplayTag CurrentState, FGameplayTag DesiredState) const override;
@@ -43,7 +44,7 @@ protected:
 protected:
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
-	UPROPERTY(EditInstanceOnly, ReplicatedUsing = OnRep_PawnData, Category = "Lyra|Pawn")
+	UPROPERTY(EditDefaultsOnly, ReplicatedUsing = OnRep_PawnData, Category = "AO|Pawn")
 	TObjectPtr<const UAOPawnData> PawnData;
 	UFUNCTION()
 	void OnRep_PawnData();

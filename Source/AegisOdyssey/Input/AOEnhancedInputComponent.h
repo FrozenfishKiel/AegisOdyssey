@@ -10,7 +10,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Config = Input)
 class AEGISODYSSEY_API UAOEnhancedInputComponent : public UEnhancedInputComponent
 {
 	GENERATED_BODY()

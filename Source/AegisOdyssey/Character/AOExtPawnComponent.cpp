@@ -10,10 +10,22 @@
 
 const FName UAOExtPawnComponent::NAME_ActorFeatureName("PawnExtension");
 
+UAOExtPawnComponent::UAOExtPawnComponent(const FObjectInitializer& ObjectInitializer) :Super(ObjectInitializer)
+{
+	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
+
+	SetIsReplicatedByDefault(true);
+	
+	PawnData = nullptr;
+	AbilitySystemComponent = nullptr;
+	
+}
+
 
 void UAOExtPawnComponent::CheckDefaultInitialization()
 {
-	//该函数会尝试推进注册的Actor下其他Component的初始化阶段，之后会继续推进自己的初始化阶段
+	//该函数会尝试推进注册的Actor下其他继承了IGameFrameworkInitStateInterface的Component的初始化阶段，之后会继续推进自己的初始化阶段
 	CheckDefaultInitializationForImplementers();
 
 	static const TArray<FGameplayTag> StateChain = {AOGameplayTags::InitState_Spawned,AOGameplayTags::InitState_DataAvailable,AOGameplayTags::InitState_DataInitialized,

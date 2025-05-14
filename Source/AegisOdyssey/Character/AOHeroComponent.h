@@ -10,6 +10,7 @@
 /**
  * 
  */
+struct FInputActionValue;
 UCLASS(Blueprintable , meta = (BlueprintSpawnableComponent))
 class AEGISODYSSEY_API UAOHeroComponent : public UPawnComponent , public IGameFrameworkInitStateInterface
 {
@@ -32,6 +33,12 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	void Input_AbilityInputTagPressed(FGameplayTag InputTag);
+	void Input_AbilityInputTagReleased(FGameplayTag InputTag);
+
+	void Input_Move(const FInputActionValue& InputActionValue);
+	void LookUp(const struct FInputActionValue&InputActionValue);
 
 	virtual void InitializePlayerInput(UInputComponent* PlayerInputComponent);
 };
+

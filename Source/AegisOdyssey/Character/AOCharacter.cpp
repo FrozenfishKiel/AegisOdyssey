@@ -2,7 +2,10 @@
 
 
 #include "AOCharacter.h"
+
+#include "AegisOdyssey/Camera/AOCameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AOCharacter)
 
@@ -22,10 +25,24 @@ AAOCharacter::AAOCharacter(const FObjectInitializer& ObjectInitializer)
 	check(MeshComp);
 	MeshComp->SetRelativeRotation(FRotator(0.f,-90.f,0.f));
 	MeshComp->SetCollisionProfileName(FName("AOPlayerCollision_Name"));
+	
 
 	/*CreateDefaultPawnExtComp*/
 	AOExtPawnComp = CreateDefaultSubobject<UAOExtPawnComponent>(TEXT("AOExtPawnComponent"));
 
+	
+	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
+	SpringArmComponent->SetupAttachment(GetRootComponent());
+	SpringArmComponent->bUsePawnControlRotation = true;
+	
+	/*CreateDefaultPawnExtComp*/
+	AOCameraComponent = CreateDefaultSubobject<UAOCameraComponent>(TEXT("AOCameraComponent"));
+	AOCameraComponent->SetupAttachment(SpringArmComponent);
+	AOCameraComponent->SetRelativeLocation(FVector(-300.0f, 0.0f, 75.0f));
+	AOCameraComponent->bUsePawnControlRotation = true;
+
+
+	/*CreateDefaultAbilitySystemComponent*/
 	AOSourceASC = CreateDefaultSubobject<UAOAbilitySystem>(TEXT("AOAbilitySystem"));
 	AOSourceASC->SetIsReplicated(true);
 	AOSourceASC->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);

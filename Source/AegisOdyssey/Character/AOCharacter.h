@@ -8,6 +8,8 @@
 #include "ModularCharacter.h"
 #include "AOCharacter.generated.h"
 
+class USpringArmComponent;
+class UAOCameraComponent;
 /**
  * 
  */
@@ -24,6 +26,10 @@ private:
 	TObjectPtr<UAOExtPawnComponent> AOExtPawnComp;
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category="AOCharacterConfig",meta=(AllowPrivateAccess=true))
 	TObjectPtr<UAOAbilitySystem> AOSourceASC;
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category="AOCharacterConfig",meta=(AllowPrivateAccess=true))
+	TObjectPtr<UAOCameraComponent> AOCameraComponent;
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="AOCharacterConfig",meta=(AllowPrivateAccess=true))
+	TObjectPtr<USpringArmComponent> SpringArmComponent;
 protected:
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void UnPossessed() override;
