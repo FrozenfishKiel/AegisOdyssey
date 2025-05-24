@@ -20,15 +20,15 @@ void UGF_AddInputMapping::OnGameFeatureRegistering()
 //子类Activating负责尝试重置
 void UGF_AddInputMapping::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
-	Super::OnGameFeatureActivating(Context);
 
-	
 	FPerContextData& ActivateData = ContextData.FindOrAdd(Context);
 	//储存器不为空
-	if (!(ActivateData.ExtensionRequestHandles.IsEmpty()) || !(ActivateData.ControllersAddedTo.IsEmpty()))
+	if (!ensure(ActivateData.ExtensionRequestHandles.IsEmpty()) || !ensure(ActivateData.ControllersAddedTo.IsEmpty()))
 	{
 		Reset(ActivateData);
 	}
+	
+	Super::OnGameFeatureActivating(Context);
 }
 
 void UGF_AddInputMapping::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
@@ -129,6 +129,7 @@ void UGF_AddInputMapping::AddToWorld(const FWorldContext& WorldContext,
 
 			//共享一个扩展需求句柄，如果它被销毁，绑定的委托会被移除
 			//AddExtensionHandler添加的时候，此时该AddAbilitiesDelegate发送一个事件，并标记为"NAME_ExtensionAdded"
+			//特定的Actor类被创建或初始化的时候也会触发
 			TSharedPtr<FComponentRequestHandle> ExtensionRequestHandle =
 				ComponentManager->AddExtensionHandler(APlayerController::StaticClass(),AddAbilitiesDelegate);
 

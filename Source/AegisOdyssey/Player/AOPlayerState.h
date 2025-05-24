@@ -10,11 +10,13 @@
 /**
  * 
  */
+
 UCLASS()
 class AEGISODYSSEY_API AAOPlayerState : public AModularPlayerState
 {
 	GENERATED_BODY()
 public:
+	static const FName NAME_AOAbilityReady;
 	UFUNCTION(BlueprintCallable, Category="AOPlayerStateConfig")
 	AAOPlayerController* GetAOPlayerController() const;
 };

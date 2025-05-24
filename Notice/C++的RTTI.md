@@ -111,3 +111,83 @@ Derived* derived_ptr = static_cast<Derived*>(base_ptr);
 * `static_cast`在**<u>编译时</u>**完成类型转换，编译器<u>仅根据静态类型</u>（声明的类型）进行转换，<u>不会检查对象的实际动态类型</u>。
 
 * 如果基类指针<u>实际指向</u>的**不是目标派生类对象**，使用`static_cast`强制向下转换会导致未定义行为（UB），例如内存越界访问、数据损坏等。
+  
+  
+
+![feeff618d9f22311bd0f113f29b8448](D:\Weixin\WeChat%20Files\wxid_b59tkxu8246w22\FileStorage\Temp\feeff618d9f22311bd0f113f29b8448.png)
+
+
+
+```
+class Point
+{
+public:
+    Point(float xval);
+    virtual ~Point();
+
+    float x() const;
+    static int PointCount();
+
+protected:
+    virtual ostream& print(ostream& os) const;
+
+    float _x;
+    static int _point_count;
+};
+```
+
+
+
+类对象实例在生成的时候会顺带生成一个指向该类虚函数表的指针，伴随虚函数表的还有RTTI（图中那个type_info for point），其余表内的指针都指向该类的**虚函数成员**，每个多态对象都有一个指向其vtable的指针，称为vptr。RTTI（就是上面图中的 type_info 结构)通常与vtable关联。
+
+**类内有虚函数时虚函数表会建立。**
+
+`dynamic_cast`就是**利用RTTI**来执行运行时**类型检查**和**安全类型转换**。
+
+* 首先，`dynamic_cast`通过查询对象的 vptr 来获取其RTTI（这也是为什么 dynamic_cast 要求对象有虚函数）
+* 然后，`dynamic_cast`比较请求的目标类型与从RTTI获得的实际类型。如果**目标类型是实际类型或其基类**，则转换成功。
+* 如果目标类型是派生类，`dynamic_cast`会检查类层次结构，以确定转换是否合法。如果在类层次结构中找到了目标类型，则转换成功；否则，转换失败。
+* 当转换成功时，`dynamic_cast`返回转换后的指针或引用。
+* 如果转换失败，对于指针类型，`dynamic_cast`返回空指针；对于引用类型，它会抛出一个`std::bad_cast`异常。
+  
+  
+  
+  
+
+总结：类型安全转换，dynamic_cast 通过检查对象的 vptr 来判断对象的实际类型。如果没有虚拟函数，编译器不会为类生成 vtable，也就无法提供 RTTI 信息。因此，dynamic_cast 无法工作，因为它没有足够的信息来确定对象的真实类型。
+
+
+
+再举一个例子
+
+```
+class A {
+public:
+    virtual void vfunc1();
+    virtual void vfunc2();
+    void func1();
+    void func2();
+private:
+    int m_data1, m_data2;
+};
+ 
+class B : public A {
+public:
+    virtual void vfunc1();
+    void func1();
+private:
+    int m_data3;
+};
+ 
+class C: public B {
+public:
+    virtual void vfunc2();
+    void func2();
+private:
+    int m_data1, m_data4;
+};
+```
+
+![这里写图片描述](https://i-blog.csdnimg.cn/blog_migrate/3bd3b35ecefd13afa68fd01d4facb5b0.png)
+
+

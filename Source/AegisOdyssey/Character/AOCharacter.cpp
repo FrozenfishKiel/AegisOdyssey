@@ -61,7 +61,7 @@ AAOCharacter::AAOCharacter(const FObjectInitializer& ObjectInitializer)
 	AOSourceASC = CreateDefaultSubobject<UAOAbilitySystem>(TEXT("AOAbilitySystem"));
 	AOSourceASC->SetIsReplicated(true);
 	AOSourceASC->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
-	SetNetUpdateFrequency(90.f);
+	SetNetUpdateFrequency(100.f);
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = true;
