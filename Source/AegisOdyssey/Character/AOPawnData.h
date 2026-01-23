@@ -9,6 +9,7 @@
 #include "Engine/DataAsset.h"
 #include "AOPawnData.generated.h"
 
+class UAOCameraMode;
 class UAOAnimStateData;
 /**
  * 
@@ -32,4 +33,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category = "AO|Pawn")
 	TObjectPtr<UAOAnimStateData> AnimStateData;  //角色状态标签-动画对 表
+
+	// Default camera mode used by player controlled pawns.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AO|Camera")
+	TSubclassOf<UAOCameraMode> DefaultCameraMode;
 };

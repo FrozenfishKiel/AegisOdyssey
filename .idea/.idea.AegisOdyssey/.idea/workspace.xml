@@ -14,10 +14,9 @@
   <component name="ChangeListManager">
     <list default="true" id="d94a3367-33f1-4132-9cbd-998a391af91c" name="更改" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.AegisOdyssey/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AegisOdyssey/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/CBP_SandboxCharacter.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/CBP_SandboxCharacter.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Games/Character/Anny/BP_Anny.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Character/Anny/BP_Anny.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Games/Character/Anny/DA_AnnyAnimStateData.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Character/Anny/DA_AnnyAnimStateData.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Games/Character/BP_Character_Default.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Character/BP_Character_Default.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/Character/AOHeroComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/Character/AOHeroComponent.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,7 +30,18 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="cidr-memory-view://0" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../UE_5.6/Engine/Source/Editor/AnimGraph/Private/AnimBlueprintCompiler.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../UE_5.6/Engine/Source/Editor/ComponentVisualizers/ComponentVisualizers.Build.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../UE_5.6/Engine/Source/Runtime/Core/Private/Logging/StructuredLog.cpp" root0="FORCE_HIGHLIGHTING" />
@@ -188,7 +198,7 @@
       <workItem from="1768309438167" duration="619000" />
       <workItem from="1769041884804" duration="1839000" />
       <workItem from="1769084179834" duration="3268000" />
-      <workItem from="1769088949270" duration="932000" />
+      <workItem from="1769088949270" duration="10573000" />
     </task>
     <servers />
   </component>

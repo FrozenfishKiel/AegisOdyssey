@@ -12,6 +12,7 @@
  */
 struct FInputMappingContextAndPriority;
 struct FInputActionValue;
+class UAOCameraMode;
 UCLASS(Blueprintable , meta = (BlueprintSpawnableComponent))
 class AEGISODYSSEY_API UAOHeroComponent : public UPawnComponent , public IGameFrameworkInitStateInterface
 {
@@ -42,7 +43,14 @@ protected:
 
 	virtual void InitializePlayerInput(UInputComponent* PlayerInputComponent);
 	void InitializePlayerInputInternal(UInputComponent* PlayerInputComponent);
+
+	TSubclassOf<UAOCameraMode> DetermineCameraMode() const;
+
 protected:
+	/** Camera mode set by an ability. */
+	UPROPERTY()
+	TSubclassOf<UAOCameraMode> AbilityCameraMode;
+	
 	UPROPERTY(EditDefaultsOnly , Category="Config")
 	TArray<FInputMappingContextAndPriority> DefaultInputMappings;
 };

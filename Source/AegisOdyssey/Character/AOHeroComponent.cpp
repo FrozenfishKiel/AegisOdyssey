@@ -18,6 +18,8 @@
 #include "Components/GameFrameworkComponentManager.h"
 #include "GameFramework/PlayerState.h"
 #include "InputMappingContext.h"
+#include "AegisOdyssey/Camera/AOCameraMode.h"
+#include "AegisOdyssey/Camera/AOCameraComponent.h"
 #include "UserSettings/EnhancedInputUserSettings.h"
 const FName UAOHeroComponent::NAME_ActorFeatureName("Hero");
 const FName UAOHeroComponent::NAME_BindInputsNow("BindInputsNow");
@@ -92,16 +94,18 @@ void UAOHeroComponent::HandleChangeInitState(UGameFrameworkComponentManager* Man
 	if (CurrentState == AOGameplayTags::InitState_DataAvailable && DesiredState == AOGameplayTags::InitState_DataInitialized)
 	{
 		APawn* Pawn = GetPawn<APawn>();
-		AAOPlayerController* AOPC = GetController<AAOPlayerController>();
 		AAOPlayerState* AOPS = GetPlayerState<AAOPlayerState>();
 		AAOCharacter* CurrentCharacter = Cast<AAOCharacter>(Pawn);
-		if (!ensure(Pawn && AOPC))
+		if (!ensure(Pawn && AOPS))
 		{
 			return;
 		}
+		
+		const UAOPawnData* PawnData = nullptr;
 
 		if (UAOExtPawnComponent* ExtPawn = UAOExtPawnComponent::FindAOExtPawnComponent(Pawn))
 		{
+			PawnData = ExtPawn->GetPawnData<UAOPawnData>();
 			ExtPawn->InitializeAbilitySystem(CurrentCharacter->GetSourceASC(),AOPS);
 		}
 
@@ -112,7 +116,39 @@ void UAOHeroComponent::HandleChangeInitState(UGameFrameworkComponentManager* Man
 				InitializePlayerInput(Pawn->InputComponent);
 			}
 		}
+
+		if (PawnData)
+		{
+			if (UAOCameraComponent* CameraComponent = UAOCameraComponent::FindCameraComponent(Pawn))
+			{
+				CameraComponent->DetermineCameraModeDelegate.BindUObject(this,&ThisClass::DetermineCameraMode);
+			}
+		}
 	}
+}
+
+TSubclassOf<UAOCameraMode> UAOHeroComponent::DetermineCameraMode() const
+{
+	if (AbilityCameraMode)
+	{
+		return AbilityCameraMode;
+	}
+
+	const APawn* Pawn = GetPawn<APawn>();
+	if (!Pawn)
+	{
+		return nullptr;
+	}
+
+	if (UAOExtPawnComponent* PawnExtComp = UAOExtPawnComponent::FindAOExtPawnComponent(Pawn))
+	{
+		if (const UAOPawnData* PawnData = PawnExtComp->GetPawnData<UAOPawnData>())
+		{
+			return PawnData->DefaultCameraMode;
+		}
+	}
+
+	return nullptr;
 }
 
 //当PawnExt的状态发生改变的时候会通过接口调用这个函数

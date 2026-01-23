@@ -80,6 +80,9 @@ AAOCharacter::AAOCharacter(const FObjectInitializer& ObjectInitializer)
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = true;
 	bUseControllerRotationRoll = false;
+
+	BaseEyeHeight = 80.0f;
+	CrouchedEyeHeight = 50.0f;
 }
 
 UAbilitySystemComponent* AAOCharacter::GetAbilitySystemComponent() const
