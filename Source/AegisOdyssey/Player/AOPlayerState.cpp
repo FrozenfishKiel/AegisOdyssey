@@ -2,9 +2,12 @@
 
 
 #include "AOPlayerState.h"
+
+#include "GameFeaturesSubsystem.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "AegisOdyssey/Character/AOExtPawnComponent.h"
 #include "AegisOdyssey/Character/AOPawnData.h"
+#include "GameFeatureAction.h"
 #include "AegisOdyssey/GameModes/AOExperienceManagerComponent.h"
 #include "AegisOdyssey/GameModes/AOGameMode.h"
 #include "Net/UnrealNetwork.h"
@@ -75,11 +78,27 @@ void AAOPlayerState::SetPawnData(const UAOPawnData* InPawnData)
 	
 	PawnData = InPawnData;
 
-	for (const UAOAbilitySet* AbilitySet : PawnData->AbilitySets)
+	FGameFeatureActivatingContext Context;
+	const FWorldContext* ExistingWorldContext = GEngine->GetWorldContextFromWorld(GetWorld());
+	if (ExistingWorldContext)
 	{
-		
+		Context.SetRequiredWorldContextHandle(ExistingWorldContext->ContextHandle);
 	}
+	auto ActivationListOfActions = [&Context] (const TArray<UGameFeatureAction*>& InActions)
+	{
+		for (UGameFeatureAction* Action : InActions)
+		{
+			if (Action != nullptr)
+			{
+				Action->OnGameFeatureRegistering();
+				Action->OnGameFeatureLoading();
+				Action->OnGameFeatureActivating(Context);
+			}
+		}
+	};
 
+	ActivationListOfActions(PawnData->Actions);
+	
 	UGameFrameworkComponentManager::SendGameFrameworkComponentExtensionEvent(this, NAME_AOAbilityReady);
 
 	ForceNetUpdate();

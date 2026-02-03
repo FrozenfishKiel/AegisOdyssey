@@ -11,6 +11,7 @@
 
 class UAOCameraMode;
 class UAOAnimStateData;
+class UGameFeatureAction;
 /**
  * 
  */
@@ -37,4 +38,8 @@ public:
 	// Default camera mode used by player controlled pawns.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AO|Camera")
 	TSubclassOf<UAOCameraMode> DefaultCameraMode;
+
+	// List of actions to perform as this experience is loaded/activated/deactivated/unloaded
+	UPROPERTY(EditDefaultsOnly, Instanced, Category="Actions")
+	TArray<TObjectPtr<UGameFeatureAction>> Actions;  //加载所需的Action
 };

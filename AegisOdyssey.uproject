@@ -19,7 +19,8 @@
 				"CommonGame",
 				"CommonUI",
 				"ModelViewViewModel",
-				"UMG"
+				"UMG",
+				"GameplayStateTreeModule"
 			]
 		}
 	],
@@ -102,6 +103,10 @@
 		},
 		{
 			"Name": "LiveLinkControlRig",
+			"Enabled": true
+		},
+		{
+			"Name": "GameplayStateTree",
 			"Enabled": true
 		}
 	]
