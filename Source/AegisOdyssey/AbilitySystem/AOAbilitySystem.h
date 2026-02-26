@@ -16,6 +16,7 @@ class AEGISODYSSEY_API UAOAbilitySystem : public UAbilitySystemComponent
 public:
 	void AbilityInputTagPressed(const FGameplayTag& InputTag);
 	void AbilityInputTagReleased(const FGameplayTag& InputTag);
+	void AbilityInputTagStarted(const FGameplayTag& InputTag);
 	void ProcessAbilityInput(float DeltaTime, bool bGamePaused);
 	void ClearAbilityInput();
 	virtual void InitAbilityActorInfo(AActor* InOwnerActor, AActor* InAvatarActor) override;
@@ -26,6 +27,7 @@ protected:
 	void TryActivateAbilitiesOnSpawn();
 
 protected:
+	TArray<FGameplayAbilitySpecHandle> InputStartedSpecHandles;
 	// Handles to abilities that had their input pressed this frame.
 	TArray<FGameplayAbilitySpecHandle> InputPressedSpecHandles;
 

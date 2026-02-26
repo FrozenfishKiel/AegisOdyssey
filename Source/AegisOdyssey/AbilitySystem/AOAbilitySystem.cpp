@@ -95,6 +95,21 @@ void UAOAbilitySystem::AbilityInputTagReleased(const FGameplayTag& InputTag)
 		}
 	}
 }
+
+void UAOAbilitySystem::AbilityInputTagStarted(const FGameplayTag& InputTag)
+{
+	if (InputTag.IsValid())
+	{
+		for (const FGameplayAbilitySpec& AbilitySpec : ActivatableAbilities.Items)
+		{
+			if (AbilitySpec.Ability && (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag)))
+			{
+				InputStartedSpecHandles.AddUnique(AbilitySpec.Handle);
+			}
+		}
+	}
+}
+
 void UAOAbilitySystem::AbilitySpecInputPressed(FGameplayAbilitySpec& Spec)
 {
 	Super::AbilitySpecInputPressed(Spec);
@@ -189,6 +204,34 @@ void UAOAbilitySystem::ProcessAbilityInput(float DeltaTime, bool bGamePaused)
 		}
 	}
 
+	for (const FGameplayAbilitySpecHandle& SpecHandle : InputStartedSpecHandles)
+	{
+		if (FGameplayAbilitySpec* AbilitySpec = FindAbilitySpecFromHandle(SpecHandle))
+		{
+			if (AbilitySpec->Ability)
+			{
+				AbilitySpec->InputPressed = true;
+
+				//如果Ability已经激活，则发送Pressed事件
+				if (AbilitySpec->IsActive())
+				{
+					// Ability is active so pass along the input event.
+					AbilitySpecInputPressed(*AbilitySpec);
+				}
+				//如果Ability没有激活，则通过按键激活
+				else
+				{
+					const UAOGameplayAbility* AOAbilityCDO = Cast<UAOGameplayAbility>(AbilitySpec->Ability);
+
+					if (AOAbilityCDO && AOAbilityCDO->GetActivationPolicy() == EAOAbilityActivationPolicy::Start)
+					{
+						AbilitiesToActivate.AddUnique(AbilitySpec->Handle);
+					}
+				}
+			}
+		}
+	}
+
 	//
 	//尝试激活所有来自点击和按下的能力。我们一次完成所有操作，这样按下的输入不会激活能力，然后也会因为点击而向能力发送输入事件。
 	//
@@ -224,10 +267,12 @@ void UAOAbilitySystem::ProcessAbilityInput(float DeltaTime, bool bGamePaused)
 	//但Hold还保留，在Released触发前，Hold的池子都不会被清空，只要它内部有成员，就会一直尝试激活对应的Ability
 	InputPressedSpecHandles.Reset();
 	InputReleasedSpecHandles.Reset();
+	InputStartedSpecHandles.Reset();
 }
 
 void UAOAbilitySystem::ClearAbilityInput()
 {
+	InputStartedSpecHandles.Reset();
 	InputPressedSpecHandles.Reset();
 	InputReleasedSpecHandles.Reset();
 	InputHeldSpecHandles.Reset();

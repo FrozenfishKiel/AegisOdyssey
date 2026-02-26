@@ -47,6 +47,7 @@ private:
 
 protected:
 	void DisableMovementAndCollision();
+	void HandleStateTreeChange();
 protected:
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void UnPossessed() override;

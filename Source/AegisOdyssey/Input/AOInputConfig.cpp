@@ -23,7 +23,7 @@ const UInputAction* UAOInputConfig::FindNativeInputActionForTag(const FGameplayT
 
 const UInputAction* UAOInputConfig::FindAbilityInputActionForTag(const FGameplayTag& InputTag, bool bLogNotFound) const
 {
-	for (const FAOInputAction& Action : AbilityInputActions)
+	for (const FAOInputAction& Action : AbilityPressedInputActions)
 	{
 		if (Action.InputAction && (Action.InputTag == InputTag))
 		{

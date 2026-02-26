@@ -7,6 +7,7 @@
 #include "AegisOdyssey/AbilitySystem/Attributes/AOCombatAttributeSet.h"
 #include "AegisOdyssey/Camera/AOCameraComponent.h"
 #include "AegisOdyssey/Equipment/AOQuickBarComponent.h"
+#include "AegisOdyssey/StateTree/AOStateTreeComponentBase.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -108,11 +109,24 @@ void AAOCharacter::DisableMovementAndCollision()
 	AOMoveComp->DisableMovement();
 }
 
+void AAOCharacter::HandleStateTreeChange()
+{
+	for (UActorComponent* Component : GetComponents())
+	{
+		if (Component->IsA(UAOStateTreeComponentBase::StaticClass()))
+		{
+			UAOStateTreeComponentBase* TreeComponent = CastChecked<UAOStateTreeComponentBase>(Component);
+			TreeComponent->RestartLogic(); //重置所有状态树
+		}
+	}
+}
+
 void AAOCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 	if (!AOExtPawnComp) return;
 	AOExtPawnComp->HandleControllerChange();
+	HandleStateTreeChange();
 }
 
 void AAOCharacter::UnPossessed()
@@ -120,12 +134,16 @@ void AAOCharacter::UnPossessed()
 	Super::UnPossessed();
 	
 	AOExtPawnComp->HandleControllerChange();  //刷新ExtComp中的ASC信息
+	HandleStateTreeChange();
+
 }
 
 void AAOCharacter::Reset()
 {
 	Super::Reset();
 	DisableMovementAndCollision();
+	HandleStateTreeChange();
+
 }
 
 void AAOCharacter::OnRep_Controller()

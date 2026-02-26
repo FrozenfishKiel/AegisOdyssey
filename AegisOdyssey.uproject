@@ -20,7 +20,8 @@
 				"CommonUI",
 				"ModelViewViewModel",
 				"UMG",
-				"GameplayStateTreeModule"
+				"GameplayStateTreeModule",
+				"StateTreeModule"
 			]
 		}
 	],

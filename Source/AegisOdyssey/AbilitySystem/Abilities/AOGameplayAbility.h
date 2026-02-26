@@ -21,7 +21,10 @@ enum class EAOAbilityActivationPolicy : uint8
 	WhileInputActive,
 
 	//尝试激活该能力当Avatar被分配时
-	OnSpawn
+	OnSpawn,
+
+	//单次激活
+	Start,
 	
 };
 /** 失败时可以用来播放动画集锦的原因 */

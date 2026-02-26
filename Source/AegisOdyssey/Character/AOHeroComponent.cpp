@@ -21,6 +21,7 @@
 #include "AegisOdyssey/Camera/AOCameraMode.h"
 #include "AegisOdyssey/Camera/AOCameraComponent.h"
 #include "UserSettings/EnhancedInputUserSettings.h"
+#include "AegisOdyssey/AOLogChannels.h"
 const FName UAOHeroComponent::NAME_ActorFeatureName("Hero");
 const FName UAOHeroComponent::NAME_BindInputsNow("BindInputsNow");
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AOHeroComponent)
@@ -287,7 +288,7 @@ void UAOHeroComponent::InitializePlayerInputInternal(UInputComponent* PlayerInpu
 
 					AOIC->AddInputMappings(InputConfig , SubSystem);
 					
-					AOIC->BindAbilityActions(InputConfig,this,&ThisClass::Input_AbilityInputTagPressed,&ThisClass::Input_AbilityInputTagReleased,BindHandles);
+					AOIC->BindAbilityActions(InputConfig,this,&ThisClass::Input_AbilityInputTagStarted,&ThisClass::Input_AbilityInputTagPressed,&ThisClass::Input_AbilityInputTagReleased,BindHandles);
 
 					AOIC->BindNativeAction(InputConfig,AOGameplayTags::Input_Move,ETriggerEvent::Triggered,this,&ThisClass::Input_Move,false);
 					AOIC->BindNativeAction(InputConfig,AOGameplayTags::Input_LookUp,ETriggerEvent::Triggered,this,&ThisClass::LookUp,false);
@@ -357,6 +358,21 @@ void UAOHeroComponent::Input_AbilityInputTagReleased(FGameplayTag InputTag)
 			if (UAOAbilitySystem* AOASC = PawnExtComp->GetAOAbilitySystemComponent())
 			{
 				AOASC->AbilityInputTagReleased(InputTag);
+			}
+		}
+	}
+}
+
+void UAOHeroComponent::Input_AbilityInputTagStarted(FGameplayTag InputTag)
+{
+	if (const APawn* Pawn = GetPawn<APawn>())
+	{
+		if (const UAOExtPawnComponent* PawnExtComp = UAOExtPawnComponent::FindAOExtPawnComponent(Pawn))
+		{
+			if (UAOAbilitySystem* AOASC = PawnExtComp->GetAOAbilitySystemComponent())
+			{
+				AOASC->AbilityInputTagStarted(InputTag);
+				UE_LOG(LogAegisOdysseyPlayer,Warning, TEXT("Start "));
 			}
 		}
 	}

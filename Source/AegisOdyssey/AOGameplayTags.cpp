@@ -12,7 +12,7 @@ namespace AOGameplayTags
 
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_Move,"Input.Move","Player Base Moving Mode");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_LookUp,"Input.LookUp","Player Base Look Mode");
-	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_Attack,"Input.Attack","Player begin Attack");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_LightAttack,"Input.LightAttack","角色轻攻击");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_Interact,"Input.Interact","Player begin Interact");
 
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Layer_Game,"UI.Layer.Game","Player Game Main UI Layer.");

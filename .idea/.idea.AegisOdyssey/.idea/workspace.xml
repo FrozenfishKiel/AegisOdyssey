@@ -14,14 +14,45 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d94a3367-33f1-4132-9cbd-998a391af91c" name="更改" comment="">
+      <change afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AbilitySystem/Abilities/Attack/Combat/GA_LightAttack.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AbilitySystem/Abilities/Attack/Combat/GA_LightAttack.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/AegisOdyssey/Animation/NotifyState/AOCombatWindow.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/AegisOdyssey/Animation/NotifyState/AOCombatWindow.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/CombatStateTree/AOCombatStateTree.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/CombatStateTree/AOCombatStateTree.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/Tasks/STT_PlayAnimation.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/Tasks/STT_PlayAnimation.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.AegisOdyssey/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AegisOdyssey/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/AegisOdyssey-git2.code-workspace" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/AegisOdyssey.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/AegisOdyssey.sln.DotSettings.user" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/AegisOdyssey.uproject" beforeDir="false" afterPath="$PROJECT_DIR$/AegisOdyssey.uproject" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Character/Anny/Abilities/GA_AnnyAttack.uasset" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Games/Character/Anny/BP_Anny.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Character/Anny/BP_Anny.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Character/Anny/DA_AnnyAbilitySet.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Character/Anny/DA_AnnyAbilitySet.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Input/DA_AOInputConfig.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Input/DA_AOInputConfig.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Input/IA_Attack.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Input/IMC_Default.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Input/IMC_Default.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/StarterContent/Architecture/Floor_400x400.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/StarterContent/Architecture/Floor_400x400.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/StarterContent/Blueprints/Blueprint_CeilingLight.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/StarterContent/Blueprints/Blueprint_CeilingLight.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/AegisOdyssey.Build.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AegisOdyssey.Build.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/Character/AOPawnData.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/Character/AOPawnData.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/Player/AOPlayerState.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/Player/AOPlayerState.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LyraCameraSystem_Analysis.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/LyraCameraSystem_Mermaid.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/LyraCameraSystem_MindMap.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/AOGameplayTags.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AOGameplayTags.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/AOGameplayTags.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AOGameplayTags.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/AOStateTags.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AOStateTags.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/AOStateTags.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AOStateTags.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/AbilitySystem/AOAbilitySystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AbilitySystem/AOAbilitySystem.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/AbilitySystem/AOAbilitySystem.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AbilitySystem/AOAbilitySystem.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/AbilitySystem/Abilities/AOGameplayAbility.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AbilitySystem/Abilities/AOGameplayAbility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/Character/AOCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/Character/AOCharacter.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/Character/AOCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/Character/AOCharacter.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/Character/AOHeroComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/Character/AOHeroComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/Character/AOHeroComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/Character/AOHeroComponent.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/Input/AOEnhancedInputComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/Input/AOEnhancedInputComponent.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/Input/AOInputConfig.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/Input/AOInputConfig.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/Input/AOInputConfig.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/Input/AOInputConfig.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/AOStateTreeComponentBase.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/AOStateTreeComponentBase.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/AOStateTreeComponentBase.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/AOStateTreeComponentBase.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,22 +65,34 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "FrozenfishKiel"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;FrozenfishKiel&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/FrozenfishKiel/AegisOdyssey.git",
-    "accountId": "e92c7d57-e916-4c0f-8427-37c3407941e0"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/FrozenfishKiel/AegisOdyssey.git&quot;,
+    &quot;accountId&quot;: &quot;e92c7d57-e916-4c0f-8427-37c3407941e0&quot;
   }
-}]]></component>
+}</component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="cidr-memory-view://3" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/AIModule/Private/BrainComponent.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Core/Public/UObject/NameTypes.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Core/Public/Windows/WindowsPlatformAtomics.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/CoreUObject/Public/UObject/ObjectHandle.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Engine/Classes/GameFramework/Pawn.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Engine/Private/PlayerController.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/AegisOdyssey/StateTree/AOStateTreeComponentBase.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/AegisOdyssey/StateTree/AOStateTreeComponentBase.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/AegisOdyssey/StateTree/Conditions/STC_ActorHasMatchTag.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/AegisOdyssey/StateTree/Conditions/STC_ActorHasMatchTag.h" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
@@ -60,21 +103,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "C/C++ 项目.AegisOdyssey.executor": "Debug",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "AO-GASP",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "editor.preferences.fonts.default",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;C/C++ 项目.AegisOdyssey.executor&quot;: &quot;Debug&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;AO-GASP&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="C/C++ 项目.AegisOdyssey">
     <configuration name="AegisOdyssey" type="CppProject" factoryName="C++ Project">
       <configuration_1 setup="1">
@@ -212,6 +255,16 @@
       <workItem from="1769084179834" duration="3268000" />
       <workItem from="1769088949270" duration="10573000" />
       <workItem from="1770091134983" duration="11027000" />
+      <workItem from="1770110290275" duration="10063000" />
+      <workItem from="1770188016682" duration="10095000" />
+      <workItem from="1771662265660" duration="31000" />
+      <workItem from="1771875827688" duration="714000" />
+      <workItem from="1771996185784" duration="766000" />
+      <workItem from="1772034620610" duration="3153000" />
+      <workItem from="1772038810052" duration="4793000" />
+      <workItem from="1772077362611" duration="13521000" />
+      <workItem from="1772093588384" duration="19306000" />
+      <workItem from="1772122865024" duration="1708000" />
     </task>
     <servers />
   </component>
@@ -221,6 +274,14 @@
   <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="CppProject">
+        <watch expression="{,,UnrealEditor-Engine.dll}::GPlayInEditorContextString" language="C++" />
+        <watch expression="this&#10;" language="C++" />
+      </configuration>
+    </watches-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

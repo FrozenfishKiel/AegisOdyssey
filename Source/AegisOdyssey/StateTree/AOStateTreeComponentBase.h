@@ -9,9 +9,12 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable , meta = (BlueprintSpawnableComponent),DisplayName = "AOStateTreeComponent")
 class AEGISODYSSEY_API UAOStateTreeComponentBase : public UStateTreeComponent
 {
 	GENERATED_BODY()
-	
+public:
+	UAOStateTreeComponentBase();
+	virtual void StartLogic() override;
+	virtual void RestartLogic() override;
 };

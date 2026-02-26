@@ -19,8 +19,8 @@ public:
 	template<class UserClass, typename FuncType>
 	void BindNativeAction(const UAOInputConfig* InputConfig, const FGameplayTag& InputTag, ETriggerEvent TriggerEvent, UserClass* Object, FuncType Func, bool bLogIfNotFound);
 
-	template<class UserClass, typename PressedFuncType, typename ReleasedFuncType>
-	void BindAbilityActions(const UAOInputConfig* InputConfig, UserClass* Object, PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc, TArray<uint32>& BindHandles);
+	template<class UserClass,typename StartedFuncType ,typename PressedFuncType, typename ReleasedFuncType>
+	void BindAbilityActions(const UAOInputConfig* InputConfig, UserClass* Object, StartedFuncType StartedFunc,PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc, TArray<uint32>& BindHandles);
 
 	void AddInputMappings(const UAOInputConfig* InputConfig, UEnhancedInputLocalPlayerSubsystem* InputSubsystem) const;
 
@@ -40,13 +40,13 @@ void UAOEnhancedInputComponent::BindNativeAction(const UAOInputConfig* InputConf
 }
 
 //输入技能按键绑定
-template <class UserClass, typename PressedFuncType, typename ReleasedFuncType>
+template <class UserClass, typename StartedFuncType, typename PressedFuncType, typename ReleasedFuncType>
 void UAOEnhancedInputComponent::BindAbilityActions(const UAOInputConfig* InputConfig, UserClass* Object,
-	PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc, TArray<uint32>& BindHandles)
+	StartedFuncType StartedFunc,PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc, TArray<uint32>& BindHandles)
 {
 	check(InputConfig);
 
-	for (const FAOInputAction& Action : InputConfig->AbilityInputActions)
+	for (const FAOInputAction& Action : InputConfig->AbilityPressedInputActions)
 	{
 		if (Action.InputAction && Action.InputTag.IsValid())
 		{
@@ -54,7 +54,22 @@ void UAOEnhancedInputComponent::BindAbilityActions(const UAOInputConfig* InputCo
 			{
 				BindHandles.Add(BindAction(Action.InputAction, ETriggerEvent::Triggered, Object, PressedFunc, Action.InputTag).GetHandle());
 			}
-
+		}
+	}
+	for (const FAOInputAction& Action : InputConfig->AbilityStartInputActions)
+	{
+		if (Action.InputAction && Action.InputTag.IsValid())
+		{
+			if (StartedFunc)
+			{
+				BindHandles.Add(BindAction(Action.InputAction,ETriggerEvent::Started,Object,StartedFunc, Action.InputTag).GetHandle());
+			}
+		}
+	}
+	for (const FAOInputAction& Action : InputConfig->AbilityReleasedInputActions)
+	{
+		if (Action.InputAction && Action.InputTag.IsValid())
+		{
 			if (ReleasedFunc)
 			{
 				BindHandles.Add(BindAction(Action.InputAction, ETriggerEvent::Completed, Object, ReleasedFunc, Action.InputTag).GetHandle());

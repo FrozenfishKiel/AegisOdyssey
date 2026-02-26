@@ -42,5 +42,13 @@ public:
 
 	// List of input actions used by the owner.  These input actions are mapped to a gameplay tag and are automatically bound to abilities with matching input tags.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (TitleProperty = "InputAction"))
-	TArray<FAOInputAction> AbilityInputActions;
+	TArray<FAOInputAction> AbilityPressedInputActions;
+	
+	// 特殊情况：单次按下单次触发的信号
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (TitleProperty = "InputAction"))
+	TArray<FAOInputAction> AbilityStartInputActions;
+
+	// 松开按下的信号
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (TitleProperty = "InputAction"))
+	TArray<FAOInputAction> AbilityReleasedInputActions;
 };
