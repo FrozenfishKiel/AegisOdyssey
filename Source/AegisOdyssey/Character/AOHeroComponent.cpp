@@ -7,6 +7,7 @@
 #include "GameFramework/Controller.h"
 #include "AOCharacter.h"
 #include "AOExtPawnComponent.h"
+#include "AOInputBufferComponent.h"
 #include "AOPawnData.h"
 #include "EnhancedInputSubsystems.h"
 #include "AegisOdyssey/AOGameplayTags.h"
@@ -339,6 +340,10 @@ void UAOHeroComponent::Input_AbilityInputTagPressed(FGameplayTag InputTag)
 {
 	if (const APawn* Pawn = GetPawn<APawn>())
 	{
+		if (UAOInputBufferComponent* InputBufferComponent = UAOInputBufferComponent::FindOInputBufferComponent(Pawn))
+		{
+			InputBufferComponent->SetBufferedInput(InputTag,EInputType::Trigger);  //设置预输入
+		}
 		if (const UAOExtPawnComponent* PawnExtComp = UAOExtPawnComponent::FindAOExtPawnComponent(Pawn))
 		{
 			if (UAOAbilitySystem* AOASC = PawnExtComp->GetAOAbilitySystemComponent())
@@ -353,6 +358,10 @@ void UAOHeroComponent::Input_AbilityInputTagReleased(FGameplayTag InputTag)
 {
 	if (const APawn* Pawn = GetPawn<APawn>())
 	{
+		if (UAOInputBufferComponent* InputBufferComponent = UAOInputBufferComponent::FindOInputBufferComponent(Pawn))
+		{
+			InputBufferComponent->SetBufferedInput(InputTag,EInputType::Release);  //设置预输入
+		}
 		if (const UAOExtPawnComponent* PawnExtComp = UAOExtPawnComponent::FindAOExtPawnComponent(Pawn))
 		{
 			if (UAOAbilitySystem* AOASC = PawnExtComp->GetAOAbilitySystemComponent())
@@ -367,6 +376,10 @@ void UAOHeroComponent::Input_AbilityInputTagStarted(FGameplayTag InputTag)
 {
 	if (const APawn* Pawn = GetPawn<APawn>())
 	{
+		if (UAOInputBufferComponent* InputBufferComponent = UAOInputBufferComponent::FindOInputBufferComponent(Pawn))
+		{
+			InputBufferComponent->SetBufferedInput(InputTag,EInputType::Start);  //设置预输入
+		}
 		if (const UAOExtPawnComponent* PawnExtComp = UAOExtPawnComponent::FindAOExtPawnComponent(Pawn))
 		{
 			if (UAOAbilitySystem* AOASC = PawnExtComp->GetAOAbilitySystemComponent())

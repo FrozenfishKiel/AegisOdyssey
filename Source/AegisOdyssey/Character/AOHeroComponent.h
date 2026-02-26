@@ -13,6 +13,15 @@
 struct FInputMappingContextAndPriority;
 struct FInputActionValue;
 class UAOCameraMode;
+
+UENUM()
+enum EInputType : uint8
+{
+	None = 0,
+	Trigger = 1 ,
+	Start = 2 ,
+	Release = 3 ,
+};
 UCLASS(Blueprintable , meta = (BlueprintSpawnableComponent))
 class AEGISODYSSEY_API UAOHeroComponent : public UPawnComponent , public IGameFrameworkInitStateInterface
 {
