@@ -151,6 +151,8 @@ void AAOCharacter::OnRep_Controller()
 	Super::OnRep_Controller();
 	if (!AOExtPawnComp) return;
 	AOExtPawnComp->HandleControllerChange();
+	HandleStateTreeChange();
+
 }
 
 void AAOCharacter::OnRep_PlayerState()
@@ -158,6 +160,8 @@ void AAOCharacter::OnRep_PlayerState()
 	Super::OnRep_PlayerState();
 	if (!AOExtPawnComp) return;
 	AOExtPawnComp->HandlePlayerStateReplicated();
+	HandleStateTreeChange();
+
 }
 
 //角色初始化组件之后

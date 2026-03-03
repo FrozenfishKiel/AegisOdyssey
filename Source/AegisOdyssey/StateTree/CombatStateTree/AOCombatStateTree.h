@@ -1,11 +1,37 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AegisOdyssey/Character/AOHeroComponent.h"
 #include "AegisOdyssey/StateTree/AOStateTreeComponentBase.h"
 #include "AOCombatStateTree.generated.h"
 
+enum EInputType : uint8;
+
+USTRUCT(BlueprintType)
+struct FCombatStateTreeInputEvent
+{
+	GENERATED_BODY()
+
+	FCombatStateTreeInputEvent()
+		: InputTag(FGameplayTag::EmptyTag)
+		, InputType(EInputType::None)
+	{
+	}
+
+	FCombatStateTreeInputEvent(const FGameplayTag InInputTag, const EInputType InInputType)
+		: InputTag(InInputTag)
+		, InputType(InInputType)
+	{
+	}
+
+	UPROPERTY(EditAnywhere, Category = "CombatStateTree")
+	FGameplayTag InputTag;
+
+	UPROPERTY(EditAnywhere, Category = "CombatStateTree")
+	TEnumAsByte<EInputType> InputType;
+};
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent),DisplayName = "AOCombatStateTree")
 class AEGISODYSSEY_API UAOCombatStateTree : public UAOStateTreeComponentBase
@@ -13,15 +39,20 @@ class AEGISODYSSEY_API UAOCombatStateTree : public UAOStateTreeComponentBase
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this component's properties
 	UAOCombatStateTree();
 
 protected:
-	// Called when the game starts
 	virtual void BeginPlay() override;
 
 public:
-	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void OnRegister() override;
+	virtual void InitializeComponent() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+private:
+	void CallStateTreeToSentEvent(const FGameplayTag InTargetTag,const EInputType InInputType);
+	FDelegateHandle OnPressInputLoadHandle;
+	FDelegateHandle OnReleaseInputLoadHandle;
+	FDelegateHandle OnStartInputLoadHandle;
 };

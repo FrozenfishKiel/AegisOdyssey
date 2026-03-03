@@ -22,6 +22,11 @@ enum EInputType : uint8
 	Start = 2 ,
 	Release = 3 ,
 };
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPressInputLoad,const FGameplayTag,const EInputType);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnReleaseInputLoad,const FGameplayTag,const EInputType);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnStartInputLoad,const FGameplayTag,const EInputType);
+
+
 UCLASS(Blueprintable , meta = (BlueprintSpawnableComponent))
 class AEGISODYSSEY_API UAOHeroComponent : public UPawnComponent , public IGameFrameworkInitStateInterface
 {
@@ -39,6 +44,11 @@ public:
 	virtual void OnActorInitStateChanged(const FActorInitStateChangedParams& Params) override;
 
 	virtual void CheckDefaultInitialization() override;
+
+public:
+	FOnPressInputLoad OnPressInputLoad;
+	FOnReleaseInputLoad OnReleaseInputLoad;
+	FOnStartInputLoad OnStartInputLoad;
 protected:
 	virtual void OnRegister() override;
 	virtual void BeginPlay() override;

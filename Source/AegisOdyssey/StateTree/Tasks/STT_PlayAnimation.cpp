@@ -3,90 +3,109 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AegisOdyssey/Character/AOCharacter.h"
 #include "AegisOdyssey/AbilitySystem/AOAbilitySystem.h"
+#include "AegisOdyssey/AbilitySystem/Abilities/Attack/Combat/GA_LightAttack.h"
+#include "AbilitySystemGlobals.h"
+#include "GameplayAbilitySpec.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(STT_PlayAnimation)
 
 EStateTreeRunStatus FSTT_PlayAnimation::EnterState(FStateTreeExecutionContext& Context,
 	const FStateTreeTransitionResult& Transition) const
 {
-	const FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
-
-	if (AAOCharacter* Character = Cast<AAOCharacter>(Context.GetOwner()))
+	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
+	
+	AAOCharacter* Character = Cast<AAOCharacter>(Context.GetOwner());
+	if (!Character) 
 	{
-		if (Character->IsLocallyControlled())
-		{
-			if (UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Character))
-			{
-				SourceASC->AddLooseGameplayTag(InstanceData.StateTag);
-			}
-
-			if (USkeletalMeshComponent* Mesh = InstanceData.SkeletalMesh)
-			{
-				if (UAnimInstance* AnimInstance = Mesh->GetAnimInstance())
-				{
-					if (InstanceData.Montage)
-					{
-						AnimInstance->Montage_Play(
-							InstanceData.Montage,
-							InstanceData.PlayRate,
-							EMontagePlayReturnType::MontageLength,
-							InstanceData.StartTime,
-							InstanceData.bStopAllMontages
-						);
-					}
-				}
-			}
-		}
+		UE_LOG(LogStateTree, Error, TEXT("FSTT_PlayAnimation::EnterState: Character is null"));
+		return EStateTreeRunStatus::Failed;
 	}
 
-	return EStateTreeRunStatus::Running;
+	InstanceData.AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Character);
+	if (!InstanceData.AbilitySystemComponent) 
+	{
+		UE_LOG(LogStateTree, Error, TEXT("FSTT_PlayAnimation::EnterState: AbilitySystemComponent is null"));
+		return EStateTreeRunStatus::Failed;
+	}
+
+	if (!InstanceData.InputTag.IsValid()) 
+	{
+		UE_LOG(LogStateTree, Error, TEXT("FSTT_PlayAnimation::EnterState: InputTag is invalid"));
+		return EStateTreeRunStatus::Failed;
+	}
+
+	UE_LOG(LogStateTree, Warning, TEXT("FSTT_PlayAnimation::EnterState: Creating ULightAttackParams..."));
+
+	ULightAttackParams* LightAttackParams = NewObject<ULightAttackParams>(Character);
+	if (!LightAttackParams) 
+	{
+		UE_LOG(LogStateTree, Error, TEXT("FSTT_PlayAnimation::EnterState: Failed to create ULightAttackParams"));
+		return EStateTreeRunStatus::Failed;
+	}
+
+	UE_LOG(LogStateTree, Warning, TEXT("FSTT_PlayAnimation::EnterState: ULightAttackParams created successfully"));
+
+	LightAttackParams->InputTag = InstanceData.InputTag;
+	LightAttackParams->Montage = InstanceData.Montage;
+	LightAttackParams->PlayRate = InstanceData.PlayRate;
+	LightAttackParams->StartSection = InstanceData.StartSection;
+	LightAttackParams->StartTime = InstanceData.StartTime;
+
+	FGameplayEventData EventData;
+	EventData.OptionalObject = LightAttackParams;
+	EventData.EventTag = InstanceData.InputTag;
+
+	UE_LOG(LogStateTree, Warning, TEXT("FSTT_PlayAnimation::EnterState: Sending event with tag: %s"), *InstanceData.InputTag.ToString());
+
+	int32 ActivatedCount = InstanceData.AbilitySystemComponent->HandleGameplayEvent(InstanceData.InputTag, &EventData);
+
+	UE_LOG(LogStateTree, Warning, TEXT("FSTT_PlayAnimation::EnterState: ActivatedCount: %d"), ActivatedCount);
+
+	if (ActivatedCount > 0)
+	{
+		return EStateTreeRunStatus::Running;
+	}
+
+	return EStateTreeRunStatus::Failed;
 }
 
 void FSTT_PlayAnimation::ExitState(FStateTreeExecutionContext& Context,
 	const FStateTreeTransitionResult& Transition) const
 {
 	const FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
-
-	if (AAOCharacter* Character = Cast<AAOCharacter>(Context.GetOwner()))
-	{
-		if (Character->IsLocallyControlled())
-		{
-			if (UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Character))
-			{
-				SourceASC->RemoveLooseGameplayTag(InstanceData.StateTag);
-			}
-
-			if (USkeletalMeshComponent* Mesh = InstanceData.SkeletalMesh)
-			{
-				if (UAnimInstance* AnimInstance = Mesh->GetAnimInstance())
-				{
-					if (InstanceData.Montage)
-					{
-						AnimInstance->Montage_Stop(0.5,InstanceData.Montage);
-					}
-				}
-			}
-		}
-	}
+	
+	
 }
 
 EStateTreeRunStatus FSTT_PlayAnimation::Tick(FStateTreeExecutionContext& Context, const float DeltaTime) const
 {
 	const FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
-
-	if (USkeletalMeshComponent* Mesh = InstanceData.SkeletalMesh)
+	
+	if (!InstanceData.AbilitySystemComponent)
 	{
-		if (UAnimInstance* AnimInstance = Mesh->GetAnimInstance())
+		return EStateTreeRunStatus::Failed;
+	}
+
+	for (const FGameplayAbilitySpec& AbilitySpec : InstanceData.AbilitySystemComponent->GetActivatableAbilities())
+	{
+		if (AbilitySpec.Ability && AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InstanceData.InputTag))
 		{
-			if (InstanceData.Montage)
+			if (AbilitySpec.IsActive())
 			{
-				if (!AnimInstance->Montage_IsPlaying(InstanceData.Montage))
-				{
-					return EStateTreeRunStatus::Succeeded;
-				}
+				return EStateTreeRunStatus::Running;
+			}
+			else
+			{
+				return EStateTreeRunStatus::Succeeded;
 			}
 		}
 	}
 
 	return EStateTreeRunStatus::Running;
+}
+
+void FSTT_PlayAnimation::StateCompleted(FStateTreeExecutionContext& Context, const EStateTreeRunStatus CompletionStatus,
+	const FStateTreeActiveStates& CompletedActiveStates) const
+{
+	FStateTreeTaskCommonBase::StateCompleted(Context, CompletionStatus, CompletedActiveStates);
 }

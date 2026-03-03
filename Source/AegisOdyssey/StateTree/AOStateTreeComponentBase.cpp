@@ -7,6 +7,7 @@
 UAOStateTreeComponentBase::UAOStateTreeComponentBase()
 {
 	bStartLogicAutomatically = false;
+	SetIsReplicatedByDefault(true);
 }
 
 void UAOStateTreeComponentBase::StartLogic()

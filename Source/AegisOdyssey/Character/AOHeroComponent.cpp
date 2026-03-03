@@ -344,6 +344,7 @@ void UAOHeroComponent::Input_AbilityInputTagPressed(FGameplayTag InputTag)
 		{
 			InputBufferComponent->SetBufferedInput(InputTag,EInputType::Trigger);  //设置预输入
 		}
+		OnPressInputLoad.Broadcast(InputTag,EInputType::Trigger);
 		if (const UAOExtPawnComponent* PawnExtComp = UAOExtPawnComponent::FindAOExtPawnComponent(Pawn))
 		{
 			if (UAOAbilitySystem* AOASC = PawnExtComp->GetAOAbilitySystemComponent())
@@ -362,6 +363,7 @@ void UAOHeroComponent::Input_AbilityInputTagReleased(FGameplayTag InputTag)
 		{
 			InputBufferComponent->SetBufferedInput(InputTag,EInputType::Release);  //设置预输入
 		}
+		OnReleaseInputLoad.Broadcast(InputTag,EInputType::Release);
 		if (const UAOExtPawnComponent* PawnExtComp = UAOExtPawnComponent::FindAOExtPawnComponent(Pawn))
 		{
 			if (UAOAbilitySystem* AOASC = PawnExtComp->GetAOAbilitySystemComponent())
@@ -380,6 +382,7 @@ void UAOHeroComponent::Input_AbilityInputTagStarted(FGameplayTag InputTag)
 		{
 			InputBufferComponent->SetBufferedInput(InputTag,EInputType::Start);  //设置预输入
 		}
+		OnStartInputLoad.Broadcast(InputTag,EInputType::Start);
 		if (const UAOExtPawnComponent* PawnExtComp = UAOExtPawnComponent::FindAOExtPawnComponent(Pawn))
 		{
 			if (UAOAbilitySystem* AOASC = PawnExtComp->GetAOAbilitySystemComponent())

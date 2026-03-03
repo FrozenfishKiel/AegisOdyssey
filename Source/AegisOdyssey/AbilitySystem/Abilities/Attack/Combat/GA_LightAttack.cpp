@@ -1,37 +1,42 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "GA_LightAttack.h"
 #include "AegisOdyssey/StateTree/AOStateTreeComponentBase.h"
 #include "AegisOdyssey/StateTree/CombatStateTree/AOCombatStateTree.h"
+#include "AegisOdyssey/Character/AOCharacter.h"
+#include "AegisOdyssey/Animation/AOAnimInstance.h"
+#include "AbilitySystemGlobals.h"
+#include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GA_LightAttack)
 
-bool UGA_LightAttack::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
-	const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags,
-	const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const
+UGA_LightAttack::UGA_LightAttack(const FObjectInitializer& ObjectInitializer)
+	:Super(ObjectInitializer)
 {
-	// 直接从ActorInfo获取AvatarActor
-	AActor* AvatarActor = GetAvatarActorFromActorInfo();
-	if (!AvatarActor)
+	Params = nullptr;
+
+	FAbilityTriggerData TriggerData;
+	TriggerData.TriggerSource = EGameplayAbilityTriggerSource::GameplayEvent;
+	//TriggerData.TriggerTag = FGameplayTag::RequestGameplayTag(FName("InputTag.LightAttack"), true);
+	AbilityTriggers.Add(TriggerData);
+}
+
+bool UGA_LightAttack::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
+                                         const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags,
+                                         const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const
+{
+	if (!Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags))
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to get AvatarActor"));
-		return false;
-	}
-	// 1. 检查ActorInfo是否有效
-	if (!ActorInfo || !ActorInfo->AvatarActor.IsValid())
-	{
-		UE_LOG(LogTemp, Error, TEXT("Invalid ActorInfo or AvatarActor"));
 		return false;
 	}
 
-	// 2. 安全获取AvatarActor
-	AActor* TargetActor = ActorInfo->AvatarActor.Get();
-	if (!TargetActor)
+	AActor* AvatarActor = GetAvatarActorFromActorInfo();
+	if (!AvatarActor)
 	{
-		UE_LOG(LogTemp, Error, TEXT("AvatarActor is null"));
 		return false;
 	}
+
 	return true;
 }
 
@@ -41,18 +46,68 @@ void UGA_LightAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	AActor* TargetActor = ActorInfo->AvatarActor.Get();
-	for (auto Components : TargetActor->GetComponents())
+	if (TriggerEventData && TriggerEventData->OptionalObject)
 	{
-		if (Components->IsA(UAOCombatStateTree::StaticClass()))
-		{
-			UAOCombatStateTree* CombatStateTree = Cast<UAOCombatStateTree>(Components);
-			check(CombatStateTree);
-
-			FStateTreeEvent Event;
-			Event.Tag = FGameplayTag::RequestGameplayTag(FName("Input.LightAttack"));
-			CombatStateTree->SendStateTreeEvent(Event);
-			EndAbility(CurrentSpecHandle,CurrentActorInfo,CurrentActivationInfo,true,false);
-		}
+		Params = Cast<ULightAttackParams>(const_cast<UObject*>(TriggerEventData->OptionalObject.Get()));
 	}
+	else if (TriggerEventData && TriggerEventData->OptionalObject2)
+	{
+		Params = Cast<ULightAttackParams>(const_cast<UObject*>(TriggerEventData->OptionalObject2.Get()));
+	}
+	else
+	{
+		EndAbility(CurrentSpecHandle,CurrentActorInfo,CurrentActivationInfo,true,true);
+	}
+
+	PlayMontageAnimation();
+}
+
+void UGA_LightAttack::PlayMontageAnimation()
+{
+
+	UAnimMontage* MontageToPlay = Params ? Params->Montage : nullptr;
+	float PlayRateValue = Params ? Params->PlayRate : 1.0f;
+	FName StartSectionValue = Params ? Params->StartSection : NAME_None;
+	float StartTimeValue = Params ? Params->StartTime : 0.0f;
+
+	MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
+		this,
+		FName("PlayMontageAndWait"),
+		MontageToPlay,
+		PlayRateValue,
+		StartSectionValue,
+		true,
+		1.0f,
+		StartTimeValue,
+		false
+	);
+
+	if (MontageTask)
+	{
+		MontageTask->OnBlendOut.AddDynamic(this, &UGA_LightAttack::OnMontageBlendedOut);
+		MontageTask->OnCompleted.AddDynamic(this, &UGA_LightAttack::OnMontageCompleted);
+		MontageTask->OnInterrupted.AddDynamic(this, &UGA_LightAttack::OnMontageInterrupted);
+		MontageTask->OnCancelled.AddDynamic(this, &UGA_LightAttack::OnMontageCancelled);
+		MontageTask->ReadyForActivation();
+	}
+}
+
+void UGA_LightAttack::OnMontageCompleted()
+{
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
+}
+
+void UGA_LightAttack::OnMontageBlendedOut()
+{
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
+}
+
+void UGA_LightAttack::OnMontageInterrupted()
+{
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
+}
+
+void UGA_LightAttack::OnMontageCancelled()
+{
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }

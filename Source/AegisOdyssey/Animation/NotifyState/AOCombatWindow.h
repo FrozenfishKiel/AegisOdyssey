@@ -41,4 +41,7 @@ private:
 	/** 连招窗口标签 */
 	UPROPERTY(EditDefaultsOnly , meta = (AllowPrivateAccess))
 	FGameplayTag CombatWindowTag;
+	
+	UPROPERTY(EditDefaultsOnly , meta = (AllowPrivateAccess))
+	FGameplayTag CombatingTag;  //正在连招状态标签
 };

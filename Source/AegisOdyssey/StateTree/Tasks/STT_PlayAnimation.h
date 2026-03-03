@@ -2,12 +2,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayAbilitySpecHandle.h"
 #include "StateTreeTaskBase.h"
 #include "STT_PlayAnimation.generated.h"
 
+class UAbilitySystemComponent;
 /**
  * 播放连招动画的任务
- * 进入状态时添加Tag，动画结束/中断/BlendOut/取消时移除Tag
+ * 通过InputTag激活对应的技能，并绑定技能结束通知
  */
 USTRUCT()
 struct FPlayAnimationMontageInstanceData
@@ -15,7 +17,7 @@ struct FPlayAnimationMontageInstanceData
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, Category = "Config")
-	FGameplayTag StateTag;
+	FGameplayTag InputTag;
 
 	UPROPERTY(EditAnywhere, Category = "Config")
 	USkeletalMeshComponent* SkeletalMesh;
@@ -34,6 +36,12 @@ struct FPlayAnimationMontageInstanceData
 
 	UPROPERTY(EditAnywhere, Category = "Config")
 	bool bStopAllMontages = true;
+
+	UPROPERTY(EditAnywhere, Category = "Config")
+	float InBlendOutTime = 0.0f;
+
+	UPROPERTY()
+	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 };
 
 USTRUCT(DisplayName="Play Animation Montage", Category="AegisOdyssey")
@@ -53,4 +61,5 @@ struct AEGISODYSSEY_API FSTT_PlayAnimation : public FStateTreeTaskCommonBase
 	virtual EStateTreeRunStatus EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const override;
 	virtual void ExitState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const override;
 	virtual EStateTreeRunStatus Tick(FStateTreeExecutionContext& Context, const float DeltaTime) const override;
+	virtual void StateCompleted(FStateTreeExecutionContext& Context, const EStateTreeRunStatus CompletionStatus, const FStateTreeActiveStates& CompletedActiveStates) const override;
 };
