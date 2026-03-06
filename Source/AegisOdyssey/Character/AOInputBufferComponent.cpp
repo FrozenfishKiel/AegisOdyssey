@@ -66,15 +66,15 @@ bool UAOInputBufferComponent::TriggerBufferedInput()
 			{
 				if (SaveInputType == EInputType::Trigger)
 				{
-					AOASC->AbilityInputTagPressed(SaveInputTag);
+					OnPressInputBuffer.Broadcast(SaveInputTag,SaveInputType);
 				}
 				else if (SaveInputType == EInputType::Start)
 				{
-					AOASC->AbilityInputTagStarted(SaveInputTag);
+					OnStartInputBuffer.Broadcast(SaveInputTag,SaveInputType);
 				}
 				else
 				{
-					AOASC->AbilityInputTagReleased(SaveInputTag);
+					OnReleaseInputBuffer.Broadcast(SaveInputTag,SaveInputType);
 				}
 			}
 		}

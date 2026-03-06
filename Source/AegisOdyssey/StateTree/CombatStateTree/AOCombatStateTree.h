@@ -55,4 +55,8 @@ private:
 	FDelegateHandle OnPressInputLoadHandle;
 	FDelegateHandle OnReleaseInputLoadHandle;
 	FDelegateHandle OnStartInputLoadHandle;
+
+	FDelegateHandle OnPressInputBufferHandle;
+	FDelegateHandle OnReleaseInputBufferHandle;
+	FDelegateHandle OnStartInputBufferHandle;
 };

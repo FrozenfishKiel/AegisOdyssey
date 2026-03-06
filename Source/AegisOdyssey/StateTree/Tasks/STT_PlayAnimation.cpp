@@ -6,6 +6,8 @@
 #include "AegisOdyssey/AbilitySystem/Abilities/Attack/Combat/GA_LightAttack.h"
 #include "AbilitySystemGlobals.h"
 #include "GameplayAbilitySpec.h"
+#include "Abilities/GameplayAbility.h"
+#include "GameplayPrediction.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(STT_PlayAnimation)
 
@@ -17,56 +19,76 @@ EStateTreeRunStatus FSTT_PlayAnimation::EnterState(FStateTreeExecutionContext& C
 	AAOCharacter* Character = Cast<AAOCharacter>(Context.GetOwner());
 	if (!Character) 
 	{
-		UE_LOG(LogStateTree, Error, TEXT("FSTT_PlayAnimation::EnterState: Character is null"));
 		return EStateTreeRunStatus::Failed;
 	}
+	
 
 	InstanceData.AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Character);
 	if (!InstanceData.AbilitySystemComponent) 
 	{
-		UE_LOG(LogStateTree, Error, TEXT("FSTT_PlayAnimation::EnterState: AbilitySystemComponent is null"));
 		return EStateTreeRunStatus::Failed;
 	}
 
 	if (!InstanceData.InputTag.IsValid()) 
 	{
-		UE_LOG(LogStateTree, Error, TEXT("FSTT_PlayAnimation::EnterState: InputTag is invalid"));
 		return EStateTreeRunStatus::Failed;
 	}
 
-	UE_LOG(LogStateTree, Warning, TEXT("FSTT_PlayAnimation::EnterState: Creating ULightAttackParams..."));
 
-	ULightAttackParams* LightAttackParams = NewObject<ULightAttackParams>(Character);
-	if (!LightAttackParams) 
+	UE_LOG(LogStateTree, Warning, TEXT("FSTT_PlayAnimation::EnterState: Canceling current abilities with tag: %s"), *InstanceData.InputTag.ToString());
+	for (const FGameplayAbilitySpec& AbilitySpec : InstanceData.AbilitySystemComponent->GetActivatableAbilities())
 	{
-		UE_LOG(LogStateTree, Error, TEXT("FSTT_PlayAnimation::EnterState: Failed to create ULightAttackParams"));
-		return EStateTreeRunStatus::Failed;
+		if (AbilitySpec.Ability->GetAssetTags().HasTagExact(InstanceData.InputTag))
+		{
+			if (AbilitySpec.Ability && AbilitySpec.IsActive())
+			{
+				UE_LOG(LogStateTree, Warning, TEXT("FSTT_PlayAnimation::EnterState: Canceling ability: %s with AbilityTag: %s"), 
+					*AbilitySpec.Ability->GetName(), *InstanceData.InputTag.ToString());
+				InstanceData.AbilitySystemComponent->CancelAbilityHandle(AbilitySpec.Handle);
+			}
+		}
 	}
 
-	UE_LOG(LogStateTree, Warning, TEXT("FSTT_PlayAnimation::EnterState: ULightAttackParams created successfully"));
+	/**
+	 * 创建轻攻击目标数据（支持网络自动复制到服务器）
+	 * FLightAttackTargetData继承自FGameplayAbilityTargetData，会自动复制到服务器
+	 */
+	FLightAttackTargetData* TargetData = new FLightAttackTargetData();
+	TargetData->InputTag = InstanceData.InputTag;
+	TargetData->Montage = InstanceData.Montage;
+	TargetData->PlayRate = InstanceData.PlayRate;
+	TargetData->StartTime = InstanceData.StartTime;
+	TargetData->StartSection = InstanceData.StartSection;
 
-	LightAttackParams->InputTag = InstanceData.InputTag;
-	LightAttackParams->Montage = InstanceData.Montage;
-	LightAttackParams->PlayRate = InstanceData.PlayRate;
-	LightAttackParams->StartSection = InstanceData.StartSection;
-	LightAttackParams->StartTime = InstanceData.StartTime;
-
+	/**
+	 * 创建目标数据句柄并添加目标数据
+	 */
+	FGameplayAbilityTargetDataHandle TargetDataHandle;
+	TargetDataHandle.Data.Add(TSharedPtr<FGameplayAbilityTargetData>(TargetData));
+	
+	/**
+	 * 创建事件数据并传递目标数据句柄
+	 * TargetData会自动复制到服务器，服务器也能获取到相同的参数
+	 */
 	FGameplayEventData EventData;
-	EventData.OptionalObject = LightAttackParams;
 	EventData.EventTag = InstanceData.InputTag;
+	EventData.TargetData = TargetDataHandle;
 
-	UE_LOG(LogStateTree, Warning, TEXT("FSTT_PlayAnimation::EnterState: Sending event with tag: %s"), *InstanceData.InputTag.ToString());
+	UE_LOG(LogStateTree, Warning, TEXT("FSTT_PlayAnimation::EnterState: Activating GA_LightAttack with TargetData - InputTag: %s, Montage: %s, PlayRate: %.2f"), 
+		*InstanceData.InputTag.ToString(), 
+		*GetNameSafe(InstanceData.Montage), 
+		InstanceData.PlayRate);
 
-	int32 ActivatedCount = InstanceData.AbilitySystemComponent->HandleGameplayEvent(InstanceData.InputTag, &EventData);
+	/**
+	 * 调用HandleGameplayEvent激活能力并传递参数
+	 * 参数会通过TargetData自动复制到服务器
+	 */
+	int32 bActivated = InstanceData.AbilitySystemComponent->HandleGameplayEvent(InstanceData.InputTag, &EventData);
 
-	UE_LOG(LogStateTree, Warning, TEXT("FSTT_PlayAnimation::EnterState: ActivatedCount: %d"), ActivatedCount);
+	UE_LOG(LogStateTree, Warning, TEXT("FSTT_PlayAnimation::EnterState: Activation result: %d"), bActivated);
 
-	if (ActivatedCount > 0)
-	{
-		return EStateTreeRunStatus::Running;
-	}
+	return EStateTreeRunStatus::Running;
 
-	return EStateTreeRunStatus::Failed;
 }
 
 void FSTT_PlayAnimation::ExitState(FStateTreeExecutionContext& Context,
@@ -77,32 +99,6 @@ void FSTT_PlayAnimation::ExitState(FStateTreeExecutionContext& Context,
 	
 }
 
-EStateTreeRunStatus FSTT_PlayAnimation::Tick(FStateTreeExecutionContext& Context, const float DeltaTime) const
-{
-	const FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
-	
-	if (!InstanceData.AbilitySystemComponent)
-	{
-		return EStateTreeRunStatus::Failed;
-	}
-
-	for (const FGameplayAbilitySpec& AbilitySpec : InstanceData.AbilitySystemComponent->GetActivatableAbilities())
-	{
-		if (AbilitySpec.Ability && AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InstanceData.InputTag))
-		{
-			if (AbilitySpec.IsActive())
-			{
-				return EStateTreeRunStatus::Running;
-			}
-			else
-			{
-				return EStateTreeRunStatus::Succeeded;
-			}
-		}
-	}
-
-	return EStateTreeRunStatus::Running;
-}
 
 void FSTT_PlayAnimation::StateCompleted(FStateTreeExecutionContext& Context, const EStateTreeRunStatus CompletionStatus,
 	const FStateTreeActiveStates& CompletedActiveStates) const

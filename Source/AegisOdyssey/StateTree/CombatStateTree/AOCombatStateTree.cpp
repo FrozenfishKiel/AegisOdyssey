@@ -5,6 +5,10 @@
 
 #include "AegisOdyssey/Character/AOHeroComponent.h"
 #include "StateTreeEvents.h"
+#include "AegisOdyssey/Character/AOInputBufferComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemComponent.h"
+#include "GameplayAbilitySpec.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AOCombatStateTree)
 
@@ -53,6 +57,12 @@ void UAOCombatStateTree::InitializeComponent()
 		OnReleaseInputLoadHandle = HeroComponent->OnReleaseInputLoad.Add(FOnReleaseInputLoad::FDelegate::CreateUObject(this,&ThisClass::CallStateTreeToSentEvent));
 		OnStartInputLoadHandle = HeroComponent->OnStartInputLoad.Add(FOnStartInputLoad::FDelegate::CreateUObject(this,&ThisClass::CallStateTreeToSentEvent));
 	}
+	if (UAOInputBufferComponent* InputBufferComponent = UAOInputBufferComponent::FindOInputBufferComponent(GetOwner()))
+	{
+		OnPressInputBufferHandle = InputBufferComponent->OnPressInputBuffer.Add(FOnPressInputBuffer::FDelegate::CreateUObject(this,&ThisClass::CallStateTreeToSentEvent));
+		OnStartInputBufferHandle = InputBufferComponent->OnStartInputBuffer.Add(FOnStartInputBuffer::FDelegate::CreateUObject(this,&ThisClass::CallStateTreeToSentEvent));
+		OnReleaseInputBufferHandle = InputBufferComponent->OnReleaseInputBuffer.Add(FOnStartInputBuffer::FDelegate::CreateUObject(this,&ThisClass::CallStateTreeToSentEvent));
+	}
 }
 
 void UAOCombatStateTree::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -75,13 +85,28 @@ void UAOCombatStateTree::EndPlay(const EEndPlayReason::Type EndPlayReason)
 			HeroComponent->OnStartInputLoad.Remove(OnStartInputLoadHandle);
 		}
 	}
+	if (UAOInputBufferComponent* InputBufferComponent = UAOInputBufferComponent::FindOInputBufferComponent(GetOwner()))
+	{
+		if (OnPressInputBufferHandle.IsValid())
+		{
+			InputBufferComponent->OnPressInputBuffer.Remove(OnPressInputBufferHandle);
+		}
+		if (OnReleaseInputBufferHandle.IsValid())
+		{
+			InputBufferComponent->OnReleaseInputBuffer.Remove(OnReleaseInputBufferHandle);
+		}
+		if (OnStartInputBufferHandle.IsValid())
+		{
+			InputBufferComponent->OnStartInputBuffer.Remove(OnStartInputBufferHandle);
+		}
+	}
 }
 
 void UAOCombatStateTree::CallStateTreeToSentEvent(const FGameplayTag InTargetTag, const EInputType InInputType)
 {
 	if (!InTargetTag.IsValid())
 	{
-		return;
+		return ;
 	}
 	UE_LOG(LogStateTree, Warning, TEXT("CallStateTreeToSentEvent: Tag=%s, InputType=%d"), *InTargetTag.ToString(), (int32)InInputType);
 	FStateTreeEvent Event;
@@ -92,5 +117,10 @@ void UAOCombatStateTree::CallStateTreeToSentEvent(const FGameplayTag InTargetTag
 	Event.Tag = InTargetTag;
 	
 	SendStateTreeEvent(Event);
+	return;
 }
+
+
+
+
 

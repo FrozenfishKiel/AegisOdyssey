@@ -19,6 +19,18 @@ class AEGISODYSSEY_API UAOCombatWindow : public UAnimNotifyState
 public:
 	UAOCombatWindow();
 
+	/**
+	 * 获取连招窗口标签
+	 * @return 连招窗口标签
+	 */
+	FGameplayTag GetCombatWindowTag() const { return CombatWindowTag; }
+
+	/**
+	 * 获取正在连招状态标签
+	 * @return 正在连招状态标签
+	 */
+	FGameplayTag GetCombatingTag() const { return CombatingTag; }
+
 protected:
 	/**
 	 * 进入连招窗口时调用

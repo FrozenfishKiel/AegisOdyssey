@@ -8,6 +8,9 @@
 #include "AOInputBufferComponent.generated.h"
 
 enum EInputType : uint8;
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnStartInputBuffer,const FGameplayTag,const EInputType);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPressInputBuffer,const FGameplayTag,const EInputType);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnReleaseInputBuffer,const FGameplayTag,const EInputType);
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class AEGISODYSSEY_API UAOInputBufferComponent : public UPawnComponent
 {
@@ -36,6 +39,10 @@ public:
 	bool TriggerBufferedInput();  //触发预输入要激活的东西
 
 	static UAOInputBufferComponent* FindOInputBufferComponent(const AActor* Actor){return Actor ? Actor->FindComponentByClass<UAOInputBufferComponent>() : nullptr;}
+
+	FOnStartInputBuffer OnStartInputBuffer;
+	FOnPressInputBuffer OnPressInputBuffer;
+	FOnReleaseInputBuffer OnReleaseInputBuffer;
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
