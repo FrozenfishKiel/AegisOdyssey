@@ -14,19 +14,27 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d94a3367-33f1-4132-9cbd-998a391af91c" name="更改" comment="">
+      <change afterPath="$PROJECT_DIR$/Source/AegisOdyssey/Animation/NotifyState/AOCombatRecovery.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/AegisOdyssey/Animation/NotifyState/AOCombatRecovery.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.AegisOdyssey/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AegisOdyssey/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Games/Character/Anny/DA_AnnyAbilitySet.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Character/Anny/DA_AnnyAbilitySet.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/AM_SwordAttack_01.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/AM_SwordAttack_01.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/AM_SwordAttack_02.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/AM_SwordAttack_02.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/AM_SwordAttack_03.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/AM_SwordAttack_03.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/Attack_01_Seq.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/Attack_01_Seq.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/Attack_02_Seq.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/Attack_02_Seq.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/Attack_03_Seq.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/Attack_03_Seq.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/Attack_04_Seq.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/Attack_04_Seq.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/Attack_05_Seq.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/Attack_05_Seq.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Character/Anny/BP_Anny.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Character/Anny/BP_Anny.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Games/Character/PublicAbilities/GA_LightAttack.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Character/PublicAbilities/GA_LightAttack.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Games/Character/StateTree/ST_SwordCombat.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Character/StateTree/ST_SwordCombat.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/AOStateTags.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AOStateTags.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/AOStateTags.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AOStateTags.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/AbilitySystem/Abilities/Attack/Combat/GA_LightAttack.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AbilitySystem/Abilities/Attack/Combat/GA_LightAttack.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/AbilitySystem/Abilities/Attack/Combat/GA_LightAttack.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AbilitySystem/Abilities/Attack/Combat/GA_LightAttack.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/Animation/NotifyState/AOCombatWindow.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/Animation/NotifyState/AOCombatWindow.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/Character/AOInputBufferComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/Character/AOInputBufferComponent.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/Character/AOInputBufferComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/Character/AOInputBufferComponent.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/CombatStateTree/AOCombatStateTree.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/CombatStateTree/AOCombatStateTree.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/CombatStateTree/AOCombatStateTree.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/CombatStateTree/AOCombatStateTree.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/Tasks/STT_PlayAnimation.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/Tasks/STT_PlayAnimation.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/Tasks/STT_PlayAnimation.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/Tasks/STT_PlayAnimation.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/Animation/NotifyState/AOCombatWindow.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/Animation/NotifyState/AOCombatWindow.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/Character/AOCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/Character/AOCharacter.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,7 +66,30 @@
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="cidr-memory-view://1" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="cidr-memory-view://22" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/AIModule/Private/BrainComponent.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Core/Public/Containers/Array.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Core/Public/UObject/NameTypes.h" root0="FORCE_HIGHLIGHTING" />
@@ -66,6 +97,7 @@
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/CoreUObject/Public/StructUtils/InstancedStruct.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/CoreUObject/Public/UObject/ObjectHandle.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Engine/Classes/Animation/AnimSequenceBase.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Engine/Classes/Components/InputComponent.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Engine/Classes/GameFramework/Pawn.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Engine/Private/Components/ActorComponent.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Engine/Private/PlayerController.cpp" root0="FORCE_HIGHLIGHTING" />
@@ -257,7 +289,7 @@
       <workItem from="1772604011887" duration="25501000" />
       <workItem from="1772686067621" duration="21515000" />
       <workItem from="1772736131410" duration="4316000" />
-      <workItem from="1772770859678" duration="1519000" />
+      <workItem from="1772770859678" duration="21774000" />
     </task>
     <servers />
   </component>

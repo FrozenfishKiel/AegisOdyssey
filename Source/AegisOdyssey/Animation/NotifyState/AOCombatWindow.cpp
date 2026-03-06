@@ -56,7 +56,6 @@ void UAOCombatWindow::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceB
 	AActor* OwnerActor = MeshComp->GetOwner();
 	if (!OwnerActor)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AOCombatWindow: OwnerActor is null"));
 		return;
 	}
 	
@@ -64,7 +63,6 @@ void UAOCombatWindow::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceB
 	AAOCharacter* AOCharacter = Cast<AAOCharacter>(OwnerActor);
 	if (!AOCharacter)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AOCombatWindow: OwnerActor is not AOCharacter"));
 		return;
 	}
 	
@@ -72,7 +70,6 @@ void UAOCombatWindow::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceB
 	UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(AOCharacter);
 	if (!ASC)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AOCombatWindow: ASC is null"));
 		return;
 	}
 	
@@ -80,6 +77,5 @@ void UAOCombatWindow::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceB
 	if (CombatWindowTag.IsValid())
 	{
 		ASC->RemoveLooseGameplayTag(CombatWindowTag);
-		UE_LOG(LogTemp, Log, TEXT("AOCombatWindow: Removed CombatWindowTag from %s"), *AOCharacter->GetName());
 	}
 }

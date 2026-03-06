@@ -22,7 +22,6 @@ AAOCharacter::AAOCharacter(const FObjectInitializer& ObjectInitializer)
 	bReplicateUsingRegisteredSubObjectList = true;
 
 	SetNetCullDistanceSquared(900000000000.0f);
-
 	UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
 	check(CapsuleComp);
 	CapsuleComp->InitCapsuleSize(50.f,90.f);

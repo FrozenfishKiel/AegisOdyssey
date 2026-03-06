@@ -15,6 +15,10 @@
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "AegisOdyssey/AbilitySystem/Tasks/AT_WaitMovementInput.h"
+#include "AegisOdyssey/AbilitySystem/Tasks/AT_WaitRotateToDirection.h"
+#include "GameFramework/PlayerController.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GA_LightAttack)
 
@@ -22,6 +26,8 @@ UGA_LightAttack::UGA_LightAttack(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
 	Params = nullptr;
+	RotationInterpSpeed = 360.0f;
+	bRotateToAttackDirection = true;
 }
 
 bool UGA_LightAttack::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -83,12 +89,34 @@ void UGA_LightAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 		}
 	}
 
+	if (!MovementInputTask)
+	{
+		MovementInputTask = UAT_WaitMovementInput::WaitMovementInput(this);
+		if (MovementInputTask)
+		{
+			MovementInputTask->OnMovementInputDetected.AddDynamic(this, &UGA_LightAttack::OnMovementInputDetected);
+			MovementInputTask->ReadyForActivation();
+			UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_LightAttack::OnRecoveryTagChanged: Started movement input detection"));
+		}
+	}
+	else
+	{
+		if (MovementInputTask)
+		{
+			MovementInputTask->EndTask();
+			MovementInputTask = nullptr;
+			UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_LightAttack::OnRecoveryTagChanged: Stopped movement input detection"));
+		}
+	}
+	
 	if (!Params)
 	{
 		UE_LOG(LogAegisOdysseyAbilitySystem, Error, TEXT("UGA_LightAttack::ActivateAbility: No params found, ending ability"));
 		EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 		return;
 	}
+
+	SetCharacterRotationToAttackDirection();
 
 	PlayMontageAnimation();
 }
@@ -137,7 +165,15 @@ void UGA_LightAttack::PlayMontageAnimation()
 		MontageTask->OnCancelled.AddDynamic(this, &UGA_LightAttack::OnMontageCancelled);
 		MontageTask->ReadyForActivation();
 	}
+}
 
+void UGA_LightAttack::OnMovementInputDetected()
+{
+	if (!CancelAbilityTag.IsValid()) return;
+	if (GetAbilitySystemComponentFromActorInfo()->HasMatchingGameplayTag(CancelAbilityTag))
+	{
+		EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);  //强制和通知服务器结束能力
+	}
 }
 
 void UGA_LightAttack::OnMontageCompleted()
@@ -236,9 +272,57 @@ void UGA_LightAttack::GetCombatWindowTagsFromMontage(UAnimMontage* Montage, TArr
 void UGA_LightAttack::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
-	// 在技能结束时立即清空标签，而不是等待AnimNotifyState的NotifyEnd()被调用
 	ClearCombatTags();
+	if (MovementInputTask)
+	{
+		MovementInputTask->EndTask();
+		MovementInputTask = nullptr;
+	}
+	
+	if (RotationTask)
+	{
+		RotationTask->EndTask();
+		RotationTask = nullptr;
+	}
 	
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 	UE_LOG(LogAegisOdysseyAbilitySystem, Warning, TEXT("UGA_LightAttack::EndAbility: Called"));
+}
+
+void UGA_LightAttack::SetCharacterRotationToAttackDirection()
+{
+	if (!CurrentActorInfo)
+	{
+		return;
+	}
+
+	APawn* Pawn = Cast<APawn>(CurrentActorInfo->AvatarActor);
+	if (!Pawn)
+	{
+		return;
+	}
+
+	APlayerController* PC = Cast<APlayerController>(Pawn->GetController());
+	if (!PC)
+	{
+		return;
+	}
+
+	if (!bRotateToAttackDirection)
+	{
+		return;
+	}
+
+	FRotator ControlRotation = PC->GetControlRotation();
+	FRotator TargetRotation = FRotator(0.0f, ControlRotation.Yaw, 0.0f);
+
+	if (!RotationTask)
+	{
+		RotationTask = UAT_WaitRotateToDirection::WaitRotateToDirection(this, TargetRotation, RotationInterpSpeed);
+		if (RotationTask)
+		{
+			RotationTask->ReadyForActivation();
+			UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_LightAttack::SetCharacterRotationToAttackDirection: Started rotation to Yaw: %.2f with speed: %.2f"), TargetRotation.Yaw, RotationInterpSpeed);
+		}
+	}
 }

@@ -9,6 +9,8 @@
 #include "GA_LightAttack.generated.h"
 
 class UAbilityTask_PlayMontageAndWait;
+class UAT_WaitMovementInput;
+class UAT_WaitRotateToDirection;
 
 /**
  * 轻攻击参数对象
@@ -151,7 +153,6 @@ public:
 	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr, FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
-	
 protected:
 	UFUNCTION()
 	void PlayMontageAnimation();
@@ -163,16 +164,34 @@ protected:
 	void OnMontageInterrupted();
 	UFUNCTION()
 	void OnMontageCancelled();
+	UFUNCTION()
+	void OnMovementInputDetected();
 
 	UFUNCTION()
 	void ClearCombatTags();
 
 private:
 	void GetCombatWindowTagsFromMontage(UAnimMontage* Montage, TArray<FGameplayTag>& OutTags);
+	void SetCharacterRotationToAttackDirection();
 
 	UPROPERTY()
 	TObjectPtr<UAbilityTask_PlayMontageAndWait> MontageTask;
 
 	UPROPERTY()
+	TObjectPtr<UAT_WaitMovementInput> MovementInputTask;
+
+	UPROPERTY()
+	TObjectPtr<UAT_WaitRotateToDirection> RotationTask;
+
+	UPROPERTY()
 	ULightAttackParams* Params;
+
+	UPROPERTY(EditDefaultsOnly , BlueprintReadOnly , meta = (AllowPrivateAccess = "true"))
+	FGameplayTag CancelAbilityTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rotation", meta = (AllowPrivateAccess = "true"))
+	float RotationInterpSpeed;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rotation", meta = (AllowPrivateAccess = "true"))
+	bool bRotateToAttackDirection;
 };
