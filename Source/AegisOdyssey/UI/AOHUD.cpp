@@ -3,12 +3,15 @@
 
 #include "AOHUD.h"
 
+#include "AOHUDViewModelComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AOHUD)
 
 AAOHUD::AAOHUD(const FObjectInitializer& ObjectInitializer)
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	HUDViewModelComponent = CreateDefaultSubobject<UAOHUDViewModelComponent>(TEXT("HUDViewModelComponent"));
 }
 
 void AAOHUD::PreInitializeComponents()

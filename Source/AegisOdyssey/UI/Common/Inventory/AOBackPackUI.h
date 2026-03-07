@@ -23,9 +23,10 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UAOBackPackSlot> BackPackSlotClass;
+
+	virtual UMVVM_InventoryMenu* GetInventoryViewModel() const override;
 private:
 	UFUNCTION(BlueprintCallable)
 	void RefreshInventoryBox(); //刷新WrapBox机制
 	FDelegateHandle RefreshInventoryBoxDelegateHandle;
-
 };

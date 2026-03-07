@@ -15,6 +15,7 @@ void UAOQuickBarUI::NativeConstruct()
 	Super::NativeConstruct();
 	if (UMVVM_InventoryMenu* ViewModel = GetInventoryViewModel())
 	{
+		RefreshInventoryBox();
 		RefreshInventoryBoxDelegateHandle = ViewModel->OnQuickBarListChangedDynamic.AddUObject(this,&ThisClass::RefreshInventoryBox);
 	}
 }
@@ -57,4 +58,22 @@ void UAOQuickBarUI::RefreshInventoryBox()
 			QuickBarBox->AddChild(QuickBarSlot);  //添加到WrapBox中
 		}
 	}
+}
+
+UMVVM_InventoryMenu* UAOQuickBarUI::GetInventoryViewModel() const
+{
+	if (const ULocalPlayer* LocalPlayer = GetOwningLocalPlayer())
+	{
+		if (APlayerController* SourcePC = LocalPlayer->GetPlayerController(GetWorld()))
+		{
+			if (APawn* ControlledPawn = SourcePC->GetPawn())
+			{
+				if (UAOQuickBarComponent* ViewModelPawn = ControlledPawn->FindComponentByClass<UAOQuickBarComponent>())
+				{
+					return ViewModelPawn->GetQuickBarViewModel();
+				}
+			}
+		}
+	}
+	return nullptr;
 }

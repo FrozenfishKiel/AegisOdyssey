@@ -51,9 +51,6 @@ protected:
 	virtual void PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& NewValue) const override;
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
 	virtual void PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue) override;
-
-	inline UAOVMPawnComponent* GetAOVMPawnComponent();
-
 private:
 	UPROPERTY(BlueprintReadOnly , ReplicatedUsing = OnRep_Health,Category = "AO|Health" , Meta = (AllowPrivateAccess = true))
 	FGameplayAttributeData Health;  //生命值

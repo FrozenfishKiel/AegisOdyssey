@@ -26,6 +26,7 @@ public:
 	virtual void Client_BroadCastInventoryAdd(const TArrayView<int32> AddIndices, int32 FinalSize, const TArray<FAOInventoryEntry>& TargetList) override;
 	virtual void Client_BroadCastInventoryChange(const TArrayView<int32> ChangedIndices, int32 FinalSize) override;
 	virtual void Client_BroadCastInventoryRemove(const TArrayView<int32> RemovedIndices, int32 FinalSize) override;
+	UMVVM_InventoryMenu* GetInventoryViewModel() const {return BackPackViewModel;}
 protected:
 	virtual void OnActorInitStateChanged(const FActorInitStateChangedParams& Params) override;
 	virtual void HandleChangeInitState(UGameFrameworkComponentManager* Manager, FGameplayTag CurrentState, FGameplayTag DesiredState) override;
@@ -34,5 +35,11 @@ protected:
 	virtual void InitializeOrRefreshInventorySlots() override;
 	virtual void InitializeParams() override;
 	virtual void BeginPlay() override;
-	
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+protected:
+	UFUNCTION()
+	void OnRep_BackPackViewModel();
+private:
+	UPROPERTY(ReplicatedUsing = OnRep_BackPackViewModel)
+	TObjectPtr<UMVVM_InventoryMenu> BackPackViewModel;
 };

@@ -6,7 +6,9 @@
 #include "AegisOdyssey/AOGameplayTags.h"
 #include "AegisOdyssey/Character/AOExtPawnComponent.h"
 #include "AegisOdyssey/Character/AOHeroComponent.h"
-#include "AegisOdyssey/Character/AOVMPawnComponent.h"
+#include "Net/Core/PushModel/PushModel.h"
+#include "AegisOdyssey/UI/ViewModel/Inventory/MVVM_InventoryMenu.h"
+#include "Net/UnrealNetwork.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AOBackPackComponent)
 
@@ -46,6 +48,10 @@ void UAOBackPackComponent::HandleChangeInitState(UGameFrameworkComponentManager*
 	if (CurrentState == AOGameplayTags::InitState_DataInitialized && DesiredState == AOGameplayTags::InitState_GameplayReady)
 	{
 		InitializeParams();
+		if (HasAuthority())
+		{
+			InitializeOrRefreshInventorySlots();
+		}
 	}
 }
 
@@ -74,22 +80,29 @@ void UAOBackPackComponent::BeginPlay()
 	ensure(TryToChangeInitState(AOGameplayTags::InitState_Spawned));
 }
 
+void UAOBackPackComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass,BackPackViewModel,COND_None,REPNOTIFY_Always);
+}
+
 
 void UAOBackPackComponent::InitializeOrRefreshInventorySlots()
 {
 	Super::InitializeOrRefreshInventorySlots();
 	//初始化背包格子
-	if (GetOwner()->HasAuthority())
+	if (InventoryList.Entries.Num() < NumSlots)
 	{
-		if (InventoryList.Entries.Num() < NumSlots)
+		InventoryList.Entries.Reserve(NumSlots);
+		for (int32 i = 0; i < NumSlots; i++)
 		{
-			InventoryList.Entries.Reserve(NumSlots);
-			for (int32 i = 0; i < NumSlots; i++)
-			{
-				FAOInventoryEntry Entry(this);
-				InventoryList.Entries.Emplace(Entry);
-			}
-			InventoryList.MarkArrayDirty();
+			FAOInventoryEntry Entry(this);
+			InventoryList.Entries.Emplace(Entry);
+		}
+		InventoryList.MarkArrayDirty();
+		if (BackPackViewModel)
+		{
+			BackPackViewModel->OnInventoryListChangedDynamic.Broadcast();
 		}
 	}
 }
@@ -97,38 +110,29 @@ void UAOBackPackComponent::InitializeOrRefreshInventorySlots()
 void UAOBackPackComponent::InitializeParams()
 {
 	Super::InitializeParams();
-	UAOVMPawnComponent* ViewModelComp = GetPawn<APawn>()->FindComponentByClass<UAOVMPawnComponent>();
-	if (ViewModelComp)
+	if (!BackPackViewModel && GetOwner()->HasAuthority())
 	{
-		ViewModelComp->CheckDefaultInitialization();  //尝试初始化一次VMPawn
-		//InventoryList.InventoryViewModel = ViewModelComp->GetCharacterInventoryViewModel();
+		BackPackViewModel = NewObject<UMVVM_InventoryMenu>();
+		AddReplicatedSubObject(BackPackViewModel);
+		MARK_PROPERTY_DIRTY_FROM_NAME(UAOBackPackComponent,BackPackViewModel,this);  //标记为脏，触发客户端回调
 	}
 }
 void UAOBackPackComponent::Client_BroadCastInventoryAdd(const TArrayView<int32> AddIndices, int32 FinalSize, const TArray<FAOInventoryEntry>& TargetList)
 {
-	if (!AddIndices.IsEmpty())
-	{
-		//InventoryList.InventoryViewModel->InventoryListDataAdd(AddIndices,FinalSize);
-	}
+	BackPackViewModel->OnInventoryListChangedDynamic.Broadcast();
 }
 
 void UAOBackPackComponent::Client_BroadCastInventoryChange(const TArrayView<int32> ChangedIndices, int32 FinalSize)
 {
-	if (!ChangedIndices.IsEmpty())
-	{
-		TArray<FAOInventoryEntry> ChangedRealList;
-		for (int32 index = 0; index < ChangedIndices.Num(); index++)
-		{
-			ChangedRealList.Emplace(InventoryList.Entries[index]);
-		}
-		//InventoryList.InventoryViewModel->InventoryListDataChanged(ChangedIndices,FinalSize);
-	}
+	BackPackViewModel->OnInventoryListChangedDynamic.Broadcast();
 }
 
 void UAOBackPackComponent::Client_BroadCastInventoryRemove(const TArrayView<int32> RemovedIndices, int32 FinalSize)
 {
-	if (!RemovedIndices.IsEmpty())
-	{
-		//InventoryList.InventoryViewModel->InventoryListDataRemove(RemovedIndices,FinalSize);
-	}
+	BackPackViewModel->OnInventoryListChangedDynamic.Broadcast();
+}
+
+void UAOBackPackComponent::OnRep_BackPackViewModel()
+{
+	//InitializeOrRefreshInventorySlots();
 }

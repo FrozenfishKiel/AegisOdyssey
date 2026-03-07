@@ -33,6 +33,7 @@ public:
 	virtual void Client_BroadCastInventoryAdd(const TArrayView<int32> AddIndices, int32 FinalSize, const TArray<FAOInventoryEntry>& TargetList) override;
 	virtual void Client_BroadCastInventoryChange(const TArrayView<int32> ChangedIndices, int32 FinalSize) override;
 	virtual void Client_BroadCastInventoryRemove(const TArrayView<int32> RemovedIndices, int32 FinalSize) override;
+	UMVVM_InventoryMenu* GetQuickBarViewModel() const {return QuickBarViewModel;}
 protected:
 	virtual void OnActorInitStateChanged(const FActorInitStateChangedParams& Params) override;
 	virtual void HandleChangeInitState(UGameFrameworkComponentManager* Manager, FGameplayTag CurrentState, FGameplayTag DesiredState) override;
@@ -50,6 +51,11 @@ private:
 private:
 	void UseItemInSlot();
 	void UnUseItemInSlot();
-
+protected:
+	UFUNCTION()
+	void OnRep_QuickBarViewModel();
+private:
+	UPROPERTY(ReplicatedUsing = OnRep_QuickBarViewModel)
+	UMVVM_InventoryMenu* QuickBarViewModel;
 };
 

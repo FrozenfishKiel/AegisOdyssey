@@ -4,10 +4,11 @@
 #include "AOHUDLayout.h"
 #include "Input/CommonUIInputTypes.h"
 #include "AOActivatableWidget.h"
+#include "AOHUD.h"
+#include "AOHUDViewModelComponent.h"
 #include "NativeGameplayTags.h"
 #include "CommonUIExtensions.h"
 #include "AegisOdyssey/AOGameplayTags.h"
-#include "AegisOdyssey/Character/AOVMPawnComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AOHUDLayout)
 
@@ -46,15 +47,9 @@ UMVVM_HUD* UAOHUDLayout::GetHUDViewModel() const
 {
 	if (APlayerController* SourcePC = GetOwningLocalPlayer()->GetPlayerController(GetWorld()))
 	{
-		if (APawn* SourcePawn = SourcePC->GetPawn())
+		if (UAOHUDViewModelComponent* HUDViewModelComponent =  AAOHUD::FindHUDOwnedComponent<UAOHUDViewModelComponent>(SourcePC))
 		{
-			if (UAOVMPawnComponent* HUDVMComp = SourcePawn->FindComponentByClass<UAOVMPawnComponent>())
-			{
-				if (UMVVM_HUD* HUDVM = HUDVMComp->GetCharacterHUDViewModel())
-				{
-					return HUDVM;
-				}
-			}
+			return HUDViewModelComponent->GetHUDMVVM();
 		}
 	}
 	return nullptr;

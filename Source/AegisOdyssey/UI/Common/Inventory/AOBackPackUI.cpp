@@ -16,7 +16,8 @@ void UAOBackPackUI::NativeConstruct()
 	Super::NativeConstruct();
 	if (UMVVM_InventoryMenu* ViewModel = GetInventoryViewModel())
 	{
-		RefreshInventoryBoxDelegateHandle = ViewModel->OnQuickBarListChangedDynamic.AddUObject(this,&ThisClass::RefreshInventoryBox);
+		RefreshInventoryBox();
+		RefreshInventoryBoxDelegateHandle = ViewModel->OnInventoryListChangedDynamic.AddUObject(this,&ThisClass::RefreshInventoryBox);
 	}
 }
 
@@ -27,7 +28,7 @@ void UAOBackPackUI::NativeDestruct()
 	{
 		if (RefreshInventoryBoxDelegateHandle.IsValid())
 		{
-			ViewModel->OnQuickBarListChangedDynamic.Remove(RefreshInventoryBoxDelegateHandle);
+			ViewModel->OnInventoryListChangedDynamic.Remove(RefreshInventoryBoxDelegateHandle);
 		}
 	}
 }
@@ -56,5 +57,22 @@ void UAOBackPackUI::RefreshInventoryBox()
 			DefaultInventoryBox->AddChild(BackPackSlot);  //添加到WrapBox中
 		}
 	}
+}
 
+UMVVM_InventoryMenu* UAOBackPackUI::GetInventoryViewModel() const
+{
+	if (const ULocalPlayer* LocalPlayer = GetOwningLocalPlayer())
+	{
+		if (APlayerController* SourcePC = LocalPlayer->GetPlayerController(GetWorld()))
+		{
+			if (APawn* ControlledPawn = SourcePC->GetPawn())
+			{
+				if (UAOBackPackComponent* ViewModelPawn = ControlledPawn->FindComponentByClass<UAOBackPackComponent>())
+				{
+					return ViewModelPawn->GetInventoryViewModel();
+				}
+			}
+		}
+	}
+	return nullptr;
 }

@@ -23,6 +23,8 @@
 #include "AegisOdyssey/Camera/AOCameraComponent.h"
 #include "UserSettings/EnhancedInputUserSettings.h"
 #include "AegisOdyssey/AOLogChannels.h"
+#include "AegisOdyssey/UI/AOHUD.h"
+#include "AegisOdyssey/UI/AOHUDViewModelComponent.h"
 const FName UAOHeroComponent::NAME_ActorFeatureName("Hero");
 const FName UAOHeroComponent::NAME_BindInputsNow("BindInputsNow");
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AOHeroComponent)
@@ -110,8 +112,8 @@ void UAOHeroComponent::HandleChangeInitState(UGameFrameworkComponentManager* Man
 			PawnData = ExtPawn->GetPawnData<UAOPawnData>();
 			ExtPawn->InitializeAbilitySystem(CurrentCharacter->GetSourceASC(),AOPS);
 		}
-
-		if (AAOPlayerController* PC = GetController<AAOPlayerController>())
+		AAOPlayerController* PC = GetController<AAOPlayerController>();
+		if (PC)
 		{
 			if (Pawn->InputComponent != nullptr)
 			{
@@ -126,7 +128,15 @@ void UAOHeroComponent::HandleChangeInitState(UGameFrameworkComponentManager* Man
 				CameraComponent->DetermineCameraModeDelegate.BindUObject(this,&ThisClass::DetermineCameraMode);
 			}
 		}
+		if (UAOHUDViewModelComponent* AOHUDViewModelComp = AAOHUD::FindHUDOwnedComponent<UAOHUDViewModelComponent>(PC))
+		{
+			if (!GetOwner()->HasAuthority())
+			{
+				AOHUDViewModelComp->CheckDefaultInitialization();  //手动调用初始状态链条
+			}
+		}
 	}
+	
 }
 
 TSubclassOf<UAOCameraMode> UAOHeroComponent::DetermineCameraMode() const

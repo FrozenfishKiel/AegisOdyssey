@@ -25,6 +25,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UAOQuickBarSlot> QuickBarSlotClass;
+
+	virtual UMVVM_InventoryMenu* GetInventoryViewModel() const override;
 private:
 	UFUNCTION(BlueprintCallable)
 	void RefreshInventoryBox(); //刷新WrapBox机制

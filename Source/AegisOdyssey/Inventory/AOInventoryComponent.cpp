@@ -5,7 +5,6 @@
 #include "AOInventoryIteminstance.h"
 #include "Net/UnrealNetwork.h"
 #include "AOInventoryItemDefinition.h"
-#include "AegisOdyssey/Character/AOVMPawnComponent.h"
 #include "Engine/ActorChannel.h"
 #include "Fragments/AOFragment_SetStats.h"
 
@@ -372,7 +371,7 @@ void FAOInventoryList::PostReplicatedAdd(const TArrayView<int32> AddedIndices, i
 		FAOInventoryEntry& Stack = Entries[Index];
 		Stack.LastObservedCount = Stack.StackCount;
 	}
-	OwnerComponent->Client_BroadCastInventoryAdd(AddedIndices,FinalSize, Entries);
+	//OwnerComponent->Client_BroadCastInventoryAdd(AddedIndices,FinalSize, Entries);
 }
 
 void FAOInventoryList::PostReplicatedChange(const TArrayView<int32> ChangedIndices, int32 FinalSize)

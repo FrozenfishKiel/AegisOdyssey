@@ -5,10 +5,10 @@
 #include "NativeGameplayTags.h"
 #include "AegisOdyssey/AOGameplayTags.h"
 #include "AegisOdyssey/Character/AOHeroComponent.h"
-#include "AegisOdyssey/Character/AOVMPawnComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "AegisOdyssey/Inventory/AOInventoryIteminstance.h"
 #include "AegisOdyssey/Inventory/AOInventoryManagerComponent.h"
+#include "AegisOdyssey/UI/ViewModel/Inventory/MVVM_InventoryMenu.h"
 #include "Net/UnrealNetwork.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AOQuickBarComponent)
@@ -53,7 +53,11 @@ void UAOQuickBarComponent::HandleChangeInitState(UGameFrameworkComponentManager*
 {
 	if (CurrentState == AOGameplayTags::InitState_DataInitialized && DesiredState == AOGameplayTags::InitState_GameplayReady)
 	{
-		
+		InitializeParams();
+		if (HasAuthority())
+		{
+			InitializeOrRefreshInventorySlots();
+		}
 	}
 }
 
@@ -123,14 +127,15 @@ void UAOQuickBarComponent::UnUseItemInSlot()
 	}
 }
 
+
 void UAOQuickBarComponent::InitializeParams()
 {
 	Super::InitializeParams();
-	UAOVMPawnComponent* ViewModelComp = GetPawn<APawn>()->FindComponentByClass<UAOVMPawnComponent>();
-	if (ViewModelComp)
+	if (!QuickBarViewModel && GetOwner()->HasAuthority())
 	{
-		ViewModelComp->CheckDefaultInitialization();
-		//InventoryList.InventoryViewModel = ViewModelComp->GetCharacterInventoryViewModel();
+		QuickBarViewModel = NewObject<UMVVM_InventoryMenu>();
+		AddReplicatedSubObject(QuickBarViewModel);
+		MARK_PROPERTY_DIRTY_FROM_NAME(UAOQuickBarComponent,QuickBarViewModel,this);  //标记为脏，触发客户端回调
 	}
 }
 
@@ -138,54 +143,50 @@ void UAOQuickBarComponent::InitializeOrRefreshInventorySlots()
 {
 	Super::InitializeOrRefreshInventorySlots();
 //初始化背包格子
-	if (GetOwner()->HasAuthority())
+	if (InventoryList.Entries.Num() < NumSlots)
 	{
-		if (InventoryList.Entries.Num() < NumSlots)
+		InventoryList.Entries.Reserve(NumSlots);
+		for (int32 i = 0; i < NumSlots; i++)
 		{
-			InventoryList.Entries.Reserve(NumSlots);
-			for (int32 i = 0; i < NumSlots; i++)
-			{
-				FAOInventoryEntry Entry(this);
-				InventoryList.Entries.Emplace(Entry);
-			}
-			InventoryList.MarkArrayDirty();
+			FAOInventoryEntry Entry(this);
+			InventoryList.Entries.Emplace(Entry);
+		}
+		InventoryList.MarkArrayDirty();
+		if (QuickBarViewModel)
+		{
+			QuickBarViewModel->OnQuickBarListChangedDynamic.Broadcast();
 		}
 	}
+}
+
+void UAOQuickBarComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ThisClass , ActivateSlotIndex);
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass,QuickBarViewModel,COND_None,REPNOTIFY_Always);
+
+}
+void UAOQuickBarComponent::Client_BroadCastInventoryAdd(const TArrayView<int32> AddIndices, int32 FinalSize, const TArray<FAOInventoryEntry>& TargetList)
+{
+	QuickBarViewModel->OnQuickBarListChangedDynamic.Broadcast();
+}
+
+void UAOQuickBarComponent::Client_BroadCastInventoryChange(const TArrayView<int32> ChangedIndices, int32 FinalSize)
+{
+	QuickBarViewModel->OnQuickBarListChangedDynamic.Broadcast();
+}
+void UAOQuickBarComponent::Client_BroadCastInventoryRemove(const TArrayView<int32> RemovedIndices, int32 FinalSize)
+{
+	QuickBarViewModel->OnQuickBarListChangedDynamic.Broadcast();
+}
+
+
+void UAOQuickBarComponent::OnRep_QuickBarViewModel()
+{
+	//InitializeOrRefreshInventorySlots();
 }
 
 void UAOQuickBarComponent::OnRep_ActivateSlotIndex()
 {
     
-}
-void UAOQuickBarComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(ThisClass , ActivateSlotIndex);
-}
-void UAOQuickBarComponent::Client_BroadCastInventoryAdd(const TArrayView<int32> AddIndices, int32 FinalSize, const TArray<FAOInventoryEntry>& TargetList)
-{
-	if (!AddIndices.IsEmpty())
-	{
-
-	}
-}
-
-void UAOQuickBarComponent::Client_BroadCastInventoryChange(const TArrayView<int32> ChangedIndices, int32 FinalSize)
-{
-	if (!ChangedIndices.IsEmpty())
-	{
-		TArray<FAOInventoryEntry> ChangeRealList;
-		for (int32 index = 0; index < ChangedIndices.Num(); index++)
-		{
-			ChangeRealList.Emplace(InventoryList.Entries[index]);
-		}
-		//InventoryList.InventoryViewModel->QuickBarDataChanged(ChangedIndices,FinalSize);
-	}
-}
-void UAOQuickBarComponent::Client_BroadCastInventoryRemove(const TArrayView<int32> RemovedIndices, int32 FinalSize)
-{
-	if (!RemovedIndices.IsEmpty())
-	{
-		//InventoryList.InventoryViewModel->QuickBarDataRemove(RemovedIndices,FinalSize);
-	}
 }

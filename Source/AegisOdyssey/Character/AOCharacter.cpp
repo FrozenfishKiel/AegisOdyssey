@@ -4,7 +4,7 @@
 #include "AOCharacter.h"
 #include "AegisOdyssey/Equipment/AOWeaponManagerComponent.h"
 #include "AOCharacterMovementComponent.h"
-#include "AegisOdyssey/AbilitySystem/Attributes/AOCombatAttributeSet.h"
+#include "AegisOdyssey/AbilitySystem/Attributes/AOHealthAttributeSet.h"
 #include "AegisOdyssey/Camera/AOCameraComponent.h"
 #include "AegisOdyssey/Equipment/AOQuickBarComponent.h"
 #include "AegisOdyssey/StateTree/AOStateTreeComponentBase.h"
@@ -74,8 +74,7 @@ AAOCharacter::AAOCharacter(const FObjectInitializer& ObjectInitializer)
 	SetNetUpdateFrequency(100.f);
 
 	HealthAttributes = CreateDefaultSubobject<UAOHealthAttributeSet>(TEXT("HealthAttributes"));
-	
-	CharacterVMComponent = CreateDefaultSubobject<UAOVMPawnComponent>(TEXT("CharacterVMComponent"));
+
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = true;

@@ -189,7 +189,6 @@ void UAOExtPawnComponent::InitializeAbilitySystem(UAOAbilitySystem* InASC, AActo
 	AbilitySystemComponent = InASC;
 
 	AbilitySystemComponent->InitAbilityActorInfo(InActor, Pawn);
-
 	OnASCWasAssignDelegate.Broadcast();
 }
 

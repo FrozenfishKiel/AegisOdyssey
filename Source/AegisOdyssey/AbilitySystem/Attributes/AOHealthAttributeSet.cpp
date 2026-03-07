@@ -4,7 +4,6 @@
 #include "AOHealthAttributeSet.h"
 #include "GameplayEffectExtension.h"
 #include "AegisOdyssey/AOVerbMessage.h"
-#include "AegisOdyssey/Character/AOVMPawnComponent.h"
 #include "Net/UnrealNetwork.h"
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AOHealthAttributeSet)
 
@@ -176,10 +175,6 @@ void UAOHealthAttributeSet::PostAttributeChange(const FGameplayAttribute& Attrib
 	}
 }
 
-UAOVMPawnComponent* UAOHealthAttributeSet::GetAOVMPawnComponent()
-{
-	return GetActorInfo()->AvatarActor->FindComponentByClass<UAOVMPawnComponent>();
-}
 
 void UAOHealthAttributeSet::OnRep_Health(const FGameplayAttributeData& OldValue)
 {

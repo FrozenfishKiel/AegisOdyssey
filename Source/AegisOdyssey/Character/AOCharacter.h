@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "AOExtPawnComponent.h"
 #include "AbilitySystemInterface.h"
-#include "AOVMPawnComponent.h"
 #include "ModularCharacter.h"
 #include "AegisOdyssey/Inventory/AOBackPackComponent.h"
 #include "AOCharacter.generated.h"
@@ -42,8 +41,7 @@ private:
 	TObjectPtr<UAOBackPackComponent> CharacterBackPackComponent;
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="AOCharacterConfig",meta=(AllowPrivateAccess=true))
 	TObjectPtr<UAOQuickBarComponent> CharacterQuickBar;
-	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="AOCharacterConfig",meta=(AllowPrivateAccess=true))
-	TObjectPtr<UAOVMPawnComponent> CharacterVMComponent;
+
 
 protected:
 	void DisableMovementAndCollision();

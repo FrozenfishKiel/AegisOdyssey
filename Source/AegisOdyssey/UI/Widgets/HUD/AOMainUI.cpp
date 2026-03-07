@@ -3,7 +3,9 @@
 
 #include "AOMainUI.h"
 
-#include "AegisOdyssey/Character/AOVMPawnComponent.h"
+#include "AegisOdyssey/UI/AOHUD.h"
+#include "AegisOdyssey/UI/AOHUDViewModelComponent.h"
+
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AOMainUI)
 
 void UAOMainUI::NativeConstruct()
@@ -18,12 +20,9 @@ UMVVM_HUD* UAOMainUI::GetMainHUDViewModel() const
 	{
 		if (APlayerController* SourcePC = LocalPlayer->GetPlayerController(GetWorld()))
 		{
-			if (APawn* ControlledPawn = SourcePC->GetPawn())
+			if (UAOHUDViewModelComponent* HUDViewModelComponent =  AAOHUD::FindHUDOwnedComponent<UAOHUDViewModelComponent>(SourcePC))
 			{
-				if (UAOVMPawnComponent* ViewModelPawn = ControlledPawn->FindComponentByClass<UAOVMPawnComponent>())
-				{
-					return ViewModelPawn->GetCharacterHUDViewModel();
-				}
+				return HUDViewModelComponent->GetHUDMVVM();
 			}
 		}
 	}

@@ -43,7 +43,7 @@ class AEGISODYSSEY_API UAOInventoryUI : public UCommonUserWidget
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintPure, BlueprintCallable)
-	UMVVM_InventoryMenu* GetInventoryViewModel() const;
+	virtual UMVVM_InventoryMenu* GetInventoryViewModel() const;
 protected:
 	template<typename ComponentClass>
 	ComponentClass* FindTargetComponent() const;
