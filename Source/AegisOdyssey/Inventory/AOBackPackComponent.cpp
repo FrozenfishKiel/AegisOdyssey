@@ -21,10 +21,7 @@ UAOBackPackComponent::UAOBackPackComponent(const FObjectInitializer& ObjectIniti
 void UAOBackPackComponent::BroadCastInventoryChange()
 {
 	Super::BroadCastInventoryChange();
-	if (InventoryList.InventoryViewModel)
-	{
-		InventoryList.InventoryViewModel->SetInventoryList(InventoryList.Entries);
-	}
+
 }
 
 
@@ -49,7 +46,6 @@ void UAOBackPackComponent::HandleChangeInitState(UGameFrameworkComponentManager*
 	if (CurrentState == AOGameplayTags::InitState_DataInitialized && DesiredState == AOGameplayTags::InitState_GameplayReady)
 	{
 		InitializeParams();
-		InitializeOrRefreshInventorySlots();
 	}
 }
 
@@ -96,10 +92,6 @@ void UAOBackPackComponent::InitializeOrRefreshInventorySlots()
 			InventoryList.MarkArrayDirty();
 		}
 	}
-	if (InventoryList.InventoryViewModel)
-	{
-		InventoryList.InventoryViewModel->SetInventoryList(InventoryList.Entries);
-	}
 }
 
 void UAOBackPackComponent::InitializeParams()
@@ -109,14 +101,14 @@ void UAOBackPackComponent::InitializeParams()
 	if (ViewModelComp)
 	{
 		ViewModelComp->CheckDefaultInitialization();  //尝试初始化一次VMPawn
-		InventoryList.InventoryViewModel = ViewModelComp->GetCharacterInventoryViewModel();
+		//InventoryList.InventoryViewModel = ViewModelComp->GetCharacterInventoryViewModel();
 	}
 }
-void UAOBackPackComponent::Client_BroadCastInventoryAdd(const TArrayView<int32> AddIndices, int32 FinalSize)
+void UAOBackPackComponent::Client_BroadCastInventoryAdd(const TArrayView<int32> AddIndices, int32 FinalSize, const TArray<FAOInventoryEntry>& TargetList)
 {
 	if (!AddIndices.IsEmpty())
 	{
-		InventoryList.InventoryViewModel->InventoryListDataAdd(AddIndices,FinalSize);
+		//InventoryList.InventoryViewModel->InventoryListDataAdd(AddIndices,FinalSize);
 	}
 }
 
@@ -129,7 +121,7 @@ void UAOBackPackComponent::Client_BroadCastInventoryChange(const TArrayView<int3
 		{
 			ChangedRealList.Emplace(InventoryList.Entries[index]);
 		}
-		InventoryList.InventoryViewModel->InventoryListDataChanged(ChangedIndices,FinalSize,ChangedRealList);
+		//InventoryList.InventoryViewModel->InventoryListDataChanged(ChangedIndices,FinalSize);
 	}
 }
 
@@ -137,6 +129,6 @@ void UAOBackPackComponent::Client_BroadCastInventoryRemove(const TArrayView<int3
 {
 	if (!RemovedIndices.IsEmpty())
 	{
-		InventoryList.InventoryViewModel->InventoryListDataRemove(RemovedIndices,FinalSize);
+		//InventoryList.InventoryViewModel->InventoryListDataRemove(RemovedIndices,FinalSize);
 	}
 }

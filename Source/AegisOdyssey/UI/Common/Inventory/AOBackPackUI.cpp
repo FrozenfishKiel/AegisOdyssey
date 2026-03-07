@@ -4,6 +4,7 @@
 #include "AOBackPackUI.h"
 #include "AOBackPackSlot.h"
 #include "ToolMenusEditor.h"
+#include "AegisOdyssey/Inventory/AOBackPackComponent.h"
 #include "AegisOdyssey/Inventory/AOInventoryIteminstance.h"
 #include "AegisOdyssey/Inventory/Fragments/AOFragment_InventoryIcon.h"
 #include "Tests/ToolMenusTestUtilities.h"
@@ -13,6 +14,22 @@
 void UAOBackPackUI::NativeConstruct()
 {
 	Super::NativeConstruct();
+	if (UMVVM_InventoryMenu* ViewModel = GetInventoryViewModel())
+	{
+		RefreshInventoryBoxDelegateHandle = ViewModel->OnQuickBarListChangedDynamic.AddUObject(this,&ThisClass::RefreshInventoryBox);
+	}
+}
+
+void UAOBackPackUI::NativeDestruct()
+{
+	Super::NativeDestruct();
+	if (UMVVM_InventoryMenu* ViewModel = GetInventoryViewModel())
+	{
+		if (RefreshInventoryBoxDelegateHandle.IsValid())
+		{
+			ViewModel->OnQuickBarListChangedDynamic.Remove(RefreshInventoryBoxDelegateHandle);
+		}
+	}
 }
 
 void UAOBackPackUI::RefreshInventoryBox()
@@ -21,20 +38,23 @@ void UAOBackPackUI::RefreshInventoryBox()
 	check(BackPackSlotClass);
 	DefaultInventoryBox->ClearChildren();
 	
-	const UMVVM_InventoryMenu* ViewModel = GetInventoryViewModel();
-	check(ViewModel);
 
-	for (int32 i = 0 ; i < ViewModel->GetInventoryList().Num(); i++)
+	if (UAOBackPackComponent* QuickBarComponent = FindTargetComponent<UAOBackPackComponent>())
 	{
-		const int32 InIndex = i;
-		const FAOInventoryEntry Entry = ViewModel->GetInventoryList()[i];
-		check(Entry.SlotOwnerComponent);
+		TArray<FAOInventoryEntry> Entries = QuickBarComponent->GetInventoryContainer();
+		for (int32 i = 0 ; i < Entries.Num(); i++)
+		{
+			const int32 InIndex = i;
+			const FAOInventoryEntry Entry = Entries[i];
+			check(Entry.SlotOwnerComponent);
 		
-		UAOBackPackSlot* BackPackSlot = CreateWidget<UAOBackPackSlot>(GetOwningPlayer() , BackPackSlotClass);
+			UAOBackPackSlot* BackPackSlot = CreateWidget<UAOBackPackSlot>(GetOwningPlayer() , BackPackSlotClass);
 		
-		BackPackSlot->Index = InIndex;
-		BackPackSlot->InInventorySlot = Entry;
-		BackPackSlot->InitializeSlot();
-		DefaultInventoryBox->AddChild(BackPackSlot);  //添加到WrapBox中
+			BackPackSlot->Index = InIndex;
+			BackPackSlot->InInventorySlot = Entry;
+			BackPackSlot->InitializeSlot();
+			DefaultInventoryBox->AddChild(BackPackSlot);  //添加到WrapBox中
+		}
 	}
+
 }

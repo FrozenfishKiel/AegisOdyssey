@@ -44,4 +44,26 @@ class AEGISODYSSEY_API UAOInventoryUI : public UCommonUserWidget
 public:
 	UFUNCTION(BlueprintPure, BlueprintCallable)
 	UMVVM_InventoryMenu* GetInventoryViewModel() const;
+protected:
+	template<typename ComponentClass>
+	ComponentClass* FindTargetComponent() const;
 };
+
+template <typename ComponentClass>
+ComponentClass* UAOInventoryUI::FindTargetComponent() const
+{
+	if (const ULocalPlayer* LocalPlayer = GetOwningLocalPlayer())
+	{
+		if (APlayerController* SourcePC = LocalPlayer->GetPlayerController(GetWorld()))
+		{
+			if (APawn* ControlledPawn = SourcePC->GetPawn())
+			{
+				if (ComponentClass* ViewModelPawn = ControlledPawn->FindComponentByClass<ComponentClass>())
+				{
+					return ViewModelPawn;
+				}
+			}
+		}
+	}
+	return nullptr;
+}

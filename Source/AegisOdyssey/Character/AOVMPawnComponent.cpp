@@ -7,6 +7,7 @@
 #include "AOExtPawnComponent.h"
 #include "AOHeroComponent.h"
 #include "AegisOdyssey/AOGameplayTags.h"
+#include "AegisOdyssey/AOLogChannels.h"
 #include "AegisOdyssey/AbilitySystem/Attributes/AOHealthAttributeSet.h"
 #include "Input/CommonUIActionRouterBase.h"
 #include "Net/UnrealNetwork.h"
@@ -72,14 +73,14 @@ void UAOVMPawnComponent::OnActorInitStateChanged(const FActorInitStateChangedPar
 
 void UAOVMPawnComponent::InitializeViewModel()
 {
-	if (!CharacterHUDViewModel)
+	if (!CharacterHUDViewModel && GetOwner()->HasAuthority())
 	{
 		CharacterHUDViewModel = NewObject<UMVVM_HUD>(GetOwner());
 		AddReplicatedSubObject(CharacterHUDViewModel);  //让该对象参与网络复制
 		// 标记脏数据，触发网络复制
 		MARK_PROPERTY_DIRTY_FROM_NAME(UAOVMPawnComponent, CharacterHUDViewModel, this);
 	}
-	if (!CharacterInventoryViewModel)
+	if (!CharacterInventoryViewModel && GetOwner()->HasAuthority())
 	{
 		CharacterInventoryViewModel = NewObject<UMVVM_InventoryMenu>(GetOwner());
 		AddReplicatedSubObject(CharacterInventoryViewModel);  //让该对象参与网络复制
@@ -109,7 +110,10 @@ void UAOVMPawnComponent::InitializeHUDViewModel()
 		if (!SourcePS) return;
 		ViewModelParams.PS = SourcePS;
 
-		CharacterHUDViewModel->SetPlayerViewModelParams(ViewModelParams);
+		if (CharacterHUDViewModel)
+		{
+			CharacterHUDViewModel->SetPlayerViewModelParams(ViewModelParams);
+		}
 	}
 }
 
@@ -206,11 +210,12 @@ void UAOVMPawnComponent::TickComponent(float DeltaTime, enum ELevelTick TickType
 }
 void UAOVMPawnComponent::OnRep_CharacterHUDViewModel()
 {
-	UE_LOG(LogTemp, Warning, TEXT("客户端获取CharacterHUDViewModel"));
+	UE_LOG(LogAegisOdyssey, Warning, TEXT("客户端获取CharacterHUDViewModel"));
+	InitializeHUDViewModel();
 }
 
 void UAOVMPawnComponent::OnRep_CharacterInventoryViewModel()
 {
-	UE_LOG(LogTemp, Warning, TEXT("客户端获取CharacterInventoryViewModel"));
+	UE_LOG(LogAegisOdyssey, Warning, TEXT("客户端获取CharacterInventoryViewModel"));
 }
 

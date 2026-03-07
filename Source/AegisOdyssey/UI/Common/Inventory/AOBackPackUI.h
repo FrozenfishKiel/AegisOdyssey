@@ -17,6 +17,7 @@ class AEGISODYSSEY_API UAOBackPackUI : public UAOInventoryUI
 	GENERATED_BODY()
 public:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 	UPROPERTY(BlueprintReadWrite,meta = (BindWidget))
 	UWrapBox* DefaultInventoryBox;
 
@@ -25,4 +26,6 @@ public:
 private:
 	UFUNCTION(BlueprintCallable)
 	void RefreshInventoryBox(); //刷新WrapBox机制
+	FDelegateHandle RefreshInventoryBoxDelegateHandle;
+
 };

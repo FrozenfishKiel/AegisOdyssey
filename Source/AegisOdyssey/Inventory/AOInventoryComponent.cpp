@@ -372,7 +372,7 @@ void FAOInventoryList::PostReplicatedAdd(const TArrayView<int32> AddedIndices, i
 		FAOInventoryEntry& Stack = Entries[Index];
 		Stack.LastObservedCount = Stack.StackCount;
 	}
-	OwnerComponent->BroadCastInventoryChange();
+	OwnerComponent->Client_BroadCastInventoryAdd(AddedIndices,FinalSize, Entries);
 }
 
 void FAOInventoryList::PostReplicatedChange(const TArrayView<int32> ChangedIndices, int32 FinalSize)

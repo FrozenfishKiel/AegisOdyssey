@@ -2,6 +2,8 @@
 
 
 #include "AOQuickBarUI.h"
+
+#include "AegisOdyssey/Equipment/AOQuickBarComponent.h"
 #include "AegisOdyssey/Inventory/AOInventoryIteminstance.h"
 #include "AegisOdyssey/Inventory/Fragments/AOFragment_InventoryIcon.h"
 #include "AegisOdyssey/Inventory/Fragments/AOFragment_PickUpIcon.h"
@@ -11,10 +13,21 @@
 void UAOQuickBarUI::NativeConstruct()
 {
 	Super::NativeConstruct();
+	if (UMVVM_InventoryMenu* ViewModel = GetInventoryViewModel())
+	{
+		RefreshInventoryBoxDelegateHandle = ViewModel->OnQuickBarListChangedDynamic.AddUObject(this,&ThisClass::RefreshInventoryBox);
+	}
 }
 void UAOQuickBarUI::NativeDestruct()
 {
 	Super::NativeDestruct();
+	if (UMVVM_InventoryMenu* ViewModel = GetInventoryViewModel())
+	{
+		if (RefreshInventoryBoxDelegateHandle.IsValid())
+		{
+			ViewModel->OnQuickBarListChangedDynamic.Remove(RefreshInventoryBoxDelegateHandle);
+		}
+	}
 }
 
 void UAOQuickBarUI::RefreshInventoryBox()
@@ -22,25 +35,26 @@ void UAOQuickBarUI::RefreshInventoryBox()
 	check(QuickBarSlotClass);
 	QuickBarBox->ClearChildren();
 	
-	const UMVVM_InventoryMenu* ViewModel = GetInventoryViewModel();  //从角色VM组件中获取VM
-	check(ViewModel);
-
-	int32 TempIndex = 1;
-	for (int32 i = 0 ; i < ViewModel->GetQuickBarList().Num(); i++)
+	if (UAOQuickBarComponent* QuickBarComponent = FindTargetComponent<UAOQuickBarComponent>())
 	{
-		const int32 InIndex = i;
-		const FAOInventoryEntry Entry = ViewModel->GetQuickBarList()[i];
-		check(Entry.SlotOwnerComponent);
+		int32 TempIndex = 1;
+		TArray<FAOInventoryEntry> Entries = QuickBarComponent->GetInventoryContainer();
+		for (int32 i = 0 ; i < Entries.Num(); i++)
+		{
+			const int32 InIndex = i;
+			const FAOInventoryEntry Entry = Entries[i];
+			check(Entry.SlotOwnerComponent);
 		
-		UAOQuickBarSlot* QuickBarSlot = CreateWidget<UAOQuickBarSlot>(GetOwningPlayer() , QuickBarSlotClass);
+			UAOQuickBarSlot* QuickBarSlot = CreateWidget<UAOQuickBarSlot>(GetOwningPlayer() , QuickBarSlotClass);
 		
-		if (TempIndex >= ViewModel->GetQuickBarList().Num()){QuickBarSlot->InputIndex->SetText(FText::AsNumber(0));}
-		else {QuickBarSlot->InputIndex->SetText(FText::AsNumber(TempIndex));}
+			if (TempIndex >= Entries.Num()){QuickBarSlot->InputIndex->SetText(FText::AsNumber(0));}
+			else {QuickBarSlot->InputIndex->SetText(FText::AsNumber(TempIndex));}
 
-		TempIndex++;
-		QuickBarSlot->Index = InIndex;
-		QuickBarSlot->InQuickBarSlot = Entry;
-		QuickBarSlot->InitializeSlot();
-		QuickBarBox->AddChild(QuickBarSlot);  //添加到WrapBox中
+			TempIndex++;
+			QuickBarSlot->Index = InIndex;
+			QuickBarSlot->InQuickBarSlot = Entry;
+			QuickBarSlot->InitializeSlot();
+			QuickBarBox->AddChild(QuickBarSlot);  //添加到WrapBox中
+		}
 	}
 }

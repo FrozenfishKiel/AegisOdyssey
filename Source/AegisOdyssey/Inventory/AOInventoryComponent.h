@@ -111,8 +111,6 @@ public:
 	
 	UPROPERTY()
 	TArray<FAOInventoryEntry> Entries;
-	UPROPERTY()
-	TObjectPtr<UMVVM_InventoryMenu> InventoryViewModel = nullptr;
 	UPROPERTY(NotReplicated)
 	TObjectPtr<UAOInventoryComponent> OwnerComponent;
 };
@@ -168,6 +166,7 @@ public:
 
 	FAOInventoryEntry FindInventoryEntryFromInstance(UAOInventoryItemInstance* ItemInstance) const;
 	virtual UAOInventoryComponent* GetInventoryComponent()  override {return this;}
+	virtual inline TArray<FAOInventoryEntry> GetInventoryContainer() const {return InventoryList.Entries;}
 public:	
 	//~UObject interface
 	virtual bool ReplicateSubobjects(class UActorChannel* Channel, class FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
@@ -178,7 +177,7 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 public:
 	virtual void Client_BroadCastInventoryRemove(const TArrayView<int32> RemovedIndices, int32 FinalSize){}
-	virtual void Client_BroadCastInventoryAdd(const TArrayView<int32> AddIndices, int32 FinalSize){}
+	virtual void Client_BroadCastInventoryAdd(const TArrayView<int32> AddIndices, int32 FinalSize, const TArray<FAOInventoryEntry>& TargetList){}
 	virtual void Client_BroadCastInventoryChange(const TArrayView<int32> ChangedIndices, int32 FinalSize){}
 	virtual void BroadCastInventoryChange(){}
 protected:

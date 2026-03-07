@@ -32,10 +32,6 @@ void UAOQuickBarComponent::BeginPlay()
 void UAOQuickBarComponent::BroadCastInventoryChange()
 {
 	Super::BroadCastInventoryChange();
-	if (InventoryList.InventoryViewModel)
-	{
-		InventoryList.InventoryViewModel->SetQuickBarList(InventoryList.Entries);
-	}
 }
 
 
@@ -57,8 +53,7 @@ void UAOQuickBarComponent::HandleChangeInitState(UGameFrameworkComponentManager*
 {
 	if (CurrentState == AOGameplayTags::InitState_DataInitialized && DesiredState == AOGameplayTags::InitState_GameplayReady)
 	{
-		InitializeParams();
-		InitializeOrRefreshInventorySlots();
+		
 	}
 }
 
@@ -135,7 +130,7 @@ void UAOQuickBarComponent::InitializeParams()
 	if (ViewModelComp)
 	{
 		ViewModelComp->CheckDefaultInitialization();
-		InventoryList.InventoryViewModel = ViewModelComp->GetCharacterInventoryViewModel();
+		//InventoryList.InventoryViewModel = ViewModelComp->GetCharacterInventoryViewModel();
 	}
 }
 
@@ -156,10 +151,6 @@ void UAOQuickBarComponent::InitializeOrRefreshInventorySlots()
 			InventoryList.MarkArrayDirty();
 		}
 	}
-	if (InventoryList.InventoryViewModel)
-	{
-		InventoryList.InventoryViewModel->SetQuickBarList(InventoryList.Entries);  //设置QuickBarList部分的值
-	}
 }
 
 void UAOQuickBarComponent::OnRep_ActivateSlotIndex()
@@ -171,11 +162,11 @@ void UAOQuickBarComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProp
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ThisClass , ActivateSlotIndex);
 }
-void UAOQuickBarComponent::Client_BroadCastInventoryAdd(const TArrayView<int32> AddIndices, int32 FinalSize)
+void UAOQuickBarComponent::Client_BroadCastInventoryAdd(const TArrayView<int32> AddIndices, int32 FinalSize, const TArray<FAOInventoryEntry>& TargetList)
 {
 	if (!AddIndices.IsEmpty())
 	{
-		InventoryList.InventoryViewModel->QuickBarDataAdd(AddIndices,FinalSize);
+
 	}
 }
 
@@ -188,13 +179,13 @@ void UAOQuickBarComponent::Client_BroadCastInventoryChange(const TArrayView<int3
 		{
 			ChangeRealList.Emplace(InventoryList.Entries[index]);
 		}
-		InventoryList.InventoryViewModel->QuickBarDataChanged(ChangedIndices,FinalSize,ChangeRealList);
+		//InventoryList.InventoryViewModel->QuickBarDataChanged(ChangedIndices,FinalSize);
 	}
 }
 void UAOQuickBarComponent::Client_BroadCastInventoryRemove(const TArrayView<int32> RemovedIndices, int32 FinalSize)
 {
 	if (!RemovedIndices.IsEmpty())
 	{
-		InventoryList.InventoryViewModel->QuickBarDataRemove(RemovedIndices,FinalSize);
+		//InventoryList.InventoryViewModel->QuickBarDataRemove(RemovedIndices,FinalSize);
 	}
 }

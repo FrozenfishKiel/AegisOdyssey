@@ -28,5 +28,5 @@ public:
 private:
 	UFUNCTION(BlueprintCallable)
 	void RefreshInventoryBox(); //刷新WrapBox机制
-
+	FDelegateHandle RefreshInventoryBoxDelegateHandle;
 };

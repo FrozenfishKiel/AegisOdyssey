@@ -27,8 +27,10 @@ public:
 
 	static const FName NAME_ActorFeatureName;
 	virtual FName GetFeatureName() const override { return NAME_ActorFeatureName;}
+
+	
 public:
-	virtual void Client_BroadCastInventoryAdd(const TArrayView<int32> AddIndices, int32 FinalSize) override;
+	virtual void Client_BroadCastInventoryAdd(const TArrayView<int32> AddIndices, int32 FinalSize, const TArray<FAOInventoryEntry>& TargetList) override;
 	virtual void Client_BroadCastInventoryChange(const TArrayView<int32> ChangedIndices, int32 FinalSize) override;
 	virtual void Client_BroadCastInventoryRemove(const TArrayView<int32> RemovedIndices, int32 FinalSize) override;
 protected:
