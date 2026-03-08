@@ -14,6 +14,9 @@ namespace AOGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_LookUp,"Input.LookUp","Player Base Look Mode");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_LightAttack,"Input.LightAttack","角色轻攻击");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_Interact,"Input.Interact","Player begin Interact");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_Jump,"Input.Jump","Player begin Jump.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_Roll,"Input.Roll","Player begin Roll.");
+
 
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Layer_Game,"UI.Layer.Game","Player Game Main UI Layer.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_LAYER_MENU,"UI.Layer.Menu","Player Game Menu UI Layer.");

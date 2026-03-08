@@ -6,11 +6,13 @@
 #include "StateTreeTaskBase.h"
 #include "STT_PlayAnimation.generated.h"
 
+class UGameplayAbility;
 class UAbilitySystemComponent;
 /**
  * 播放连招动画的任务
  * 通过InputTag激活对应的技能，并绑定技能结束通知
  */
+class UAOAbilityTaskHelper;
 USTRUCT()
 struct FPlayAnimationMontageInstanceData
 {
@@ -42,6 +44,10 @@ struct FPlayAnimationMontageInstanceData
 
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
+
+	bool bActivated = false;
+
+	TObjectPtr<UAOAbilityTaskHelper> AOAbilityTaskHelper;
 };
 
 USTRUCT(DisplayName="Play Animation Montage", Category="AegisOdyssey")
@@ -62,4 +68,17 @@ struct AEGISODYSSEY_API FSTT_PlayAnimation : public FStateTreeTaskCommonBase
 	virtual void ExitState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const override;
 	//virtual EStateTreeRunStatus Tick(FStateTreeExecutionContext& Context, const float DeltaTime) const override;
 	virtual void StateCompleted(FStateTreeExecutionContext& Context, const EStateTreeRunStatus CompletionStatus, const FStateTreeActiveStates& CompletedActiveStates) const override;
+	virtual EStateTreeRunStatus Tick(FStateTreeExecutionContext& Context, const float DeltaTime) const override;
+private:
+
+};
+
+UCLASS()
+class AEGISODYSSEY_API UAOAbilityTaskHelper : public UObject
+{
+	GENERATED_BODY()
+public:
+	void OnAbilityEnded(UGameplayAbility* TargetAbility);
+public:
+	bool bAbilityIsActivate = false;
 };

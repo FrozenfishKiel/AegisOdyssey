@@ -1,32 +1,24 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "AegisOdyssey/AbilitySystem/Abilities/AOGameplayAbility.h"
 #include "AegisOdyssey/Character/AOHeroComponent.h"
-#include "GameplayAbilitySpec.h"
-#include "GA_LightAttack.generated.h"
+#include "AegisOdyssey/StateTree/CombatStateTree/AOCombatStateTree.h"
+#include "GA_Roll.generated.h"
 
-class UAbilityTask_PlayMontageAndWait;
-class UAT_WaitMovementInput;
 class UAT_WaitRotateToDirection;
-
+class UAbilityTask_PlayMontageAndWait;
 /**
- * 轻攻击参数对象
- * 通过GameplayEvent的OptionalObject传递给GA_LightAttack
- */
-
-/**
- * 轻攻击目标数据
- * 用于网络传输轻攻击参数（支持自动复制到服务器）
+ * 
  */
 USTRUCT(BlueprintType)
-struct FLightAttackTargetData : public FGameplayAbilityTargetData
+struct FRollTargetData : public FGameplayAbilityTargetData
 {
 	GENERATED_BODY()
 
-	FLightAttackTargetData()
+	FRollTargetData()
 		: InputTag(FGameplayTag::EmptyTag)
 		, InputType(EInputType::None)
 		, PlayRate(1.0f)
@@ -59,7 +51,7 @@ struct FLightAttackTargetData : public FGameplayAbilityTargetData
 	 */
 	virtual UScriptStruct* GetScriptStruct() const override
 	{
-		return FLightAttackTargetData::StaticStruct();
+		return FRollTargetData::StaticStruct();
 	}
 
 	/**
@@ -92,35 +84,15 @@ struct FLightAttackTargetData : public FGameplayAbilityTargetData
 		return true;
 	}
 };
-
-/**
- * 轻攻击目标数据的类型特征
- * 启用网络序列化支持
- */
-template<>
-struct TStructOpsTypeTraits<FLightAttackTargetData> : public TStructOpsTypeTraitsBase2<FLightAttackTargetData>
-{
-	enum
-	{
-		WithNetSerializer = true,
-	};
-};
-
-/**
- * 
- */
 UCLASS()
-class AEGISODYSSEY_API UGA_LightAttack : public UAOGameplayAbility
+class AEGISODYSSEY_API UGA_Roll : public UAOGameplayAbility
 {
 	GENERATED_BODY()
-
-public:
-	UGA_LightAttack(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+protected:
+	virtual void CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility) override;
 	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr, FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
-protected:
-	UFUNCTION()
 	void PlayMontageAnimation();
 	UFUNCTION()
 	void OnMontageCompleted();
@@ -130,50 +102,34 @@ protected:
 	void OnMontageInterrupted();
 	UFUNCTION()
 	void OnMontageCancelled();
-	UFUNCTION()
-	void OnMovementInputDetected();
-
-	UFUNCTION()
-	void ClearCombatTags();
-
 private:
-	void GetCombatWindowTagsFromMontage(UAnimMontage* InMontage, TArray<FGameplayTag>& OutTags);
 	void SetCharacterRotationToAttackDirection();
 
-	UPROPERTY()
-	TObjectPtr<UAbilityTask_PlayMontageAndWait> MontageTask;
-
-	UPROPERTY()
-	TObjectPtr<UAT_WaitMovementInput> MovementInputTask;
-
-	UPROPERTY()
-	TObjectPtr<UAT_WaitRotateToDirection> RotationTask;
-
-	UPROPERTY(EditDefaultsOnly , BlueprintReadOnly , meta = (AllowPrivateAccess = "true"))
-	FGameplayTag CancelAbilityTag;
-
+private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rotation", meta = (AllowPrivateAccess = "true"))
 	float RotationInterpSpeed;
 	
-
-
-
+	UPROPERTY()
+	TObjectPtr<UAT_WaitRotateToDirection> RotationTask;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LightAttack",meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
+	TObjectPtr<UAbilityTask_PlayMontageAndWait> MontageTask;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Roll",meta = (AllowPrivateAccess = "true"))
 	FGameplayTag InputTag;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LightAttack", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Roll", meta = (AllowPrivateAccess = "true"))
 	TEnumAsByte<EInputType> InputType;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LightAttack", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Roll", meta = (AllowPrivateAccess = "true"))
 	class UAnimMontage* Montage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LightAttack", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Roll", meta = (AllowPrivateAccess = "true"))
 	float PlayRate;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LightAttack", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Roll", meta = (AllowPrivateAccess = "true"))
 	FName StartSection;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LightAttack", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Roll", meta = (AllowPrivateAccess = "true"))
 	float StartTime;
 };

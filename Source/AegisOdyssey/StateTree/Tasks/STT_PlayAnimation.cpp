@@ -48,7 +48,11 @@ EStateTreeRunStatus FSTT_PlayAnimation::EnterState(FStateTreeExecutionContext& C
 			}
 		}
 	}
-
+	// 创建或重置Helper
+	if (!InstanceData.AOAbilityTaskHelper)
+	{
+		InstanceData.AOAbilityTaskHelper = NewObject<UAOAbilityTaskHelper>(Context.GetOwner());
+	}
 	/**
 	 * 创建轻攻击目标数据（支持网络自动复制到服务器）
 	 * FLightAttackTargetData继承自FGameplayAbilityTargetData，会自动复制到服务器
@@ -79,13 +83,33 @@ EStateTreeRunStatus FSTT_PlayAnimation::EnterState(FStateTreeExecutionContext& C
 		*GetNameSafe(InstanceData.Montage), 
 		InstanceData.PlayRate);
 
+	FGameplayAbilitySpecHandle AbilitySpecHandle;
+	UGameplayAbility* TargetAbility = nullptr;
+	for (const FGameplayAbilitySpec& AbilitySpec : InstanceData.AbilitySystemComponent->GetActivatableAbilities())
+	{
+		if (AbilitySpec.Ability->GetAssetTags().HasTagExact(InstanceData.InputTag))
+		{
+			if (AbilitySpec.Ability && !AbilitySpec.IsActive())
+			{
+				AbilitySpecHandle = AbilitySpec.Handle;
+				TargetAbility = AbilitySpec.Ability;
+			}
+		}
+	}
+
+
 	/**
 	 * 调用HandleGameplayEvent激活能力并传递参数
 	 * 参数会通过TargetData自动复制到服务器
 	 */
-	int32 bActivated = InstanceData.AbilitySystemComponent->HandleGameplayEvent(InstanceData.InputTag, &EventData);
 
-	UE_LOG(LogStateTree, Warning, TEXT("FSTT_PlayAnimation::EnterState: Activation result: %d"), bActivated);
+	FOnGameplayAbilityEnded::FDelegate AbilityEndedDelegate;
+	AbilityEndedDelegate.BindUObject(InstanceData.AOAbilityTaskHelper, &UAOAbilityTaskHelper::OnAbilityEnded);
+
+	InstanceData.AOAbilityTaskHelper->bAbilityIsActivate = InstanceData.AbilitySystemComponent->InternalTryActivateAbility(AbilitySpecHandle,FPredictionKey(),&TargetAbility,
+		&AbilityEndedDelegate, &EventData);
+
+	UE_LOG(LogStateTree, Warning, TEXT("FSTT_PlayAnimation::EnterState: Activation result: %d"), InstanceData.bActivated);
 
 	return EStateTreeRunStatus::Running;
 
@@ -95,8 +119,6 @@ void FSTT_PlayAnimation::ExitState(FStateTreeExecutionContext& Context,
 	const FStateTreeTransitionResult& Transition) const
 {
 	const FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
-	
-	
 }
 
 
@@ -104,4 +126,23 @@ void FSTT_PlayAnimation::StateCompleted(FStateTreeExecutionContext& Context, con
 	const FStateTreeActiveStates& CompletedActiveStates) const
 {
 	FStateTreeTaskCommonBase::StateCompleted(Context, CompletionStatus, CompletedActiveStates);
+}
+
+EStateTreeRunStatus FSTT_PlayAnimation::Tick(FStateTreeExecutionContext& Context, const float DeltaTime) const
+{
+	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
+
+	if (!InstanceData.AOAbilityTaskHelper) return EStateTreeRunStatus::Failed;
+	if (!InstanceData.AOAbilityTaskHelper->bAbilityIsActivate)
+	{
+		UE_LOG(LogStateTree, Warning, TEXT("FSTT_PlayAnimation::Finish Task From Current Ability End "));
+
+		return EStateTreeRunStatus::Succeeded;
+	}
+	return EStateTreeRunStatus::Running;
+}
+
+void UAOAbilityTaskHelper::OnAbilityEnded(UGameplayAbility* TargetAbility)
+{
+	bAbilityIsActivate = false;
 }

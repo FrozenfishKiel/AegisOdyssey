@@ -19,3 +19,8 @@ void UAOStateTreeComponentBase::RestartLogic()
 {
 	Super::RestartLogic();
 }
+
+void UAOStateTreeComponentBase::CallStateTreeToSentEvent(const FGameplayTag InTargetTag, const EInputType InInputType)
+{
+	
+}

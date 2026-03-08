@@ -6,6 +6,7 @@
 #include "Components/StateTreeComponent.h"
 #include "AOStateTreeComponentBase.generated.h"
 
+enum EInputType : uint8;
 /**
  * 
  */
@@ -17,4 +18,6 @@ public:
 	UAOStateTreeComponentBase();
 	virtual void StartLogic() override;
 	virtual void RestartLogic() override;
+protected:
+	virtual void CallStateTreeToSentEvent(const FGameplayTag InTargetTag, const EInputType InInputType);
 };

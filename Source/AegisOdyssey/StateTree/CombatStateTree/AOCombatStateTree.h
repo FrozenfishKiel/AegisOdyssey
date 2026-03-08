@@ -33,7 +33,7 @@ struct FCombatStateTreeInputEvent
 	TEnumAsByte<EInputType> InputType;
 };
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent),DisplayName = "AOCombatStateTree")
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent),DisplayName = "AOChainComboStateTree")
 class AEGISODYSSEY_API UAOCombatStateTree : public UAOStateTreeComponentBase
 {
 	GENERATED_BODY()
@@ -43,6 +43,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void CallStateTreeToSentEvent(const FGameplayTag InTargetTag,const EInputType InInputType) override;
 
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
@@ -51,7 +52,6 @@ public:
 	virtual void InitializeComponent() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 private:
-	void CallStateTreeToSentEvent(const FGameplayTag InTargetTag,const EInputType InInputType);
 	FDelegateHandle OnPressInputLoadHandle;
 	FDelegateHandle OnReleaseInputLoadHandle;
 	FDelegateHandle OnStartInputLoadHandle;

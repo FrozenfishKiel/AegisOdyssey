@@ -25,9 +25,11 @@
 UGA_LightAttack::UGA_LightAttack(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
-	Params = nullptr;
+	InputType = EInputType::None;
+	Montage = nullptr;
+	PlayRate = 0.f;
+	StartTime = 0.f;
 	RotationInterpSpeed = 360.0f;
-	bRotateToAttackDirection = true;
 }
 
 bool UGA_LightAttack::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -70,19 +72,12 @@ void UGA_LightAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 				 * 创建参数对象并填充数据
 				 * 客户端和服务器都会执行这段代码，获取到相同的参数
 				 */
-				Params = NewObject<ULightAttackParams>(this);
-				Params->InputTag = LightAttackData->InputTag;
-				Params->InputType = LightAttackData->InputType;
-				Params->Montage = LightAttackData->Montage.Get();
-				Params->PlayRate = LightAttackData->PlayRate;
-				Params->StartSection = LightAttackData->StartSection;
-				Params->StartTime = LightAttackData->StartTime;
-				
-				UE_LOG(LogAegisOdysseyAbilitySystem, Warning, TEXT("UGA_LightAttack::ActivateAbility: Got params from TargetData - InputTag: %s, Montage: %s, PlayRate: %.2f, Role: %s"), 
-					*Params->InputTag.ToString(), 
-					*GetNameSafe(Params->Montage), 
-					Params->PlayRate,
-					HasAuthority(&ActivationInfo) ? TEXT("Server") : TEXT("Client"));
+				InputTag = LightAttackData->InputTag;
+				InputType = LightAttackData->InputType;
+				Montage = LightAttackData->Montage.Get();
+				PlayRate = LightAttackData->PlayRate;
+				StartSection = LightAttackData->StartSection;
+				StartTime = LightAttackData->StartTime;
 				
 				break;
 			}
@@ -108,13 +103,6 @@ void UGA_LightAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 			UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_LightAttack::OnRecoveryTagChanged: Stopped movement input detection"));
 		}
 	}
-	
-	if (!Params)
-	{
-		UE_LOG(LogAegisOdysseyAbilitySystem, Error, TEXT("UGA_LightAttack::ActivateAbility: No params found, ending ability"));
-		EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
-		return;
-	}
 
 	SetCharacterRotationToAttackDirection();
 
@@ -134,26 +122,16 @@ void UGA_LightAttack::PlayMontageAnimation()
 		return;
 	}
 	
-	UAnimMontage* MontageToPlay = Params ? Params->Montage : nullptr;
-	float PlayRateValue = Params ? Params->PlayRate : 1.0f;
-	FName StartSectionValue = Params ? Params->StartSection : NAME_None;
-	float StartTimeValue = Params ? Params->StartTime : 0.0f;
-
-	UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_LightAttack::PlayMontageAnimation: MontageToPlay: %s, PlayRate: %.2f, StartSection: %s, StartTime: %.2f"),
-		MontageToPlay ? *MontageToPlay->GetName() : TEXT("None"),
-		PlayRateValue,
-		*StartSectionValue.ToString(),
-		StartTimeValue);
 
 	MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
 		this,
 		FName("PlayMontageAndWait"),
-		MontageToPlay,
-		PlayRateValue,
-		StartSectionValue,
+		Montage,
+		PlayRate,
+		StartSection,
 		true,
 		1.0f,
-		StartTimeValue,
+		StartTime,
 		false
 	);
 
@@ -214,9 +192,9 @@ void UGA_LightAttack::ClearCombatTags()
 
 	// 获取蒙太奇中所有的CombatWindowTag
 	TArray<FGameplayTag> CombatTags;
-	if (Params && Params->Montage)
+	if (Montage)
 	{
-		GetCombatWindowTagsFromMontage(Params->Montage, CombatTags);
+		GetCombatWindowTagsFromMontage(Montage, CombatTags);
 	}
 
 	// 立即移除所有连招窗口标签
@@ -230,15 +208,15 @@ void UGA_LightAttack::ClearCombatTags()
 	}
 }
 
-void UGA_LightAttack::GetCombatWindowTagsFromMontage(UAnimMontage* Montage, TArray<FGameplayTag>& OutTags)
+void UGA_LightAttack::GetCombatWindowTagsFromMontage(UAnimMontage* InMontage, TArray<FGameplayTag>& OutTags)
 {
-	if (!Montage)
+	if (!InMontage)
 	{
 		return;
 	}
 
 	// 遍历蒙太奇中的所有AnimNotify
-	for (const FAnimNotifyEvent& NotifyEvent : Montage->Notifies)
+	for (const FAnimNotifyEvent& NotifyEvent : InMontage->Notifies)
 	{
 		// 检查是否是UAOCombatWindow类型的AnimNotifyState
 		if (NotifyEvent.NotifyStateClass && NotifyEvent.NotifyStateClass->IsA<UAOCombatWindow>())
@@ -307,12 +285,7 @@ void UGA_LightAttack::SetCharacterRotationToAttackDirection()
 	{
 		return;
 	}
-
-	if (!bRotateToAttackDirection)
-	{
-		return;
-	}
-
+	
 	FRotator ControlRotation = PC->GetControlRotation();
 	FRotator TargetRotation = FRotator(0.0f, ControlRotation.Yaw, 0.0f);
 
