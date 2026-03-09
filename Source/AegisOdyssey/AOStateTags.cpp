@@ -9,5 +9,5 @@ namespace AOStateTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Combat_Recovery, "State.Combat.Recovery", "角色攻击动作后摇");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Combat_Preparation, "State.Combat.Preparation", "角色攻击动作前摇");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Combat_Roll, "State.Combat.Roll", "角色翻滚状态");
-
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Combat_Sprint, "State.Combat.Sprint", "角色疾跑状态");
 }

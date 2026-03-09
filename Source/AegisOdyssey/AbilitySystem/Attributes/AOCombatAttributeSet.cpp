@@ -4,6 +4,8 @@
 #include "AOCombatAttributeSet.h"
 
 #include "GameplayEffectExtension.h"
+#include "AegisOdyssey/Character/AOCharacter.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AOCombatAttributeSet)
@@ -18,6 +20,8 @@ void UAOCombatAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimePro
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME_CONDITION_NOTIFY(UAOCombatAttributeSet , Attack , COND_None , REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UAOCombatAttributeSet , MaxSpeed , COND_None , REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UAOCombatAttributeSet , SprintSpeedBonus , COND_None , REPNOTIFY_Always);
 }
 
 bool UAOCombatAttributeSet::PreGameplayEffectExecute(struct FGameplayEffectModCallbackData& Data)
@@ -44,6 +48,18 @@ void UAOCombatAttributeSet::PreAttributeBaseChange(const FGameplayAttribute& Att
 void UAOCombatAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
 	Super::PreAttributeChange(Attribute, NewValue);
+	
+	if (Attribute == GetMaxSpeedAttribute())
+	{
+		if (AAOCharacter* AOCharacter = Cast<AAOCharacter>( GetOwningAbilitySystemComponent()->GetAvatarActor()))
+		{
+			UCharacterMovementComponent* CharacterMovementComponent = AOCharacter->GetCharacterMovement();
+			if (CharacterMovementComponent)
+			{
+				CharacterMovementComponent->MaxWalkSpeed = GetMaxSpeed();
+			}
+		}
+	}
 }
 
 void UAOCombatAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
@@ -52,6 +68,16 @@ void UAOCombatAttributeSet::PostAttributeChange(const FGameplayAttribute& Attrib
 }
 
 void UAOCombatAttributeSet::OnRep_Attack()
+{
+	
+}
+
+void UAOCombatAttributeSet::OnRep_MaxSpeed()
+{
+	
+}
+
+void UAOCombatAttributeSet::OnRep_SprintSpeedBonus()
 {
 	
 }

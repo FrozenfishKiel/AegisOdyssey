@@ -16,6 +16,9 @@ namespace AOGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_Interact,"Input.Interact","Player begin Interact");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_Jump,"Input.Jump","Player begin Jump.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_Roll,"Input.Roll","Player begin Roll.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_Sprint,"Input.Sprint","Player begin Sprint.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_CalcelSprint,"Input.CancelSprint","Player begin CancelSprint.");
+
 
 
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Layer_Game,"UI.Layer.Game","Player Game Main UI Layer.");

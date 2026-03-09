@@ -20,6 +20,8 @@ public:
 	UAOCombatAttributeSet();
 
 	ATTRIBUTE_ACCESSORS(UAOCombatAttributeSet , Attack);
+	ATTRIBUTE_ACCESSORS(UAOCombatAttributeSet , MaxSpeed);
+	ATTRIBUTE_ACCESSORS(UAOCombatAttributeSet , SprintSpeedBonus);
 
 protected:
 	void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
@@ -36,4 +38,12 @@ private:
 	FGameplayAttributeData Attack;
 	UFUNCTION()
 	void OnRep_Attack();
+	
+	UPROPERTY(BlueprintReadOnly , ReplicatedUsing = OnRep_Attack , Category = "AO|Attack" , meta = (AllowPrivateAccess = true))
+	FGameplayAttributeData MaxSpeed;
+	void OnRep_MaxSpeed();
+
+	UPROPERTY(BlueprintReadOnly , ReplicatedUsing = OnRep_Attack , Category = "AO|Attack" , meta = (AllowPrivateAccess = true))
+	FGameplayAttributeData SprintSpeedBonus;
+	void OnRep_SprintSpeedBonus();
 };
