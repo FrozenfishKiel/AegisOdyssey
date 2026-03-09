@@ -60,7 +60,7 @@ AAOCharacter::AAOCharacter(const FObjectInitializer& ObjectInitializer)
 	GetCharacterMovement()->GroundFriction = 8.0f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 1400.0f;
 	GetCharacterMovement()->bUseControllerDesiredRotation = false;
-	GetCharacterMovement()->bOrientRotationToMovement = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
 	GetCharacterMovement()->bAllowPhysicsRotationDuringAnimRootMotion = false;
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;

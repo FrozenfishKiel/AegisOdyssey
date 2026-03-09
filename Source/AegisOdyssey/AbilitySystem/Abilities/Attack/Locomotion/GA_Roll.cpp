@@ -45,23 +45,27 @@ void UGA_Roll::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FG
 		{
 			if (Data.IsValid() && Data->GetScriptStruct() == FRollTargetData::StaticStruct())
 			{
-				FRollTargetData* LightAttackData = static_cast<FRollTargetData*>(Data.Get());
+				FRollTargetData* RollTargetData = static_cast<FRollTargetData*>(Data.Get());
 				
 				/**
 				 * 创建参数对象并填充数据
 				 * 客户端和服务器都会执行这段代码，获取到相同的参数
 				 */
-				InputTag = LightAttackData->InputTag;
-				InputType = LightAttackData->InputType;
-				Montage = LightAttackData->Montage.Get();
-				PlayRate = LightAttackData->PlayRate;
-				StartSection = LightAttackData->StartSection;
-				StartTime = LightAttackData->StartTime;
+				InputTag = RollTargetData->InputTag;
+				InputType = RollTargetData->InputType;
+				Montage = RollTargetData->Montage.Get();
+				PlayRate = RollTargetData->PlayRate;
+				StartSection = RollTargetData->StartSection;
+				StartTime = RollTargetData->StartTime;
 				
 				break;
 			}
 		}
 	}
+
+	SetCharacterRotationToAttackDirection();
+
+	PlayMontageAnimation();
 }
 
 void UGA_Roll::PlayMontageAnimation()
@@ -124,6 +128,37 @@ void UGA_Roll::OnMontageCancelled()
 
 }
 
+/*
+* 假设摄像机朝向北方（Y轴正方向），角色朝向南方（Y轴负方向）：
+
+情况1：按 W 键（朝摄像机前方）
+
+- MoveInputVector = (0, 1, 0)（世界坐标系，朝北）
+- ForwardDirection = (0, 1, 0)（摄像机前向，朝北）
+- RightDirection = (1, 0, 0)（摄像机右向，朝东）
+- ForwardDot = 0×0 + 1×1 + 0×0 = 1
+- RightDot = 0×1 + 1×0 + 0×0 = 0
+- CameraRelativeDirection = (0, 1, 0)×1 + (1, 0, 0)×0 = (0, 1, 0)
+- 结果：朝摄像机前方翻滚 ✓
+情况2：按 S 键（朝摄像机后方）
+
+- MoveInputVector = (0, -1, 0)（世界坐标系，朝南）
+- ForwardDirection = (0, 1, 0)（摄像机前向，朝北）
+- RightDirection = (1, 0, 0)（摄像机右向，朝东）
+- ForwardDot = 0×0 + (-1)×1 + 0×0 = -1
+- RightDot = 0×1 + (-1)×0 + 0×0 = 0
+- CameraRelativeDirection = (0, 1, 0)×(-1) + (1, 0, 0)×0 = (0, -1, 0)
+- 结果：朝摄像机后方翻滚 ✓
+情况3：按 W+A 键（朝摄像机左前方）
+
+- MoveInputVector = (-0.707, 0.707, 0)（世界坐标系，朝西北）
+- ForwardDirection = (0, 1, 0)（摄像机前向，朝北）
+- RightDirection = (1, 0, 0)（摄像机右向，朝东）
+- ForwardDot = (-0.707)×0 + 0.707×1 + 0×0 = 0.707
+- RightDot = (-0.707)×1 + 0.707×0 + 0×0 = -0.707
+- CameraRelativeDirection = (0, 1, 0)×0.707 + (1, 0, 0)×(-0.707) = (-0.707, 0.707, 0)
+- 结果：朝摄像机左前方翻滚 ✓
+ */
 void UGA_Roll::SetCharacterRotationToAttackDirection()
 {
 	if (!CurrentActorInfo)
@@ -143,38 +178,45 @@ void UGA_Roll::SetCharacterRotationToAttackDirection()
 		return;
 	}
 
-	// 获取移动输入方向
 	FVector MoveInputVector = FVector::ZeroVector;
 	if (ACharacter* Character = Cast<ACharacter>(Pawn))
 	{
-		if (UCharacterMovementComponent* MovementComp = Character->GetCharacterMovement())
-		{
-			MoveInputVector = MovementComp->GetLastInputVector();
-		}
+		MoveInputVector = Character->GetLastMovementInputVector();
 	}
 
-	// 计算翻滚方向
 	FRotator TargetRotation;
-	constexpr float InputDeadZone = 0.1f; // 输入死区阈值
+	constexpr float InputDeadZone = 0.1f;
 
 	if (MoveInputVector.Size() > InputDeadZone)
 	{
-		// 有移动输入，使用输入方向
-		// 输入向量已经是世界空间的方向（考虑了摄像机旋转）
-		TargetRotation = MoveInputVector.Rotation();
+		FRotator ControlRotation = PC->GetControlRotation();
+		FRotator YawRotation(0.0f, ControlRotation.Yaw, 0.0f);
+		
+		FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		
+		float ForwardDot = FVector::DotProduct(MoveInputVector, ForwardDirection);
+		float RightDot = FVector::DotProduct(MoveInputVector, RightDirection);
+		
+		FVector CameraRelativeDirection = ForwardDirection * ForwardDot + RightDirection * RightDot;
+		CameraRelativeDirection = CameraRelativeDirection.GetSafeNormal();
+		
+		TargetRotation = CameraRelativeDirection.Rotation();
 		TargetRotation.Pitch = 0.0f;
 		TargetRotation.Roll = 0.0f;
 		
-		UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_Roll::SetCharacterRotationToAttackDirection: Rolling in move direction: X=%.2f, Y=%.2f"), 
-			MoveInputVector.X, MoveInputVector.Y);
+		UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_Roll::SetCharacterRotationToAttackDirection: Rolling in camera-relative direction: Forward=%.2f, Right=%.2f, Yaw=%.2f"), 
+			ForwardDot, RightDot, TargetRotation.Yaw);
 	}
 	else
 	{
-		//无移动输入直接正常播放动画就行（后撤）
-		return;
+		TargetRotation = Pawn->GetActorRotation();
+		TargetRotation.Pitch = 0.0f;
+		TargetRotation.Roll = 0.0f;
+		
+		UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_Roll::SetCharacterRotationToAttackDirection: No input, rolling in character facing direction: Yaw=%.2f"), TargetRotation.Yaw);
 	}
 
-	// 使用旋转任务平滑旋转到目标方向
 	if (!RotationTask)
 	{
 		RotationTask = UAT_WaitRotateToDirection::WaitRotateToDirection(this, TargetRotation, RotationInterpSpeed);
@@ -190,6 +232,17 @@ void UGA_Roll::SetCharacterRotationToAttackDirection()
 void UGA_Roll::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
                           const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
+	if (MontageTask)
+	{
+		MontageTask->EndTask();
+		Montage = nullptr;
+	}
+	if (RotationTask)
+	{
+		RotationTask->EndTask();
+		RotationTask = nullptr;
+	}
+	
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 

@@ -14,37 +14,29 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d94a3367-33f1-4132-9cbd-998a391af91c" name="更改" comment="">
-      <change afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AbilitySystem/Abilities/Attack/Locomotion/GA_Roll.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AbilitySystem/Abilities/Attack/Locomotion/GA_Roll.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/CombatStateTree/AOCombatLocomotionStateTree.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/CombatStateTree/AOCombatLocomotionStateTree.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/AegisOdyssey/Animation/NotifyState/AOCombatPreparation.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/AegisOdyssey/Animation/NotifyState/AOCombatPreparation.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/Tasks/STT_PlayRollAnimation.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/Tasks/STT_PlayRollAnimation.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.AegisOdyssey/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AegisOdyssey/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Blueprints/CBP_SandboxCharacter.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/CBP_SandboxCharacter.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/EssentialSwordShieldAnimations/Animation/Sequence/Roll_BR_Seq.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/EssentialSwordShieldAnimations/Animation/Sequence/Roll_BR_Seq.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/EssentialSwordShieldAnimations/Animation/Sequence/Roll_F_Seq.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/EssentialSwordShieldAnimations/Animation/Sequence/Roll_L_Seq.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/EssentialSwordShieldAnimations/Animation/Sequence/Roll_L_Seq.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/EssentialSwordShieldAnimations/Animation/Sequence/Roll_R_Seq.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/EssentialSwordShieldAnimations/Animation/Sequence/Roll_R_Seq.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/EssentialSwordShieldAnimations/Mannequin/Character/Mesh/SK_Mannequin.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/EssentialSwordShieldAnimations/Mannequin/Character/Mesh/SK_Mannequin.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Games/Animations/Characters/Roll/Roll_BR_Seq.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/AM_SwordAttack_01.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/AM_SwordAttack_01.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/AM_SwordAttack_02.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/AM_SwordAttack_02.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/AM_SwordAttack_03.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/AM_SwordAttack_03.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/AM_SwordAttack_04.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/AM_SwordAttack_04.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/AM_SwordAttack_05.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Animations/Characters/Combat/AM_SwordAttack_05.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Games/Animations/Characters/Roll/Roll_F_Seq.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Animations/Characters/Roll/Roll_F_Seq.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Games/Animations/Characters/Roll/Roll_L_Seq.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Games/Animations/Characters/Roll/Roll_R_Seq.uasset" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Games/Character/Anny/BP_Anny.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Character/Anny/BP_Anny.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Games/Character/Anny/DA_AnnyAbilitySet.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Character/Anny/DA_AnnyAbilitySet.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Games/Character/PublicAbilities/GA_Interact.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Games/Character/PublicAbilities/GA_Interact_Collect.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Games/Character/PublicAbilities/GA_LightAttack.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Games/Character/PublicAbilities/GA_SelectQuickBarSlot.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Games/Character/StateTree/ST_SwordCombat.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Character/StateTree/ST_SwordCombat.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Games/Input/DA_AOInputConfig.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Input/DA_AOInputConfig.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Games/Items/Weapons/Sword/IronSword/BP_IronSword.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Items/Weapons/Sword/IronSword/BP_IronSword.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/AOGameplayTags.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AOGameplayTags.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/AOGameplayTags.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AOGameplayTags.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/AbilitySystem/Abilities/Attack/Combat/GA_LightAttack.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AbilitySystem/Abilities/Attack/Combat/GA_LightAttack.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/AbilitySystem/Abilities/Attack/Combat/GA_LightAttack.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AbilitySystem/Abilities/Attack/Combat/GA_LightAttack.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/AOStateTreeComponentBase.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/AOStateTreeComponentBase.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/AOStateTreeComponentBase.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/AOStateTreeComponentBase.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/CombatStateTree/AOCombatStateTree.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/CombatStateTree/AOCombatStateTree.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Character/BP_Character_Default.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Character/BP_Character_Default.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Character/PublicAbilities/GA_BP_LightAttack.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Character/PublicAbilities/GA_BP_LightAttack.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Character/PublicAbilities/GA_BP_Roll.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Character/PublicAbilities/GA_BP_Roll.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Character/StateTree/ST_CombatLocomotion.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Character/StateTree/ST_CombatLocomotion.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Games/Input/IMC_Default.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Games/Input/IMC_Default.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/AOStateTags.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AOStateTags.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/AOStateTags.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AOStateTags.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/AbilitySystem/Abilities/Attack/Locomotion/GA_Roll.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AbilitySystem/Abilities/Attack/Locomotion/GA_Roll.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/AbilitySystem/Abilities/Attack/Locomotion/GA_Roll.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/AbilitySystem/Abilities/Attack/Locomotion/GA_Roll.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/Character/AOCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/Character/AOCharacter.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/Tasks/STT_PlayAnimation.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/Tasks/STT_PlayAnimation.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/Tasks/STT_PlayAnimation.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AegisOdyssey/StateTree/Tasks/STT_PlayAnimation.h" afterDir="false" />
     </list>
@@ -96,20 +88,112 @@
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="cidr-memory-view://9" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="cidr-memory-view://25" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/AIModule/Private/BrainComponent.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Core/Private/Logging/StructuredLog.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Core/Private/Windows/WindowsErrorOutputDevice.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Core/Public/Containers/Array.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Core/Public/Templates/UnrealTemplate.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Core/Public/UObject/NameTypes.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Core/Public/Windows/WindowsPlatformAtomics.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/CoreUObject/Private/UObject/PropertyStruct.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/CoreUObject/Public/StructUtils/InstancedStruct.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/CoreUObject/Public/UObject/ObjectHandle.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/CoreUObject/Public/UObject/ObjectPtr.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectArray.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Engine/Classes/Animation/AnimSequenceBase.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Engine/Classes/Components/InputComponent.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Engine/Classes/GameFramework/Pawn.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Engine/Classes/GameFramework/PlayerState.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Engine/Private/Components/ActorComponent.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Engine/Private/Pawn.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Engine/Private/PlayerController.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/Engine/Public/Animation/AnimTypes.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.6/Engine/Source/Runtime/GameplayTags/Private/GameplayTagsManager.cpp" root0="FORCE_HIGHLIGHTING" />
@@ -305,6 +389,7 @@
       <workItem from="1772858683035" duration="39064000" />
       <workItem from="1772905933891" duration="4046000" />
       <workItem from="1772942180499" duration="24832000" />
+      <workItem from="1773033211074" duration="21771000" />
     </task>
     <servers />
   </component>

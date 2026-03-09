@@ -7,5 +7,7 @@ namespace AOStateTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Combat_CombatWindow, "State.Combat.CombatWindow", "角色攻击窗口");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Combat_Combating, "State.Combat.Combating", "角色连招中");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Combat_Recovery, "State.Combat.Recovery", "角色攻击动作后摇");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Combat_Preparation, "State.Combat.Preparation", "角色攻击动作前摇");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Combat_Roll, "State.Combat.Roll", "角色翻滚状态");
 
 }

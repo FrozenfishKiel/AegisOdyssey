@@ -84,6 +84,15 @@ struct FRollTargetData : public FGameplayAbilityTargetData
 		return true;
 	}
 };
+
+template<>
+struct TStructOpsTypeTraits<FRollTargetData> : public TStructOpsTypeTraitsBase2<FRollTargetData>
+{
+	enum
+	{
+		WithNetSerializer = true,
+	};
+};
 UCLASS()
 class AEGISODYSSEY_API UGA_Roll : public UAOGameplayAbility
 {

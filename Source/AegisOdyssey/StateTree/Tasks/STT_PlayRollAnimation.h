@@ -1,16 +1,15 @@
-// STT_PlayAnimation.h
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameplayAbilitySpecHandle.h"
 #include "StateTreeTaskBase.h"
-#include "STT_PlayAnimation.generated.h"
+#include "STT_PlayRollAnimation.generated.h"
 
 class UGameplayAbility;
 class UAbilitySystemComponent;
 
 USTRUCT()
-struct FPlayAnimationMontageInstanceData
+struct FPlayRollAnimationMontageInstanceData
 {
 	GENERATED_BODY()
 
@@ -47,14 +46,14 @@ struct FPlayAnimationMontageInstanceData
 	FGameplayAbilitySpecHandle AbilitySpecHandle;
 };
 
-USTRUCT(DisplayName="Play Chain Combo Animation Montage", Category="AegisOdyssey")
-struct AEGISODYSSEY_API FSTT_PlayAnimation : public FStateTreeTaskCommonBase
+USTRUCT(DisplayName="Play Roll Animation Montage", Category="AegisOdyssey")
+struct AEGISODYSSEY_API FSTT_PlayRollAnimation : public FStateTreeTaskCommonBase
 {
 	GENERATED_BODY()
 
-	using FInstanceDataType = FPlayAnimationMontageInstanceData;
+	using FInstanceDataType = FPlayRollAnimationMontageInstanceData;
 
-	FSTT_PlayAnimation() = default;
+	FSTT_PlayRollAnimation() = default;
 
 	virtual const UStruct* GetInstanceDataType() const override
 	{

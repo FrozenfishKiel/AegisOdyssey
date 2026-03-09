@@ -1,17 +1,16 @@
-#include "STT_PlayAnimation.h"
+#include "STT_PlayRollAnimation.h"
+#include UE_INLINE_GENERATED_CPP_BY_NAME(STT_PlayRollAnimation)
 #include "StateTreeExecutionContext.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AegisOdyssey/Character/AOCharacter.h"
 #include "AegisOdyssey/AbilitySystem/AOAbilitySystem.h"
-#include "AegisOdyssey/AbilitySystem/Abilities/Attack/Combat/GA_LightAttack.h"
+#include "AegisOdyssey/AbilitySystem/Abilities/Attack/Locomotion/GA_Roll.h"
 #include "AbilitySystemGlobals.h"
 #include "GameplayAbilitySpec.h"
 #include "Abilities/GameplayAbility.h"
 #include "GameplayPrediction.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(STT_PlayAnimation)
-
-EStateTreeRunStatus FSTT_PlayAnimation::EnterState(FStateTreeExecutionContext& Context,
+EStateTreeRunStatus FSTT_PlayRollAnimation::EnterState(FStateTreeExecutionContext& Context,
 	const FStateTreeTransitionResult& Transition) const
 {
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
@@ -34,21 +33,21 @@ EStateTreeRunStatus FSTT_PlayAnimation::EnterState(FStateTreeExecutionContext& C
 		return EStateTreeRunStatus::Failed;
 	}
 
-	UE_LOG(LogStateTree, Warning, TEXT("FSTT_PlayAnimation::EnterState: Canceling current abilities with tag: %s"), *InstanceData.InputTag.ToString());
+	UE_LOG(LogStateTree, Warning, TEXT("FSTT_PlayRollAnimation::EnterState: Canceling current abilities with tag: %s"), *InstanceData.InputTag.ToString());
 	for (const FGameplayAbilitySpec& AbilitySpec : InstanceData.AbilitySystemComponent->GetActivatableAbilities())
 	{
 		if (AbilitySpec.Ability->GetAssetTags().HasTagExact(InstanceData.InputTag))
 		{
 			if (AbilitySpec.Ability && AbilitySpec.IsActive())
 			{
-				UE_LOG(LogStateTree, Warning, TEXT("FSTT_PlayAnimation::EnterState: Canceling ability: %s with AbilityTag: %s"), 
+				UE_LOG(LogStateTree, Warning, TEXT("FSTT_PlayRollAnimation::EnterState: Canceling ability: %s with AbilityTag: %s"), 
 					*AbilitySpec.Ability->GetName(), *InstanceData.InputTag.ToString());
 				InstanceData.AbilitySystemComponent->CancelAbilityHandle(AbilitySpec.Handle);
 			}
 		}
 	}
 
-	FLightAttackTargetData* TargetData = new FLightAttackTargetData();
+	FRollTargetData* TargetData = new FRollTargetData();
 	TargetData->InputTag = InstanceData.InputTag;
 	TargetData->Montage = InstanceData.Montage;
 	TargetData->PlayRate = InstanceData.PlayRate;
@@ -62,7 +61,7 @@ EStateTreeRunStatus FSTT_PlayAnimation::EnterState(FStateTreeExecutionContext& C
 	EventData.EventTag = InstanceData.InputTag;
 	EventData.TargetData = TargetDataHandle;
 
-	UE_LOG(LogStateTree, Warning, TEXT("FSTT_PlayAnimation::EnterState: Activating GA_LightAttack with TargetData - InputTag: %s, Montage: %s, PlayRate: %.2f"), 
+	UE_LOG(LogStateTree, Warning, TEXT("FSTT_PlayRollAnimation::EnterState: Activating GA_Roll with TargetData - InputTag: %s, Montage: %s, PlayRate: %.2f"), 
 		*InstanceData.InputTag.ToString(), 
 		*GetNameSafe(InstanceData.Montage), 
 		InstanceData.PlayRate);
@@ -81,24 +80,25 @@ EStateTreeRunStatus FSTT_PlayAnimation::EnterState(FStateTreeExecutionContext& C
 
 	InstanceData.bActivated = InstanceData.AbilitySystemComponent->InternalTryActivateAbility(InstanceData.AbilitySpecHandle,FPredictionKey(),nullptr,
 		nullptr, &EventData);
+	
 
 	return EStateTreeRunStatus::Running;
 }
 
-void FSTT_PlayAnimation::ExitState(FStateTreeExecutionContext& Context,
+void FSTT_PlayRollAnimation::ExitState(FStateTreeExecutionContext& Context,
 	const FStateTreeTransitionResult& Transition) const
 {
 	const FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
+	
 }
 
-
-void FSTT_PlayAnimation::StateCompleted(FStateTreeExecutionContext& Context, const EStateTreeRunStatus CompletionStatus,
+void FSTT_PlayRollAnimation::StateCompleted(FStateTreeExecutionContext& Context, const EStateTreeRunStatus CompletionStatus,
 	const FStateTreeActiveStates& CompletedActiveStates) const
 {
 	FStateTreeTaskCommonBase::StateCompleted(Context, CompletionStatus, CompletedActiveStates);
 }
 
-EStateTreeRunStatus FSTT_PlayAnimation::Tick(FStateTreeExecutionContext& Context, const float DeltaTime) const
+EStateTreeRunStatus FSTT_PlayRollAnimation::Tick(FStateTreeExecutionContext& Context, const float DeltaTime) const
 {
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
 	FGameplayAbilitySpec* AbilitySpec = InstanceData.AbilitySystemComponent->FindAbilitySpecFromHandle(InstanceData.AbilitySpecHandle);
@@ -111,5 +111,3 @@ EStateTreeRunStatus FSTT_PlayAnimation::Tick(FStateTreeExecutionContext& Context
 	}
 	return EStateTreeRunStatus::Running;
 }
-
-
