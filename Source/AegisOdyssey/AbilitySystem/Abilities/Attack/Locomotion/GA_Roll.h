@@ -140,6 +140,7 @@ protected:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 	virtual void ApplyCooldown(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;
+	virtual const FGameplayTagContainer* GetCooldownTags() const override;
 	void PlayMontageAnimation();
 	UFUNCTION()
 	void OnMontageCompleted();
@@ -161,52 +162,46 @@ private:
 	UPROPERTY()
 	TObjectPtr<UAbilityTask_PlayMontageAndWait> MontageTask;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Roll",meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
 	FGameplayTag InputTag;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Roll", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
 	TEnumAsByte<EInputType> InputType;
 	UPROPERTY()
 	class UAnimMontage* Montage;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Roll", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
 	UAnimMontage* ForwardMontage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Roll", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
 	UAnimMontage* BackwardMontage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Roll", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
 	UAnimMontage* LeftMontage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Roll", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
 	UAnimMontage* RightMontage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Roll", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
 	UAnimMontage* ForwardLeftMontage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Roll", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
 	UAnimMontage* ForwardRightMontage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Roll", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
 	UAnimMontage* BackwardLeftMontage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Roll", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
 	UAnimMontage* BackwardRightMontage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Roll", meta = (AllowPrivateAccess = "true"))
 	float PlayRate;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Roll", meta = (AllowPrivateAccess = "true"))
 	FName StartSection;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Roll", meta = (AllowPrivateAccess = "true"))
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cooldown", meta = (AllowPrivateAccess = "true"))
 	float CooldownDuration;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Roll", meta = (AllowPrivateAccess = "true"))
 	float StartTime = 0.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Roll", meta = (AllowPrivateAccess = "true"))
-	FGameplayTagContainer CooldownTags;
 
 	UPROPERTY()
 	FVector SavedMoveInputDirection;

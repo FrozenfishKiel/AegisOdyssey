@@ -2,6 +2,7 @@
 
 
 #include "GA_Roll.h"
+#include "NativeGameplayTags.h"
 #include "AegisOdyssey/Character/AOCharacter.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "AegisOdyssey/AOLogChannels.h"
@@ -12,11 +13,19 @@
 #include "AbilitySystemComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GA_Roll)
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Ability_Roll_Cooldown, "Ability.Roll.Cooldown");
+
+static const FGameplayTagContainer RollCooldownTags(TAG_Ability_Roll_Cooldown);
 
 void UGA_Roll::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility)
 {
 	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
+}
+
+const FGameplayTagContainer* UGA_Roll::GetCooldownTags() const
+{
+	return &RollCooldownTags;
 }
 
 bool UGA_Roll::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -239,7 +248,7 @@ void UGA_Roll::SelectDirectionalMontage()
 	else
 	{
 		// 没有输入时，使用前向翻滚
-		Montage = ForwardMontage;
+		Montage = BackwardMontage;
 		UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_Roll::SelectDirectionalMontage: No input, using Forward Roll"));
 	}
 
@@ -283,7 +292,15 @@ void UGA_Roll::ApplyCooldown(const FGameplayAbilitySpecHandle Handle, const FGam
 		return;
 	}
 
-	FGameplayEffectSpecHandle SpecHandle = ASC->MakeOutgoingSpec(UGameplayEffect::StaticClass(), GetAbilityLevel(Handle, ActorInfo), MakeEffectContext(Handle, ActorInfo));
+	UGameplayEffect* CooldownGE = NewObject<UGameplayEffect>(GetTransientPackage());
+	CooldownGE->DurationPolicy = EGameplayEffectDurationType::HasDuration;
+
+	FGameplayEffectContextHandle EffectContext = MakeEffectContext(Handle, ActorInfo);
+	float Level = GetAbilityLevel(Handle, ActorInfo);
+
+	FGameplayEffectSpec* NewSpec = new FGameplayEffectSpec(CooldownGE, EffectContext, Level);
+	FGameplayEffectSpecHandle SpecHandle(NewSpec);
+
 	if (!SpecHandle.Data.IsValid())
 	{
 		return;
@@ -291,7 +308,7 @@ void UGA_Roll::ApplyCooldown(const FGameplayAbilitySpecHandle Handle, const FGam
 
 	FGameplayEffectSpec& Spec = *SpecHandle.Data;
 	Spec.SetDuration(CooldownDuration, true);
-	Spec.DynamicGrantedTags.AppendTags(CooldownTags);
+	Spec.DynamicGrantedTags.AppendTags(RollCooldownTags);
 
 	ASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
 }
