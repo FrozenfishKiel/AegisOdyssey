@@ -49,11 +49,20 @@ EStateTreeRunStatus FSTT_PlayRollAnimation::EnterState(FStateTreeExecutionContex
 
 	FRollTargetData* TargetData = new FRollTargetData();
 	TargetData->InputTag = InstanceData.InputTag;
-	TargetData->Montage = InstanceData.Montage;
 	TargetData->PlayRate = InstanceData.PlayRate;
 	TargetData->StartTime = InstanceData.StartTime;
 	TargetData->StartSection = InstanceData.StartSection;
 
+	TargetData->ForwardMontage = InstanceData.ForwardMontage;
+	TargetData->RightMontage = InstanceData.RightMontage;
+	TargetData->LeftMontage = InstanceData.LeftMontage;
+	TargetData->BackwardMontage = InstanceData.BackwardMontage;
+	TargetData->ForwardLeftMontage = InstanceData.ForwardLeftMontage;
+	TargetData->ForwardRightMontage = InstanceData.ForwardRightMontage;
+	TargetData->BackwardLeftMontage = InstanceData.BackwardLeftMontage;
+	TargetData->BackwardRightMontage = InstanceData.BackwardRightMontage;
+	TargetData->MoveInputDirection = Character->GetLastMovementInputVector();
+	
 	FGameplayAbilityTargetDataHandle TargetDataHandle;
 	TargetDataHandle.Data.Add(TSharedPtr<FGameplayAbilityTargetData>(TargetData));
 	
@@ -61,9 +70,8 @@ EStateTreeRunStatus FSTT_PlayRollAnimation::EnterState(FStateTreeExecutionContex
 	EventData.EventTag = InstanceData.InputTag;
 	EventData.TargetData = TargetDataHandle;
 
-	UE_LOG(LogStateTree, Warning, TEXT("FSTT_PlayRollAnimation::EnterState: Activating GA_Roll with TargetData - InputTag: %s, Montage: %s, PlayRate: %.2f"), 
+	UE_LOG(LogStateTree, Warning, TEXT("FSTT_PlayRollAnimation::EnterState: Activating GA_Roll with TargetData - InputTag: %s, PlayRate: %.2f"), 
 		*InstanceData.InputTag.ToString(), 
-		*GetNameSafe(InstanceData.Montage), 
 		InstanceData.PlayRate);
 
 	for (const FGameplayAbilitySpec& AbilitySpec : InstanceData.AbilitySystemComponent->GetActivatableAbilities())

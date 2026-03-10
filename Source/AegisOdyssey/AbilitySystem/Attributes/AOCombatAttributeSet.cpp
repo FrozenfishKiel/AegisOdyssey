@@ -7,6 +7,7 @@
 #include "AegisOdyssey/Character/AOCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "AegisOdyssey/AOLogChannels.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AOCombatAttributeSet)
 
@@ -49,22 +50,32 @@ void UAOCombatAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribu
 {
 	Super::PreAttributeChange(Attribute, NewValue);
 	
-	if (Attribute == GetMaxSpeedAttribute())
-	{
-		if (AAOCharacter* AOCharacter = Cast<AAOCharacter>( GetOwningAbilitySystemComponent()->GetAvatarActor()))
-		{
-			UCharacterMovementComponent* CharacterMovementComponent = AOCharacter->GetCharacterMovement();
-			if (CharacterMovementComponent)
-			{
-				CharacterMovementComponent->MaxWalkSpeed = GetMaxSpeed();
-			}
-		}
-	}
+
 }
 
 void UAOCombatAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
 {
 	Super::PostAttributeChange(Attribute, OldValue, NewValue);
+	
+	
+	if (Attribute == GetMaxSpeedAttribute() || Attribute == GetSprintSpeedBonusAttribute())
+	{
+
+		
+		if (AAOCharacter* AOCharacter = Cast<AAOCharacter>( GetOwningAbilitySystemComponent()->GetAvatarActor()))
+		{
+
+			UCharacterMovementComponent* CharacterMovementComponent = AOCharacter->GetCharacterMovement();
+			if (CharacterMovementComponent)
+			{
+				float TotalSpeed = GetMaxSpeed();
+				CharacterMovementComponent->MaxWalkSpeed = TotalSpeed;
+				float NewMaxWalkSpeed = CharacterMovementComponent->MaxWalkSpeed;
+				UE_LOG(LogAegisOdysseyAttributeSet, Log, TEXT("UAOCombatAttributeSet::PostAttributeChange: MaxWalkSpeed  %.2f "), 
+					NewMaxWalkSpeed);
+			}
+		}
+	}
 }
 
 void UAOCombatAttributeSet::OnRep_Attack()
@@ -74,10 +85,11 @@ void UAOCombatAttributeSet::OnRep_Attack()
 
 void UAOCombatAttributeSet::OnRep_MaxSpeed()
 {
+	UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UAOCombatAttributeSet::OnRep_MaxSpeed: MaxSpeed replicated to %.2f"), GetMaxSpeed());
 	
 }
 
 void UAOCombatAttributeSet::OnRep_SprintSpeedBonus()
 {
-	
+
 }

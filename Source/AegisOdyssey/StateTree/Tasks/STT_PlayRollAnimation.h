@@ -20,7 +20,28 @@ struct FPlayRollAnimationMontageInstanceData
 	USkeletalMeshComponent* SkeletalMesh;
 
 	UPROPERTY(EditAnywhere, Category = "Config")
-	UAnimMontage* Montage;
+	UAnimMontage* ForwardMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Config")
+	UAnimMontage* BackwardMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Config")
+	UAnimMontage* LeftMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Config")
+	UAnimMontage* RightMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Config")
+	UAnimMontage* ForwardLeftMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Config")
+	UAnimMontage* ForwardRightMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Config")
+	UAnimMontage* BackwardLeftMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Config")
+	UAnimMontage* BackwardRightMontage;
 
 	UPROPERTY(EditAnywhere, Category = "Config")
 	float PlayRate = 1.0f;

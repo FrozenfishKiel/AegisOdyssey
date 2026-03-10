@@ -7,6 +7,9 @@
 #include "AegisOdyssey/AOLogChannels.h"
 #include "AegisOdyssey/AbilitySystem/Tasks/AT_WaitRotateToDirection.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "AbilitySystemGlobals.h"
+#include "GameplayEffect.h"
+#include "AbilitySystemComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GA_Roll)
 
@@ -53,18 +56,29 @@ void UGA_Roll::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FG
 				 */
 				InputTag = RollTargetData->InputTag;
 				InputType = RollTargetData->InputType;
-				Montage = RollTargetData->Montage.Get();
 				PlayRate = RollTargetData->PlayRate;
 				StartSection = RollTargetData->StartSection;
 				StartTime = RollTargetData->StartTime;
+				
+				ForwardMontage = RollTargetData->ForwardMontage;
+				RightMontage = RollTargetData->RightMontage;
+				BackwardMontage = RollTargetData->BackwardMontage;
+				LeftMontage = RollTargetData->LeftMontage;
+				ForwardLeftMontage = RollTargetData->ForwardLeftMontage;
+				ForwardRightMontage = RollTargetData->ForwardRightMontage;
+				BackwardLeftMontage = RollTargetData->BackwardLeftMontage;
+				BackwardRightMontage = RollTargetData->BackwardRightMontage;
+				
+				SavedMoveInputDirection = RollTargetData->MoveInputDirection;
 				
 				break;
 			}
 		}
 	}
 
-	SetCharacterRotationToAttackDirection();
+	CommitAbility(Handle, ActorInfo, ActivationInfo);
 
+	SelectDirectionalMontage();
 	PlayMontageAnimation();
 }
 
@@ -128,38 +142,11 @@ void UGA_Roll::OnMontageCancelled()
 
 }
 
-/*
-* 假设摄像机朝向北方（Y轴正方向），角色朝向南方（Y轴负方向）：
-
-情况1：按 W 键（朝摄像机前方）
-
-- MoveInputVector = (0, 1, 0)（世界坐标系，朝北）
-- ForwardDirection = (0, 1, 0)（摄像机前向，朝北）
-- RightDirection = (1, 0, 0)（摄像机右向，朝东）
-- ForwardDot = 0×0 + 1×1 + 0×0 = 1
-- RightDot = 0×1 + 1×0 + 0×0 = 0
-- CameraRelativeDirection = (0, 1, 0)×1 + (1, 0, 0)×0 = (0, 1, 0)
-- 结果：朝摄像机前方翻滚 ✓
-情况2：按 S 键（朝摄像机后方）
-
-- MoveInputVector = (0, -1, 0)（世界坐标系，朝南）
-- ForwardDirection = (0, 1, 0)（摄像机前向，朝北）
-- RightDirection = (1, 0, 0)（摄像机右向，朝东）
-- ForwardDot = 0×0 + (-1)×1 + 0×0 = -1
-- RightDot = 0×1 + (-1)×0 + 0×0 = 0
-- CameraRelativeDirection = (0, 1, 0)×(-1) + (1, 0, 0)×0 = (0, -1, 0)
-- 结果：朝摄像机后方翻滚 ✓
-情况3：按 W+A 键（朝摄像机左前方）
-
-- MoveInputVector = (-0.707, 0.707, 0)（世界坐标系，朝西北）
-- ForwardDirection = (0, 1, 0)（摄像机前向，朝北）
-- RightDirection = (1, 0, 0)（摄像机右向，朝东）
-- ForwardDot = (-0.707)×0 + 0.707×1 + 0×0 = 0.707
-- RightDot = (-0.707)×1 + 0.707×0 + 0×0 = -0.707
-- CameraRelativeDirection = (0, 1, 0)×0.707 + (1, 0, 0)×(-0.707) = (-0.707, 0.707, 0)
-- 结果：朝摄像机左前方翻滚 ✓
+/**
+ * 根据输入方向选择对应的翻滚动画
+ * 支持8个方向的翻滚：前、后、左、右、左前、右前、左后、右后
  */
-void UGA_Roll::SetCharacterRotationToAttackDirection()
+void UGA_Roll::SelectDirectionalMontage()
 {
 	if (!CurrentActorInfo)
 	{
@@ -178,14 +165,10 @@ void UGA_Roll::SetCharacterRotationToAttackDirection()
 		return;
 	}
 
-	FVector MoveInputVector = FVector::ZeroVector;
-	if (ACharacter* Character = Cast<ACharacter>(Pawn))
-	{
-		MoveInputVector = Character->GetLastMovementInputVector();
-	}
+	FVector MoveInputVector = SavedMoveInputDirection;
 
-	FRotator TargetRotation;
 	constexpr float InputDeadZone = 0.1f;
+	constexpr float DiagonalThreshold = 0.5f;
 
 	if (MoveInputVector.Size() > InputDeadZone)
 	{
@@ -197,37 +180,78 @@ void UGA_Roll::SetCharacterRotationToAttackDirection()
 		
 		float ForwardDot = FVector::DotProduct(MoveInputVector, ForwardDirection);
 		float RightDot = FVector::DotProduct(MoveInputVector, RightDirection);
-		
+
 		FVector CameraRelativeDirection = ForwardDirection * ForwardDot + RightDirection * RightDot;
-		CameraRelativeDirection = CameraRelativeDirection.GetSafeNormal();
 		
-		TargetRotation = CameraRelativeDirection.Rotation();
+		FRotator TargetRotation = CameraRelativeDirection.Rotation();
 		TargetRotation.Pitch = 0.0f;
 		TargetRotation.Roll = 0.0f;
 		
-		UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_Roll::SetCharacterRotationToAttackDirection: Rolling in camera-relative direction: Forward=%.2f, Right=%.2f, Yaw=%.2f"), 
-			ForwardDot, RightDot, TargetRotation.Yaw);
+		UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_Roll::SelectDirectionalMontage: ForwardDot=%.2f, RightDot=%.2f"), 
+			ForwardDot, RightDot);
+		
+		if (ForwardDot > DiagonalThreshold && RightDot > DiagonalThreshold)
+		{
+			Montage = ForwardRightMontage;
+			UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_Roll::SelectDirectionalMontage: Selected Forward-Right Roll"));
+		}
+		else if (ForwardDot > DiagonalThreshold && RightDot < -DiagonalThreshold)
+		{
+			Montage = ForwardLeftMontage;
+			UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_Roll::SelectDirectionalMontage: Selected Forward-Left Roll"));
+		}
+		else if (ForwardDot < -DiagonalThreshold && RightDot > DiagonalThreshold)
+		{
+			Montage = BackwardRightMontage;
+			UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_Roll::SelectDirectionalMontage: Selected Backward-Right Roll"));
+		}
+		else if (ForwardDot < -DiagonalThreshold && RightDot < -DiagonalThreshold)
+		{
+			Montage = BackwardLeftMontage;
+			UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_Roll::SelectDirectionalMontage: Selected Backward-Left Roll"));
+		}
+		else if (ForwardDot > DiagonalThreshold)
+		{
+			Montage = ForwardMontage;
+			UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_Roll::SelectDirectionalMontage: Selected Forward Roll"));
+		}
+		else if (ForwardDot < -DiagonalThreshold)
+		{
+			Montage = BackwardMontage;
+			UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_Roll::SelectDirectionalMontage: Selected Backward Roll"));
+		}
+		else if (RightDot > DiagonalThreshold)
+		{
+			Montage = RightMontage;
+			UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_Roll::SelectDirectionalMontage: Selected Right Roll"));
+		}
+		else if (RightDot < -DiagonalThreshold)
+		{
+			Montage = LeftMontage;
+			UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_Roll::SelectDirectionalMontage: Selected Left Roll"));
+		}
+		else
+		{
+			Montage = ForwardMontage;
+			UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_Roll::SelectDirectionalMontage: Defaulting to Forward Roll"));
+		}
 	}
 	else
 	{
-		TargetRotation = Pawn->GetActorRotation();
-		TargetRotation.Pitch = 0.0f;
-		TargetRotation.Roll = 0.0f;
-		
-		UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_Roll::SetCharacterRotationToAttackDirection: No input, rolling in character facing direction: Yaw=%.2f"), TargetRotation.Yaw);
+		// 没有输入时，使用前向翻滚
+		Montage = ForwardMontage;
+		UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_Roll::SelectDirectionalMontage: No input, using Forward Roll"));
 	}
 
-	if (!RotationTask)
+	// 检查选中的动画是否有效
+	if (!Montage)
 	{
-		RotationTask = UAT_WaitRotateToDirection::WaitRotateToDirection(this, TargetRotation, RotationInterpSpeed);
-		if (RotationTask)
-		{
-			RotationTask->ReadyForActivation();
-			UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_Roll::SetCharacterRotationToAttackDirection: Started rotation to Yaw: %.2f with speed: %.2f"), 
-				TargetRotation.Yaw, RotationInterpSpeed);
-		}
+		
+		UE_LOG(LogAegisOdysseyAbilitySystem, Warning, TEXT("UGA_Roll::SelectDirectionalMontage: Selected montage is null!"));
 	}
+
 }
+
 
 void UGA_Roll::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
                           const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
@@ -244,5 +268,31 @@ void UGA_Roll::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGamepl
 	}
 	
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+}
+
+void UGA_Roll::ApplyCooldown(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const
+{
+	if (CooldownDuration <= 0.0f)
+	{
+		return;
+	}
+
+	UAbilitySystemComponent* ASC = ActorInfo ? ActorInfo->AbilitySystemComponent.Get() : nullptr;
+	if (!ASC)
+	{
+		return;
+	}
+
+	FGameplayEffectSpecHandle SpecHandle = ASC->MakeOutgoingSpec(UGameplayEffect::StaticClass(), GetAbilityLevel(Handle, ActorInfo), MakeEffectContext(Handle, ActorInfo));
+	if (!SpecHandle.Data.IsValid())
+	{
+		return;
+	}
+
+	FGameplayEffectSpec& Spec = *SpecHandle.Data;
+	Spec.SetDuration(CooldownDuration, true);
+	Spec.DynamicGrantedTags.AppendTags(CooldownTags);
+
+	ASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
 }
 

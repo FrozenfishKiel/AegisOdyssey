@@ -2,7 +2,7 @@
 
 
 #include "GA_Sprint.h"
-
+#include "GameFramework/CharacterMovementComponent.h"
 #include "AegisOdyssey/AbilitySystem/Attributes/AOCombatAttributeSet.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GA_Sprint)
@@ -50,7 +50,7 @@ void UGA_Sprint::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const 
         
 		FGameplayModifierInfo ModifierInfo;
 		ModifierInfo.Attribute = UAOCombatAttributeSet::GetSprintSpeedBonusAttribute();
-		ModifierInfo.ModifierOp = EGameplayModOp::Additive;
+		ModifierInfo.ModifierOp = EGameplayModOp::Override;
 		ModifierInfo.ModifierMagnitude = FScalableFloat(SprintSpeedBonusAmount);
         
 		NewGE->Modifiers.Add(ModifierInfo);

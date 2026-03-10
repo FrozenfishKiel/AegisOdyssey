@@ -11,3 +11,4 @@ DEFINE_LOG_CATEGORY(LogAegisOdysseyExperience);
 DEFINE_LOG_CATEGORY(LogAegisOdysseyAbilitySystem);
 DEFINE_LOG_CATEGORY(LogAegisOdysseyPlayer);
 DEFINE_LOG_CATEGORY(LogAegisOdysseyInventory);
+DEFINE_LOG_CATEGORY(LogAegisOdysseyAttributeSet);

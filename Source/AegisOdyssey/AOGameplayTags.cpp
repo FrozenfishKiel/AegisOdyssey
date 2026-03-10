@@ -18,6 +18,7 @@ namespace AOGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_Roll,"Input.Roll","Player begin Roll.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_Sprint,"Input.Sprint","Player begin Sprint.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_CalcelSprint,"Input.CancelSprint","Player begin CancelSprint.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_CancelJump,"Input.CancelJump","Player begin CancelJump.");
 
 
 

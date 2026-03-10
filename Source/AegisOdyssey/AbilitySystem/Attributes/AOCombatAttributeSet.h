@@ -34,16 +34,18 @@ protected:
 
 private:
 
-	UPROPERTY(BlueprintReadOnly , ReplicatedUsing = OnRep_Attack , Category = "AO|Attack" , meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Attack, Category = "AO|Attack", meta = (AllowPrivateAccess = true))
 	FGameplayAttributeData Attack;
 	UFUNCTION()
 	void OnRep_Attack();
 	
-	UPROPERTY(BlueprintReadOnly , ReplicatedUsing = OnRep_Attack , Category = "AO|Attack" , meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxSpeed, Category = "AO|Movement", meta = (AllowPrivateAccess = true))
 	FGameplayAttributeData MaxSpeed;
+	UFUNCTION()
 	void OnRep_MaxSpeed();
 
-	UPROPERTY(BlueprintReadOnly , ReplicatedUsing = OnRep_Attack , Category = "AO|Attack" , meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_SprintSpeedBonus, Category = "AO|Movement", meta = (AllowPrivateAccess = true))
 	FGameplayAttributeData SprintSpeedBonus;
+	UFUNCTION()
 	void OnRep_SprintSpeedBonus();
 };

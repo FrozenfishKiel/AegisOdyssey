@@ -81,12 +81,20 @@ bool UAOHeroComponent::CanChangeInitState(UGameFrameworkComponentManager* Manage
 	else if (CurrentState == AOGameplayTags::InitState_DataAvailable && DesiredState == AOGameplayTags::InitState_DataInitialized)
 	{
 		AAOPlayerState* AOPS = GetPlayerState<AAOPlayerState>();
+
 		//确保并等待PawnExtComp的初始化状态提前于当前this的状态
 		return AOPS || Manager->HasFeatureReachedInitState(Pawn,UAOExtPawnComponent::NAME_ActorFeatureName,AOGameplayTags::InitState_DataInitialized);
 	}
 	else if (CurrentState == AOGameplayTags::InitState_DataInitialized && DesiredState == AOGameplayTags::InitState_GameplayReady)
 	{
-		return true;
+		const bool bIsLocallyControlled = Pawn->IsLocallyControlled();
+		const bool bIsBot = Pawn->IsBotControlled();
+
+		if (bIsLocallyControlled && !bIsBot)
+		{
+			AAOPlayerController* AOPC = GetController<AAOPlayerController>();
+			
+		}
 	}
 	return false;
 }
@@ -95,15 +103,12 @@ bool UAOHeroComponent::CanChangeInitState(UGameFrameworkComponentManager* Manage
 void UAOHeroComponent::HandleChangeInitState(UGameFrameworkComponentManager* Manager, FGameplayTag CurrentState,
 	FGameplayTag DesiredState)
 {
+	APawn* Pawn = GetPawn<APawn>();
+
 	if (CurrentState == AOGameplayTags::InitState_DataAvailable && DesiredState == AOGameplayTags::InitState_DataInitialized)
 	{
-		APawn* Pawn = GetPawn<APawn>();
 		AAOPlayerState* AOPS = GetPlayerState<AAOPlayerState>();
 		AAOCharacter* CurrentCharacter = Cast<AAOCharacter>(Pawn);
-		if (!ensure(Pawn && AOPS))
-		{
-			return;
-		}
 		
 		const UAOPawnData* PawnData = nullptr;
 
@@ -128,9 +133,16 @@ void UAOHeroComponent::HandleChangeInitState(UGameFrameworkComponentManager* Man
 				CameraComponent->DetermineCameraModeDelegate.BindUObject(this,&ThisClass::DetermineCameraMode);
 			}
 		}
-		if (UAOHUDViewModelComponent* AOHUDViewModelComp = AAOHUD::FindHUDOwnedComponent<UAOHUDViewModelComponent>(PC))
+	}
+	if (CurrentState == AOGameplayTags::InitState_DataInitialized && DesiredState == AOGameplayTags::InitState_GameplayReady)
+	{
+		const bool bIsLocallyControlled = Pawn->IsLocallyControlled();
+		const bool bIsBot = Pawn->IsBotControlled();
+
+		if (bIsLocallyControlled && !bIsBot)
 		{
-			if (!GetOwner()->HasAuthority())
+			AAOPlayerController* AOPC = GetController<AAOPlayerController>();
+			if (UAOHUDViewModelComponent* AOHUDViewModelComp = AAOHUD::FindHUDOwnedComponent<UAOHUDViewModelComponent>(AOPC))
 			{
 				AOHUDViewModelComp->CheckDefaultInitialization();  //手动调用初始状态链条
 			}
