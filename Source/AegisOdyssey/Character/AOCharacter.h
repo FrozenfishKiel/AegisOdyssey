@@ -9,6 +9,7 @@
 #include "AegisOdyssey/Inventory/AOBackPackComponent.h"
 #include "AOCharacter.generated.h"
 
+enum class ECharacterStates : uint8;
 class UAOQuickBarComponent;
 class UAOWeaponManagerComponent;
 class UAOInventoryComponent;
@@ -41,7 +42,6 @@ private:
 	TObjectPtr<UAOBackPackComponent> CharacterBackPackComponent;
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="AOCharacterConfig",meta=(AllowPrivateAccess=true))
 	TObjectPtr<UAOQuickBarComponent> CharacterQuickBar;
-
 
 protected:
 	void DisableMovementAndCollision();

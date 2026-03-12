@@ -11,5 +11,6 @@ namespace AOStateTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Combat_Roll, "State.Combat.Roll", "角色翻滚状态");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Combat_Sprint, "State.Combat.Sprint", "角色疾跑状态");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Combat_Jump, "State.Combat.Jump", "角色跳跃状态");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Combat_Block, "State.Combat.Block", "角色格挡状态");
 
 }

@@ -29,6 +29,7 @@ UGA_LightAttack::UGA_LightAttack(const FObjectInitializer& ObjectInitializer)
 	Montage = nullptr;
 	PlayRate = 0.f;
 	StartTime = 0.f;
+	Montage = nullptr;
 	RotationInterpSpeed = 360.0f;
 }
 

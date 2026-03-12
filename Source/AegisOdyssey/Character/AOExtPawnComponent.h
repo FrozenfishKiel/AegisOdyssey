@@ -28,6 +28,7 @@ public:
 	virtual void CheckDefaultInitialization() override;
 	static UAOExtPawnComponent* FindAOExtPawnComponent(const AActor* Actor){return Actor ? Actor->FindComponentByClass<UAOExtPawnComponent>() : nullptr;}
 	UAOAbilitySystem* GetAOAbilitySystemComponent() const {return Cast<UAOAbilitySystem>(AbilitySystemComponent);}
+	UFUNCTION(BlueprintCallable)
 	UAbilitySystemComponent* GetAbilitySystemComponent() const {return AbilitySystemComponent;}
 	
 	

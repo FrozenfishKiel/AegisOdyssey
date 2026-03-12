@@ -104,7 +104,6 @@ void UGA_Roll::PlayMontageAnimation()
 		return;
 	}
 	
-
 	MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
 		this,
 		FName("PlayMontageAndWait"),

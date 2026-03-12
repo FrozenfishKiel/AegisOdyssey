@@ -1,5 +1,6 @@
 #include "AT_WaitRotateToDirection.h"
 #include "AbilitySystemComponent.h"
+#include "AegisOdyssey/AOLogChannels.h"
 #include "GameFramework/Pawn.h"
 #include "Kismet/KismetMathLibrary.h"
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AT_WaitRotateToDirection)
@@ -50,5 +51,13 @@ void UAT_WaitRotateToDirection::TickTask(float DeltaTime)
 		float CurrentYaw = FRotator::NormalizeAxis(CurrentRotation.Yaw);
 		float TargetYaw = FRotator::NormalizeAxis(TargetRotation.Yaw);
 		float YawDifference = FMath::Abs(CurrentYaw - TargetYaw);
+		
+		UE_LOG(LogAegisOdysseyAbilitySystem, VeryVerbose, TEXT("UAT_WaitRotateToDirection::TickTask: Current Yaw=%.2f, Target Yaw=%.2f, Diff=%.2f, InterpSpeed=%.2f"), 
+			CurrentYaw, TargetYaw, YawDifference, InterpSpeed);
+		
+		if (YawDifference < 1.0f)
+		{
+			EndTask();
+		}
 	}
 }

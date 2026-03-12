@@ -36,7 +36,6 @@ float UMMC_CalculateMaxSpeed::CalculateBaseMagnitude_Implementation(const FGamep
 
 	float SprintSpeedBonus = 0.f;
 	GetCapturedAttributeMagnitude(SprintSpeedBonusDef, Spec, EvaluateParameters, SprintSpeedBonus);
-	SprintSpeedBonus = FMath::Max<float>(SprintSpeedBonus, 0.f);
 	
 	return 500 + SprintSpeedBonus;
 }

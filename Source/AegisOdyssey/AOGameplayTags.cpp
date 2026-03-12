@@ -19,6 +19,8 @@ namespace AOGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_Sprint,"Input.Sprint","Player begin Sprint.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_CalcelSprint,"Input.CancelSprint","Player begin CancelSprint.");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_CancelJump,"Input.CancelJump","Player begin CancelJump.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_Block,"Input.Block","Player begin Block.");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_CancelBlock,"Input.CancelBlock","Player begin CancelBlock.");
 
 
 

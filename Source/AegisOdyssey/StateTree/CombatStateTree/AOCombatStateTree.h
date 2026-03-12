@@ -15,19 +15,16 @@ struct FCombatStateTreeInputEvent
 	GENERATED_BODY()
 
 	FCombatStateTreeInputEvent()
-		: InputTag(FGameplayTag::EmptyTag)
-		, InputType(EInputType::None)
+		: 
+		InputType(EInputType::None)
 	{
 	}
 
 	FCombatStateTreeInputEvent(const FGameplayTag InInputTag, const EInputType InInputType)
-		: InputTag(InInputTag)
-		, InputType(InInputType)
+		: 
+		InputType(InInputType)
 	{
 	}
-
-	UPROPERTY(EditAnywhere, Category = "CombatStateTree")
-	FGameplayTag InputTag;
 
 	UPROPERTY(EditAnywhere, Category = "CombatStateTree")
 	TEnumAsByte<EInputType> InputType;
