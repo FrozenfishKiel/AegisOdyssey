@@ -16,6 +16,10 @@
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
 #include "Kismet/KismetSystemLibrary.h"
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Ability_Block_Cooldown, "Ability.Block.Cooldown");
+
+static const FGameplayTagContainer BlockCooldownTags(TAG_Ability_Block_Cooldown);
+
 
 UGA_Block::UGA_Block(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -34,6 +38,7 @@ UGA_Block::UGA_Block(const FObjectInitializer& ObjectInitializer)
 	LoopBlockMontage = nullptr;
 	EndBlockMontage = nullptr;
 	RotationInterpSpeed = 360.0f;
+	CooldownDuration = 0.f;
 }
 
 bool UGA_Block::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -80,7 +85,7 @@ void UGA_Block::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 		}
 	}
 
-	CommitAbility(Handle, ActorInfo, ActivationInfo);
+	SetCharacterRotationToBlockDirection();
 
 	WaitInputReleaseTask = UAbilityTask_WaitInputRelease::WaitInputRelease(this);
 	if (WaitInputReleaseTask)
@@ -158,9 +163,54 @@ void UGA_Block::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGamep
 		}
 		SprintSpeedEffectHandle.Invalidate();
 	}
+	if (bWasCancelled)  //如果是被Cancel的能力，则应用冷却
+	{
+		CommitAbility(Handle, ActorInfo, ActivationInfo);
+	}
 	
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 	UE_LOG(LogAegisOdysseyAbilitySystem, Warning, TEXT("UGA_Block::EndAbility: Called"));
+}
+
+void UGA_Block::ApplyCooldown(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+	const FGameplayAbilityActivationInfo ActivationInfo) const
+{
+	Super::ApplyCooldown(Handle, ActorInfo, ActivationInfo);
+	if (CooldownDuration <= 0.0f)
+	{
+		return;
+	}
+
+	UAbilitySystemComponent* ASC = ActorInfo ? ActorInfo->AbilitySystemComponent.Get() : nullptr;
+	if (!ASC)
+	{
+		return;
+	}
+
+	UGameplayEffect* CooldownGE = NewObject<UGameplayEffect>(GetTransientPackage());
+	CooldownGE->DurationPolicy = EGameplayEffectDurationType::HasDuration;
+
+	FGameplayEffectContextHandle EffectContext = MakeEffectContext(Handle, ActorInfo);
+	float Level = GetAbilityLevel(Handle, ActorInfo);
+
+	FGameplayEffectSpec* NewSpec = new FGameplayEffectSpec(CooldownGE, EffectContext, Level);
+	FGameplayEffectSpecHandle SpecHandle(NewSpec);
+
+	if (!SpecHandle.Data.IsValid())
+	{
+		return;
+	}
+
+	FGameplayEffectSpec& Spec = *SpecHandle.Data;
+	Spec.SetDuration(CooldownDuration, true);
+	Spec.DynamicGrantedTags.AppendTags(BlockCooldownTags);
+
+	ASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+}
+
+const FGameplayTagContainer* UGA_Block::GetCooldownTags() const
+{
+	return &BlockAbilitiesWithTag;
 }
 
 void UGA_Block::OnMontageCompleted()
@@ -299,25 +349,17 @@ void UGA_Block::SetCharacterRotationToBlockDirection()
 	FRotator ControlRotation = PC->GetControlRotation();
 	FRotator TargetRotation = FRotator(0.0f, ControlRotation.Yaw, 0.0f);
 	
-	FRotator CurrentRotation = Pawn->GetActorRotation();
-	UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_Block::SetCharacterRotationToBlockDirection: Current Yaw=%.2f, Target Yaw=%.2f, InterpSpeed=%.2f"), 
-		CurrentRotation.Yaw, TargetRotation.Yaw, RotationInterpSpeed);
-
 	if (RotationTask)
 	{
 		RotationTask->EndTask();
 		RotationTask = nullptr;
 	}
 	
-	RotationTask = UAT_WaitRotateToDirection::WaitRotateToDirection(this, TargetRotation, RotationInterpSpeed);
+	RotationTask = UAT_WaitRotateToDirection::WaitRotateToDirection(this, TargetRotation, RotationInterpSpeed, true);
 	if (RotationTask)
 	{
 		RotationTask->ReadyForActivation();
-		UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_Block::SetCharacterRotationToBlockDirection: Started rotation to Yaw: %.2f with speed: %.2f"), TargetRotation.Yaw, RotationInterpSpeed);
-	}
-	else
-	{
-		UE_LOG(LogAegisOdysseyAbilitySystem, Error, TEXT("UGA_Block::SetCharacterRotationToBlockDirection: Failed to create RotationTask"));
+		UE_LOG(LogAegisOdysseyAbilitySystem, Log, TEXT("UGA_Block::SetCharacterRotationToBlockDirection: Started continuous rotation to Yaw: %.2f with speed: %.2f"), TargetRotation.Yaw, RotationInterpSpeed);
 	}
 }
 
@@ -416,7 +458,6 @@ void UGA_Block::PlayLoopBlockAnimation()
 		PlayLoopBlockMontageTask->ReadyForActivation();
 	}
 	
-	SetCharacterRotationToBlockDirection();
 }
 
 void UGA_Block::PlayEndBlockAnimation()
@@ -435,6 +476,18 @@ void UGA_Block::PlayEndBlockAnimation()
 	if (!EndBlockMontage)
 	{
 		EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
+	}
+	if (PlayLoopBlockMontageTask)
+	{
+		PlayLoopBlockMontageTask->EndTask();
+		PlayLoopBlockMontageTask = nullptr;
+	}
+
+	//清理完其他两个动画
+	if (PlayStartBlockMontageTask)
+	{
+		PlayStartBlockMontageTask->EndTask();
+		PlayStartBlockMontageTask = nullptr;
 	}
 
 	if (PlayEndBlockMontageTask)

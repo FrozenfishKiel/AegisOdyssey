@@ -11,7 +11,7 @@ public class AegisOdyssey : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
 			"Core", "CoreUObject", "Engine", "InputCore","ModularGameplay" , "GameplayTags","GameplayAbilities","GameplayTasks" , "ModularGameplayActors" , "GameFeatures",
-			"EnhancedInput" , "Slate" , "SlateCore" , "Networking" , "UIExtension","GameplayStateTreeModule","StateTreeModule","AIModule"
+			"EnhancedInput" , "Slate" , "SlateCore" , "Networking" , "UIExtension","GameplayStateTreeModule","StateTreeModule","AIModule","MotionWarping"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]

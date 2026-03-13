@@ -16,9 +16,10 @@ public:
 	virtual void TickTask(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Ability|Tasks", meta = (HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly = "TRUE"))
-	static UAT_WaitRotateToDirection* WaitRotateToDirection(UGameplayAbility* OwningAbility, FRotator TargetRotation, float InterpSpeed);
+	static UAT_WaitRotateToDirection* WaitRotateToDirection(UGameplayAbility* OwningAbility, FRotator TargetRotation, float InterpSpeed, bool bContinuous = false);
 
 private:
 	FRotator TargetRotation;
 	float InterpSpeed;
+	bool bContinuous;
 };

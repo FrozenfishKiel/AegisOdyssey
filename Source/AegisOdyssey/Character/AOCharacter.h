@@ -25,6 +25,7 @@ class AEGISODYSSEY_API AAOCharacter : public AModularCharacter,public IAbilitySy
 public:
 	static const FName NAME_AOAbilityReady;
 	AAOCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	UFUNCTION(BlueprintCallable)
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	virtual UAOAbilitySystem* GetSourceASC() const {return AOSourceASC ? AOSourceASC : nullptr;}
 private:

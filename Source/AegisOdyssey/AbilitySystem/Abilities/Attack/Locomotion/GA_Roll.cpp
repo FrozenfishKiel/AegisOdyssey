@@ -15,7 +15,7 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GA_Roll)
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Ability_Roll_Cooldown, "Ability.Roll.Cooldown");
 
-static const FGameplayTagContainer RollCooldownTags(TAG_Ability_Roll_Cooldown);
+static const FGameplayTagContainer BlockCooldownTags(TAG_Ability_Roll_Cooldown);
 
 void UGA_Roll::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility)
@@ -25,7 +25,7 @@ void UGA_Roll::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGam
 
 const FGameplayTagContainer* UGA_Roll::GetCooldownTags() const
 {
-	return &RollCooldownTags;
+	return &BlockCooldownTags;
 }
 
 bool UGA_Roll::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -307,7 +307,7 @@ void UGA_Roll::ApplyCooldown(const FGameplayAbilitySpecHandle Handle, const FGam
 
 	FGameplayEffectSpec& Spec = *SpecHandle.Data;
 	Spec.SetDuration(CooldownDuration, true);
-	Spec.DynamicGrantedTags.AppendTags(RollCooldownTags);
+	Spec.DynamicGrantedTags.AppendTags(BlockCooldownTags);
 
 	ASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
 }

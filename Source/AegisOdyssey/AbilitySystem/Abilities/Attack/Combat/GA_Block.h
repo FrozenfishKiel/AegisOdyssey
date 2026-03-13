@@ -115,6 +115,8 @@ class AEGISODYSSEY_API UGA_Block : public UAOGameplayAbility
 	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr, FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
+	virtual void ApplyCooldown(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;
+	virtual const FGameplayTagContainer* GetCooldownTags() const override;
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Config")
 	float SprintSpeedBonusAmount = 0.f;
@@ -163,6 +165,9 @@ private:
 
 	UPROPERTY()
 	class UAnimMontage* EndBlockMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cooldown", meta = (AllowPrivateAccess = "true"))
+	float CooldownDuration;
 
 	UPROPERTY()
 	class UAnimMontage* Montage;
