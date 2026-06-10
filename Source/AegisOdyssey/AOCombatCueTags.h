@@ -1,0 +1,14 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "NativeGameplayTags.h"
+
+namespace AOCombatCueTags
+{
+	AEGISODYSSEY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(GameplayCue_Combat_Hit);
+	AEGISODYSSEY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(GameplayCue_Combat_Block);
+	AEGISODYSSEY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(GameplayCue_Combat_Parry);
+	AEGISODYSSEY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(GameplayCue_Combat_Broken);
+	AEGISODYSSEY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(GameplayCue_Combat_AttackEffects_WeaponSwingLoop);
+	AEGISODYSSEY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(GameplayCue_Combat_AttackEffects_WeaponHitBurst);
+}

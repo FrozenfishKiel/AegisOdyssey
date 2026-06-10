@@ -1,0 +1,19 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "NativeGameplayTags.h"
+
+namespace AOCombatEventTags
+{
+	AEGISODYSSEY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(GameplayEvent_Combat_HitReact_Activate);
+	AEGISODYSSEY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(GameplayEvent_Combat_HitReact_AllowMove);
+	AEGISODYSSEY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(GameplayEvent_Combat_HitReact_Finish);
+	AEGISODYSSEY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(GameplayEvent_Combat_ParriedReact_Activate);
+	AEGISODYSSEY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(GameplayEvent_Combat_ParriedReact_AllowMove);
+	AEGISODYSSEY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(GameplayEvent_Combat_ParriedReact_Finish);
+	AEGISODYSSEY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(GameplayEvent_Combat_Block_ParrySuccess);
+	AEGISODYSSEY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(GameplayEvent_Combat_Block_FullBlockSuccess);
+	AEGISODYSSEY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(GameplayEvent_Combat_Block_PartialBlockSuccess);
+}
