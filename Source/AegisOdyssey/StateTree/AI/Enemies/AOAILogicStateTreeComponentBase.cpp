@@ -40,6 +40,8 @@ void UAOAILogicStateTreeComponentBase::InitializeComponent()
 void UAOAILogicStateTreeComponentBase::UninitializeComponent()
 {
 	UnbindInventoryDecisionEvents();
+	bHasPendingSubmittedInventoryDecisionEvent = false;
+	PendingSubmittedInventoryDecisionEvent = FAOAIInventoryDecisionResult();
 	Super::UninitializeComponent();
 	StopLogic(FString("None"));
 }
@@ -47,6 +49,8 @@ void UAOAILogicStateTreeComponentBase::UninitializeComponent()
 void UAOAILogicStateTreeComponentBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	UnbindInventoryDecisionEvents();
+	bHasPendingSubmittedInventoryDecisionEvent = false;
+	PendingSubmittedInventoryDecisionEvent = FAOAIInventoryDecisionResult();
 	Super::EndPlay(EndPlayReason);
 	StopLogic(FString("None"));
 }
@@ -54,12 +58,12 @@ void UAOAILogicStateTreeComponentBase::EndPlay(const EEndPlayReason::Type EndPla
 void UAOAILogicStateTreeComponentBase::FullReset()
 {
 	InstanceData.Reset();
+	bHasPendingSubmittedInventoryDecisionEvent = false;
+	PendingSubmittedInventoryDecisionEvent = FAOAIInventoryDecisionResult();
 }
 
 void UAOAILogicStateTreeComponentBase::BindInventoryDecisionEvents()
 {
-	// StateTree 桥接层现在只订阅“正式提交的库存结果”。
-	// 这样运行中的树收到的就是统一主链已经确认过的结果，而不是评估期中间态。
 	AActor* OwnerActor = GetOwner();
 	if (OwnerActor == nullptr)
 	{
@@ -96,10 +100,24 @@ void UAOAILogicStateTreeComponentBase::UnbindInventoryDecisionEvents()
 	CachedDecisionComponent = nullptr;
 }
 
-void UAOAILogicStateTreeComponentBase::HandleSubmittedInventoryDecisionChanged(const FAOAIInventoryDecisionResult& SubmittedInventoryDecision)
+void UAOAILogicStateTreeComponentBase::HandleSubmittedInventoryDecisionChanged(
+	const FAOAIInventoryDecisionResult& SubmittedInventoryDecision)
 {
-	// 统一把库存结果变化转成 StateTree Event。
-	// 有动作时发 Updated，没有动作时发 Cleared，方便资源层只监听事件语义。
+	if (!TryDispatchSubmittedInventoryDecisionEvent(SubmittedInventoryDecision))
+	{
+		bHasPendingSubmittedInventoryDecisionEvent = true;
+		PendingSubmittedInventoryDecisionEvent = SubmittedInventoryDecision;
+	}
+}
+
+bool UAOAILogicStateTreeComponentBase::TryDispatchSubmittedInventoryDecisionEvent(
+	const FAOAIInventoryDecisionResult& SubmittedInventoryDecision)
+{
+	if (!IsRunning())
+	{
+		return false;
+	}
+
 	FStateTreeEvent Event;
 	Event.Tag = SubmittedInventoryDecision.bHasAction
 		? AOGameplayTags::AI_Event_InventoryDecision_Updated
@@ -110,10 +128,20 @@ void UAOAILogicStateTreeComponentBase::HandleSubmittedInventoryDecisionChanged(c
 	Event.Payload = FConstStructView(Payload);
 
 	SendStateTreeEvent(Event);
+	return true;
 }
 
-void UAOAILogicStateTreeComponentBase::TickComponent(float DeltaTime, ELevelTick TickType,
-                                                     FActorComponentTickFunction* ThisTickFunction)
+void UAOAILogicStateTreeComponentBase::TickComponent(
+	float DeltaTime,
+	ELevelTick TickType,
+	FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (bHasPendingSubmittedInventoryDecisionEvent
+		&& TryDispatchSubmittedInventoryDecisionEvent(PendingSubmittedInventoryDecisionEvent))
+	{
+		bHasPendingSubmittedInventoryDecisionEvent = false;
+		PendingSubmittedInventoryDecisionEvent = FAOAIInventoryDecisionResult();
+	}
 }

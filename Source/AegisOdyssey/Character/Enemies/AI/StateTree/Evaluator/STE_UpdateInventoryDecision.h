@@ -13,7 +13,7 @@ struct FUpdateInventoryDecisionInstanceData
 {
 	GENERATED_BODY()
 
-	// 当前库存评估观测到的目标。
+	// 当前库存评估观察到的目标。
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<AActor> CurrentTarget = nullptr;
 
@@ -54,6 +54,7 @@ struct AEGISODYSSEY_API FSTE_UpdateInventoryDecision : public FStateTreeEvaluato
 	// 返回库存决策 Evaluator 使用的实例数据结构。
 	virtual const UStruct* GetInstanceDataType() const override { return FInstanceDataType::StaticStruct(); }
 
-	// 每帧评估库存决策，并同步正式提交结果和窗口态。
+	// 每帧执行库存决策评估。
+	// 它负责把当前战斗事实和 TacticalState 转换成库存评估结果，再同步回 UAOAIDecisionComponent。
 	virtual void Tick(FStateTreeExecutionContext& Context, const float DeltaTime) const override;
 };

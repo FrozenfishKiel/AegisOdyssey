@@ -18,6 +18,48 @@ struct FGameplayEffectSpec;
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnAISubmittedInventoryDecisionChanged, const FAOAIInventoryDecisionResult&);
 
 USTRUCT(BlueprintType)
+struct FAOAIDecisionDebugSnapshot
+{
+	GENERATED_BODY()
+
+	// 当前调试面板是否已经锁定到一个 AI 决策组件。
+	UPROPERTY(VisibleAnywhere, Category = "Runtime")
+	bool bIsTrackingAI = false;
+
+	// 当前被观察 AI 的显示名。
+	UPROPERTY(VisibleAnywhere, Category = "Runtime")
+	FName TrackedActorName = NAME_None;
+
+	// 当前统一决策队列中的条目数量。
+	UPROPERTY(VisibleAnywhere, Category = "Runtime")
+	int32 DecisionQueueCount = 0;
+	UPROPERTY(VisibleAnywhere, Category = "Runtime")
+	FGameplayTag SelectedIntentTag;
+	UPROPERTY(VisibleAnywhere, Category = "Runtime")
+	bool bHasCurrentEvaluationInventoryDecision = false;
+	UPROPERTY(VisibleAnywhere, Category = "Runtime")
+	FGameplayTag CurrentEvaluationInventoryActionTag;
+
+	// 当前队首待提交决策标签。
+	UPROPERTY(VisibleAnywhere, Category = "Runtime")
+	FGameplayTag CurrentQueuedDecisionTag;
+	UPROPERTY(VisibleAnywhere, Category = "Runtime")
+	FGameplayTag CurrentSubmittedDecisionTag;
+	UPROPERTY(VisibleAnywhere, Category = "Runtime")
+	FGameplayTag LastSubmittedDecisionTag;
+
+	// 当前是否存在已经正式提交给执行层的库存决策结果。
+	UPROPERTY(VisibleAnywhere, Category = "Runtime")
+	bool bHasCurrentSubmittedInventoryDecision = false;
+
+	// 当前已经正式提交给执行层的库存决策结果快照。
+	UPROPERTY(VisibleAnywhere, Category = "Runtime")
+	FAOAIInventoryDecisionResult CurrentSubmittedInventoryDecision;
+	UPROPERTY(VisibleAnywhere, Category = "Runtime")
+	float PendingSubmitDelaySeconds = -1.0f;
+};
+
+USTRUCT(BlueprintType)
 struct FAOAIDecisionIntentRuntimeState
 {
 	GENERATED_BODY()
@@ -221,6 +263,14 @@ public:
 
 	// 正式提交库存结果变更事件。
 	FOnAISubmittedInventoryDecisionChanged& OnSubmittedInventoryDecisionChanged() { return SubmittedInventoryDecisionChangedEvent; }
+
+	// 构建当前 AI 决策组件的调试快照。
+	// 这份快照只用于调试观察层，不参与正式执行语义。
+	UFUNCTION(BlueprintPure, Category = "AO|AI|Decision|Debug")
+	bool BuildDebugSnapshot(FAOAIDecisionDebugSnapshot& OutDebugSnapshot) const;
+
+	// 测试专用：直接写入一份已提交库存决策结果，供 ViewModel / HUD 调试链路验证使用。
+	void SetDebugSubmittedInventoryDecisionResultForTests(const FAOAIInventoryDecisionResult& InSubmittedInventoryDecisionResult);
 
 protected:
 	// 生命周期开始时绑定受击事件监听。

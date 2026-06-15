@@ -3,11 +3,14 @@
 #include "AbilitySystemComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerState.h"
+#include "EngineUtils.h"
 #include "AOHUD.h"
 #include "AegisOdyssey/AOCombatMessageSubsystem.h"
 #include "AegisOdyssey/AbilitySystem/Attributes/Combat/AOCombatAttributeSet.h"
 #include "AegisOdyssey/AbilitySystem/Attributes/Core/AOHealthAttributeSet.h"
 #include "AegisOdyssey/Character/AOExtPawnComponent.h"
+#include "AegisOdyssey/Character/Enemies/AI/Decision/AOAIDecisionComponent.h"
+#include "AegisOdyssey/UI/AIDebug/AOAIDecisionDebugFileLogger.h"
 #include "AegisOdyssey/Crafting/Components/AOCraftingComponent.h"
 #include "AegisOdyssey/Inventory/AOInventoryMessageSubsystem.h"
 #include "AegisOdyssey/Player/AOPlayerController.h"
@@ -21,6 +24,7 @@
 #include "ViewModel/MVVM_ItemHoverTooltip.h"
 #include "ViewModel/MVVM_LocalCombatState.h"
 #include "ViewModel/MVVM_TargetHealthBarCollection.h"
+#include "ViewModel/AIDebug/MVVM_AIDecisionDebug.h"
 #include "WorldHealthBar/AOCombatFloatingTextComponent.h"
 #include "WorldHealthBar/AOTargetHealthBarComponent.h"
 #include "WorldHealthBar/AOLocalTargetHealthBarObserverComponent.h"
@@ -45,6 +49,7 @@ void UAOHUDViewModelComponent::InitializeComponent()
 void UAOHUDViewModelComponent::UninitializeComponent()
 {
 	ClearDefaultInitializationRetry();
+	ClearAIDebugObservationRefresh();
 	UnbindSkillObservationSource();
 	UnbindCraftingObservationSource();
 	UnbindCombatMessageSource();
@@ -65,6 +70,7 @@ void UAOHUDViewModelComponent::OnRegister()
 void UAOHUDViewModelComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	ClearDefaultInitializationRetry();
+	ClearAIDebugObservationRefresh();
 	UnbindSkillObservationSource();
 	UnbindCraftingObservationSource();
 	UnbindCombatMessageSource();
@@ -126,6 +132,38 @@ UMVVM_Crafting* UAOHUDViewModelComponent::GetCraftingViewModel() const
 UMVVM_ItemHoverTooltip* UAOHUDViewModelComponent::GetItemHoverTooltipViewModel() const
 {
 	return HUDViewModel != nullptr ? HUDViewModel->GetItemHoverTooltipViewModel() : nullptr;
+}
+
+UMVVM_AIDecisionDebug* UAOHUDViewModelComponent::GetAIDecisionDebugViewModel() const
+{
+	return HUDViewModel != nullptr ? HUDViewModel->GetAIDecisionDebugViewModel() : nullptr;
+}
+
+void UAOHUDViewModelComponent::SetAIDebugObservationEnabled(bool bEnabled)
+{
+	if (bAIDebugObservationEnabled == bEnabled)
+	{
+		return;
+	}
+
+	bAIDebugObservationEnabled = bEnabled;
+
+	if (bAIDebugObservationEnabled)
+	{
+		StartAIDebugLogSession();
+		RefreshAIDebugObservation();
+		ScheduleAIDebugObservationRefresh();
+	}
+	else
+	{
+		ClearAIDebugObservationRefresh();
+		StopAIDebugLogSession();
+
+		if (UMVVM_AIDecisionDebug* DebugViewModel = GetAIDecisionDebugViewModel())
+		{
+			DebugViewModel->ApplyDebugSnapshot(FAOAIDecisionDebugSnapshot());
+		}
+	}
 }
 
 void UAOHUDViewModelComponent::CheckDefaultInitialization()
@@ -435,4 +473,89 @@ void UAOHUDViewModelComponent::HandleInventoryAcquisitionMessage(FAOInventoryAcq
 	}
 
 	HUDViewModel->ApplyInventoryAcquisitionNotification(Notification);
+}
+
+void UAOHUDViewModelComponent::StartAIDebugLogSession()
+{
+	CurrentAIDebugSessionLogFilePath = FAOAIDecisionDebugFileLogger::CreateSessionLogFilePath();
+	FAOAIDecisionDebugFileLogger::InitializeSessionLogFile(CurrentAIDebugSessionLogFilePath);
+}
+
+void UAOHUDViewModelComponent::StopAIDebugLogSession()
+{
+	CurrentAIDebugSessionLogFilePath.Reset();
+}
+
+void UAOHUDViewModelComponent::RefreshAIDebugObservation()
+{
+	UMVVM_AIDecisionDebug* DebugViewModel = GetAIDecisionDebugViewModel();
+	if (DebugViewModel == nullptr)
+	{
+		return;
+	}
+
+	FAOAIDecisionDebugSnapshot DebugSnapshot;
+	if (UAOAIDecisionComponent* DecisionComponent = FindSingleObservedAIDecisionComponent())
+	{
+		DecisionComponent->BuildDebugSnapshot(DebugSnapshot);
+	}
+
+	if (!CurrentAIDebugSessionLogFilePath.IsEmpty())
+	{
+		FAOAIDecisionDebugFileLogger::AppendSnapshot(CurrentAIDebugSessionLogFilePath, DebugSnapshot);
+	}
+
+	DebugViewModel->ApplyDebugSnapshot(DebugSnapshot);
+}
+
+void UAOHUDViewModelComponent::ScheduleAIDebugObservationRefresh()
+{
+	if (!bAIDebugObservationEnabled)
+	{
+		return;
+	}
+
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().SetTimer(
+			AIDebugObservationRefreshTimerHandle,
+			this,
+			&ThisClass::RefreshAIDebugObservation,
+			0.1f,
+			true);
+	}
+}
+
+void UAOHUDViewModelComponent::ClearAIDebugObservationRefresh()
+{
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(AIDebugObservationRefreshTimerHandle);
+	}
+}
+
+UAOAIDecisionComponent* UAOHUDViewModelComponent::FindSingleObservedAIDecisionComponent() const
+{
+	const AActor* LocalPlayerActor = GetLocalPlayerActor();
+	UWorld* World = GetWorld();
+	if (World == nullptr)
+	{
+		return nullptr;
+	}
+
+	for (TActorIterator<APawn> It(World); It; ++It)
+	{
+		APawn* CandidatePawn = *It;
+		if (CandidatePawn == nullptr || CandidatePawn == LocalPlayerActor)
+		{
+			continue;
+		}
+
+		if (UAOAIDecisionComponent* DecisionComponent = CandidatePawn->FindComponentByClass<UAOAIDecisionComponent>())
+		{
+			return DecisionComponent;
+		}
+	}
+
+	return nullptr;
 }

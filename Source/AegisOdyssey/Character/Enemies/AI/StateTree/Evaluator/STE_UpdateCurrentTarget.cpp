@@ -13,9 +13,9 @@
 
 namespace
 {
-constexpr float DefaultAIAttackRange = 200.0f;
+constexpr float DefaultCurrentTargetAIAttackRange = 200.0f;
 
-APawn* ResolveOwnerPawn(const FStateTreeExecutionContext& Context)
+APawn* ResolveCurrentTargetOwnerPawn(const FStateTreeExecutionContext& Context)
 {
 	if (AActor* OwnerActor = Cast<AActor>(Context.GetOwner()))
 	{
@@ -37,7 +37,7 @@ float ResolveAIAttackRange(const APawn* OwnerPawn)
 {
 	if (OwnerPawn == nullptr)
 	{
-		return DefaultAIAttackRange;
+		return DefaultCurrentTargetAIAttackRange;
 	}
 
 	if (const UAOWeaponManagerComponent* WeaponManagerComponent = OwnerPawn->FindComponentByClass<UAOWeaponManagerComponent>())
@@ -51,14 +51,14 @@ float ResolveAIAttackRange(const APawn* OwnerPawn)
 		}
 	}
 
-	return DefaultAIAttackRange;
+	return DefaultCurrentTargetAIAttackRange;
 }
 }
 
 void FSTE_UpdateCurrentTarget::Tick(FStateTreeExecutionContext& Context, const float DeltaTime) const
 {
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
-	APawn* OwnerPawn = ResolveOwnerPawn(Context);
+	APawn* OwnerPawn = ResolveCurrentTargetOwnerPawn(Context);
 	AAOAIPlayerBotController* AIController = OwnerPawn ? Cast<AAOAIPlayerBotController>(OwnerPawn->GetController()) : nullptr;
 
 	if (AIController == nullptr)

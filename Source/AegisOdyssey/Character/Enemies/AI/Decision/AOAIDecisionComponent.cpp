@@ -170,17 +170,19 @@ void UAOAIDecisionComponent::CacheCombatEvaluation(
 	}
 }
 
+// 写入库存评估层本帧观察到的事实、动作运行时分数和最终评估结果。
+// 这里保存的仍然是“评估态”，只有后续经过 SubmitCurrentDecisionOutputs 才可能进入正式提交态。
 void UAOAIDecisionComponent::CacheInventoryEvaluation(
 	const float CurrentWorldTimeSeconds,
 	const FAOAIInventoryDecisionFacts& InInventoryDecisionFacts,
 	const TMap<FGameplayTag, FAOAIInventoryDecisionCandidateFacts>& InCandidateFactsByActionTag,
 	const TMap<FGameplayTag, FAOAIInventoryDecisionRuntimeState>& InInventoryRuntimeStates,
-	const FAOAIInventoryDecisionResult& InPendingInventoryDecisionResult)
+	const FAOAIInventoryDecisionResult& InEvaluationInventoryDecisionResult)
 {
 	InventoryDecisionFacts = InInventoryDecisionFacts;
 	InventoryCandidateFactsByActionTag = InCandidateFactsByActionTag;
 	InventoryRuntimeStates = InInventoryRuntimeStates;
-	SetPendingInventoryDecisionResult(InPendingInventoryDecisionResult);
+	SetCurrentEvaluationInventoryDecisionResult(InEvaluationInventoryDecisionResult);
 	LastInventoryEvaluationTimeSeconds = CurrentWorldTimeSeconds;
 
 	if (FMath::IsNearlyEqual(LastCombatEvaluationTimeSeconds, CurrentWorldTimeSeconds)
@@ -218,6 +220,8 @@ bool UAOAIDecisionComponent::CommitExecutedIntent(FGameplayTag ExecutedIntentTag
 	return true;
 }
 
+// 回写一个已经正式执行完成的库存动作。
+// 只有它与当前 submitted inventory result 匹配时，才会真正更新执行记忆并清空当前提交态。
 bool UAOAIDecisionComponent::CommitExecutedInventoryAction(const FAOAIInventoryDecisionResult& ExecutedDecisionResult, float CurrentWorldTimeSeconds)
 {
 	if (!ExecutedDecisionResult.bHasAction || !ExecutedDecisionResult.ActionTag.IsValid())
@@ -225,7 +229,7 @@ bool UAOAIDecisionComponent::CommitExecutedInventoryAction(const FAOAIInventoryD
 		return false;
 	}
 
-	if (!DoesInventoryDecisionResultMatchPending(ExecutedDecisionResult))
+	if (!DoesInventoryDecisionResultMatchSubmitted(ExecutedDecisionResult))
 	{
 		return false;
 	}
@@ -246,13 +250,11 @@ bool UAOAIDecisionComponent::CommitExecutedInventoryAction(const FAOAIInventoryD
 		RuntimeState->LastExecutedTime = CurrentWorldTimeSeconds;
 	}
 
-	ClearPendingInventoryDecision();
-	return true;
-}
+	// 只有正式消费了当前 submitted inventory result，才允许把它从执行侧清空。
+	CurrentSubmittedInventoryDecisionResult = FAOAIInventoryDecisionResult();
+	SubmittedInventoryDecisionChangedEvent.Broadcast(CurrentSubmittedInventoryDecisionResult);
 
-void UAOAIDecisionComponent::ClearPendingInventoryDecision()
-{
-	SetPendingInventoryDecisionResult(FAOAIInventoryDecisionResult());
+	return true;
 }
 
 bool UAOAIDecisionComponent::EnqueueDecisionTag(FGameplayTag DecisionTag, float CurrentWorldTimeSeconds)
@@ -339,17 +341,10 @@ void UAOAIDecisionComponent::SubmitCurrentDecisionOutputs(float CurrentWorldTime
 			LastSubmittedInventoryDecisionResult = SubmittedInventoryDecisionResult;
 			SubmittedInventoryDecisionChangedEvent.Broadcast(CurrentSubmittedInventoryDecisionResult);
 		}
-		else
-		{
-			CurrentSubmittedInventoryDecisionResult = FAOAIInventoryDecisionResult();
-			SubmittedInventoryDecisionChangedEvent.Broadcast(CurrentSubmittedInventoryDecisionResult);
-		}
 	}
 	else if (!HasPendingDecisionTag())
 	{
 		CurrentSubmittedDecisionTag = FGameplayTag();
-		CurrentSubmittedInventoryDecisionResult = FAOAIInventoryDecisionResult();
-		SubmittedInventoryDecisionChangedEvent.Broadcast(CurrentSubmittedInventoryDecisionResult);
 	}
 }
 
@@ -369,6 +364,7 @@ bool UAOAIDecisionComponent::TrySubmitNextDecision(float CurrentWorldTimeSeconds
 
 	OutSubmittedDecision = DecisionQueue[0];
 	DecisionQueue.RemoveAt(0);
+	CompactInventoryDecisionPayloads();
 
 	if (DecisionQueue.IsEmpty())
 	{
@@ -409,7 +405,7 @@ bool UAOAIDecisionComponent::MatchesCurrentDecisionTag(FGameplayTag DecisionTag)
 		return GetCurrentQueuedDecisionTag().MatchesTag(DecisionTag);
 	}
 
-	return HasSelectedIntent(DecisionTag);
+	return SelectedIntentTag.IsValid() && SelectedIntentTag.MatchesTag(DecisionTag);
 }
 
 void UAOAIDecisionComponent::ResetDecisionState()
@@ -427,8 +423,9 @@ void UAOAIDecisionComponent::ResetDecisionState()
 	LastSubmittedDecisionTag = FGameplayTag();
 	CurrentSubmittedInventoryDecisionResult = FAOAIInventoryDecisionResult();
 	LastSubmittedInventoryDecisionResult = FAOAIInventoryDecisionResult();
-	SetPendingInventoryDecisionResult(FAOAIInventoryDecisionResult());
+	CurrentEvaluationInventoryDecisionResult = FAOAIInventoryDecisionResult();
 	InventoryDecisionExecutionRecord = FAOAIInventoryDecisionExecutionRecord();
+	InventoryDecisionPayloads.Reset();
 	SelectedIntentTag = FGameplayTag();
 	LastExecutedIntentTag = FGameplayTag();
 	RepeatedIntentCount = 0;
@@ -466,20 +463,25 @@ FGameplayTag UAOAIDecisionComponent::BuildCurrentIntentDecisionTag() const
 	return SelectedIntentTag;
 }
 
+// 把当前库存评估结果投影成统一决策队列中的库存条目。
+// 如果当前评估结果还未形成有效动作，这里必须失败，避免空结果污染提交链。
 bool UAOAIDecisionComponent::BuildCurrentInventoryDecisionItem(float CurrentWorldTimeSeconds, FAOAIDecisionQueueItem& OutDecisionItem) const
 {
-	if (!PendingInventoryDecisionResult.bHasAction || !PendingInventoryDecisionResult.ActionTag.IsValid())
+	if (!CurrentEvaluationInventoryDecisionResult.bHasAction || !CurrentEvaluationInventoryDecisionResult.ActionTag.IsValid())
 	{
 		return false;
 	}
 
 	OutDecisionItem = FAOAIDecisionQueueItem();
 	OutDecisionItem.DecisionTag = AOGameplayTags::AI_Decision_Inventory_UseItem;
-	OutDecisionItem.SourceTag = PendingInventoryDecisionResult.ActionTag;
+	OutDecisionItem.SourceTag = CurrentEvaluationInventoryDecisionResult.ActionTag;
 	OutDecisionItem.EnqueueWorldTimeSeconds = CurrentWorldTimeSeconds;
-	return true;
+	OutDecisionItem.PayloadId = const_cast<UAOAIDecisionComponent*>(this)->StoreInventoryDecisionPayload(CurrentEvaluationInventoryDecisionResult);
+	return OutDecisionItem.PayloadId != INDEX_NONE;
 }
 
+// 当一个统一队列条目代表库存动作时，从快照池里把它对应的库存决策结果还原出来。
+// 这样执行层读到的是“入队那一刻的稳定结果”，而不是下一帧可能已经变化的 Evaluator 缓存。
 bool UAOAIDecisionComponent::TryResolveInventoryDecisionResultForQueuedItem(
 	const FAOAIDecisionQueueItem& DecisionItem,
 	FAOAIInventoryDecisionResult& OutResult) const
@@ -491,25 +493,38 @@ bool UAOAIDecisionComponent::TryResolveInventoryDecisionResultForQueuedItem(
 		return false;
 	}
 
-	if (!PendingInventoryDecisionResult.bHasAction || !PendingInventoryDecisionResult.ActionTag.IsValid())
+	if (!TryGetInventoryDecisionPayload(DecisionItem.PayloadId, OutResult))
 	{
 		return false;
 	}
 
-	if (DecisionItem.SourceTag.IsValid() && !PendingInventoryDecisionResult.ActionTag.MatchesTagExact(DecisionItem.SourceTag))
+	if (!OutResult.bHasAction || !OutResult.ActionTag.IsValid())
 	{
 		return false;
 	}
 
-	OutResult = PendingInventoryDecisionResult;
-	return true;
+	return !DecisionItem.SourceTag.IsValid() || OutResult.ActionTag.MatchesTagExact(DecisionItem.SourceTag);
 }
 
 bool UAOAIDecisionComponent::IsQueuedDecisionEquivalent(const FAOAIDecisionQueueItem& ExistingItem, const FAOAIDecisionQueueItem& CandidateItem) const
 {
-	return ExistingItem.DecisionTag.IsValid()
-		&& ExistingItem.DecisionTag.MatchesTagExact(CandidateItem.DecisionTag)
-		&& ExistingItem.SourceTag.MatchesTagExact(CandidateItem.SourceTag);
+	if (!ExistingItem.DecisionTag.IsValid() || !ExistingItem.DecisionTag.MatchesTagExact(CandidateItem.DecisionTag))
+	{
+		return false;
+	}
+
+	if (ExistingItem.DecisionTag.MatchesTagExact(AOGameplayTags::AI_Decision_Inventory_UseItem))
+	{
+		FAOAIInventoryDecisionResult ExistingResult;
+		FAOAIInventoryDecisionResult CandidateResult;
+		if (TryGetInventoryDecisionPayload(ExistingItem.PayloadId, ExistingResult)
+			&& TryGetInventoryDecisionPayload(CandidateItem.PayloadId, CandidateResult))
+		{
+			return AreInventoryDecisionResultsEqual(ExistingResult, CandidateResult);
+		}
+	}
+
+	return ExistingItem.SourceTag.MatchesTagExact(CandidateItem.SourceTag);
 }
 
 bool UAOAIDecisionComponent::GetCurrentSubmittedInventoryDecisionResult(FAOAIInventoryDecisionResult& OutResult) const
@@ -518,18 +533,50 @@ bool UAOAIDecisionComponent::GetCurrentSubmittedInventoryDecisionResult(FAOAIInv
 	return CurrentSubmittedInventoryDecisionResult.bHasAction;
 }
 
+bool UAOAIDecisionComponent::BuildDebugSnapshot(FAOAIDecisionDebugSnapshot& OutDebugSnapshot) const
+{
+	OutDebugSnapshot = FAOAIDecisionDebugSnapshot();
+
+	const AActor* OwnerActor = GetOwner();
+	if (OwnerActor == nullptr)
+	{
+		return false;
+	}
+
+	OutDebugSnapshot.bIsTrackingAI = true;
+	OutDebugSnapshot.TrackedActorName = OwnerActor->GetFName();
+	OutDebugSnapshot.DecisionQueueCount = DecisionQueue.Num();
+	OutDebugSnapshot.SelectedIntentTag = SelectedIntentTag;
+	OutDebugSnapshot.bHasCurrentEvaluationInventoryDecision = CurrentEvaluationInventoryDecisionResult.bHasAction;
+	OutDebugSnapshot.CurrentEvaluationInventoryActionTag = CurrentEvaluationInventoryDecisionResult.ActionTag;
+	OutDebugSnapshot.CurrentQueuedDecisionTag = GetCurrentQueuedDecisionTag();
+	OutDebugSnapshot.CurrentSubmittedDecisionTag = CurrentSubmittedDecisionTag;
+	OutDebugSnapshot.LastSubmittedDecisionTag = LastSubmittedDecisionTag;
+	OutDebugSnapshot.CurrentSubmittedInventoryDecision = CurrentSubmittedInventoryDecisionResult;
+	OutDebugSnapshot.bHasCurrentSubmittedInventoryDecision = CurrentSubmittedInventoryDecisionResult.bHasAction;
+	const UWorld* World = GetWorld();
+	if (World != nullptr && NextDecisionSubmitTimeSeconds >= 0.0f)
+	{
+		OutDebugSnapshot.PendingSubmitDelaySeconds = FMath::Max(0.0f, NextDecisionSubmitTimeSeconds - World->GetTimeSeconds());
+	}
+	return true;
+}
+
+void UAOAIDecisionComponent::SetDebugSubmittedInventoryDecisionResultForTests(
+	const FAOAIInventoryDecisionResult& InSubmittedInventoryDecisionResult)
+{
+	CurrentSubmittedInventoryDecisionResult = InSubmittedInventoryDecisionResult;
+	LastSubmittedInventoryDecisionResult = InSubmittedInventoryDecisionResult;
+	SubmittedInventoryDecisionChangedEvent.Broadcast(CurrentSubmittedInventoryDecisionResult);
+}
+
 bool UAOAIDecisionComponent::GetLastSubmittedInventoryDecisionResult(FAOAIInventoryDecisionResult& OutResult) const
 {
 	OutResult = LastSubmittedInventoryDecisionResult;
 	return LastSubmittedInventoryDecisionResult.bHasAction;
 }
 
-bool UAOAIDecisionComponent::HasSelectedIntent(FGameplayTag IntentTag) const
-{
-	return IntentTag.IsValid() && SelectedIntentTag.IsValid() && SelectedIntentTag.MatchesTag(IntentTag);
-}
-
-bool UAOAIDecisionComponent::GetIntentMetrics(FGameplayTag IntentTag, float& OutDesire, float& OutScore) const
+bool UAOAIDecisionComponent::GetIntentRuntimeMetrics(FGameplayTag IntentTag, float& OutDesire, float& OutScore) const
 {
 	const FGameplayTag ResolvedIntentTag = IntentTag.IsValid() ? IntentTag : SelectedIntentTag;
 	const FAOAIDecisionIntentRuntimeState* RuntimeState = IntentRuntimeStates.Find(ResolvedIntentTag);
@@ -564,26 +611,10 @@ bool UAOAIDecisionComponent::GetPendingActionDirection(FVector& OutWorldDirectio
 	return bHasPendingActionDirection;
 }
 
-bool UAOAIDecisionComponent::GetPendingInventoryDecisionResult(FAOAIInventoryDecisionResult& OutResult) const
+bool UAOAIDecisionComponent::GetCurrentEvaluationInventoryDecisionResult(FAOAIInventoryDecisionResult& OutResult) const
 {
-	OutResult = PendingInventoryDecisionResult;
-	return PendingInventoryDecisionResult.bHasAction;
-}
-
-float UAOAIDecisionComponent::GetSelectedIntentDesire() const
-{
-	float OutDesire = 0.0f;
-	float OutScore = 0.0f;
-	GetIntentMetrics(SelectedIntentTag, OutDesire, OutScore);
-	return OutDesire;
-}
-
-float UAOAIDecisionComponent::GetSelectedIntentScore() const
-{
-	float OutDesire = 0.0f;
-	float OutScore = 0.0f;
-	GetIntentMetrics(SelectedIntentTag, OutDesire, OutScore);
-	return OutScore;
+	OutResult = CurrentEvaluationInventoryDecisionResult;
+	return CurrentEvaluationInventoryDecisionResult.bHasAction;
 }
 
 void UAOAIDecisionComponent::EnsureIntentDefinitionsInitialized()
@@ -658,15 +689,82 @@ void UAOAIDecisionComponent::SyncInventoryRuntimeStatesWithDefinitions()
 	}
 }
 
-void UAOAIDecisionComponent::SetPendingInventoryDecisionResult(const FAOAIInventoryDecisionResult& NewResult)
+// 更新“当前帧库存评估结果”缓存。
+// 这个缓存只表达 Evaluator 此刻想做什么，不直接代表已经进入统一队列。
+void UAOAIDecisionComponent::SetCurrentEvaluationInventoryDecisionResult(const FAOAIInventoryDecisionResult& NewResult)
 {
-	if (AreInventoryDecisionResultsEqual(PendingInventoryDecisionResult, NewResult))
+	if (AreInventoryDecisionResultsEqual(CurrentEvaluationInventoryDecisionResult, NewResult))
 	{
 		return;
 	}
 
-	PendingInventoryDecisionResult = NewResult;
-	PendingInventoryDecisionChangedEvent.Broadcast(PendingInventoryDecisionResult);
+	CurrentEvaluationInventoryDecisionResult = NewResult;
+}
+
+// 为即将入队的库存动作保存一份稳定快照。
+// 队列条目只持有 PayloadId，真正的库存结果内容存放在这个快照池里。
+int32 UAOAIDecisionComponent::StoreInventoryDecisionPayload(const FAOAIInventoryDecisionResult& InventoryDecisionResult)
+{
+	if (!InventoryDecisionResult.bHasAction || !InventoryDecisionResult.ActionTag.IsValid())
+	{
+		return INDEX_NONE;
+	}
+
+	return InventoryDecisionPayloads.Add(InventoryDecisionResult);
+}
+
+// 根据快照编号读回库存决策结果。
+// 如果编号无效，调用方必须把这次库存提交视为不可恢复的无效条目。
+bool UAOAIDecisionComponent::TryGetInventoryDecisionPayload(int32 PayloadId, FAOAIInventoryDecisionResult& OutResult) const
+{
+	OutResult = FAOAIInventoryDecisionResult();
+	if (!InventoryDecisionPayloads.IsValidIndex(PayloadId))
+	{
+		return false;
+	}
+
+	OutResult = InventoryDecisionPayloads[PayloadId];
+	return OutResult.bHasAction;
+}
+
+// 压缩库存结果快照池，只保留当前队列仍然引用的条目。
+// 这样可以避免旧快照随着评估循环无限累积。
+void UAOAIDecisionComponent::CompactInventoryDecisionPayloads()
+{
+	if (InventoryDecisionPayloads.IsEmpty())
+	{
+		return;
+	}
+
+	TArray<FAOAIInventoryDecisionResult> CompactedPayloads;
+	CompactedPayloads.Reserve(DecisionQueue.Num());
+
+	TMap<int32, int32> RemappedPayloadIds;
+	for (FAOAIDecisionQueueItem& DecisionItem : DecisionQueue)
+	{
+		if (DecisionItem.PayloadId == INDEX_NONE)
+		{
+			continue;
+		}
+
+		if (const int32* ExistingPayloadId = RemappedPayloadIds.Find(DecisionItem.PayloadId))
+		{
+			DecisionItem.PayloadId = *ExistingPayloadId;
+			continue;
+		}
+
+		if (!InventoryDecisionPayloads.IsValidIndex(DecisionItem.PayloadId))
+		{
+			DecisionItem.PayloadId = INDEX_NONE;
+			continue;
+		}
+
+		const int32 NewPayloadId = CompactedPayloads.Add(InventoryDecisionPayloads[DecisionItem.PayloadId]);
+		RemappedPayloadIds.Add(DecisionItem.PayloadId, NewPayloadId);
+		DecisionItem.PayloadId = NewPayloadId;
+	}
+
+	InventoryDecisionPayloads = MoveTemp(CompactedPayloads);
 }
 
 void UAOAIDecisionComponent::ResetRecentDamageTracking()
@@ -890,33 +988,33 @@ void UAOAIDecisionComponent::PruneRecentDamageEntries(float CurrentWorldTimeSeco
 	}
 }
 
-bool UAOAIDecisionComponent::DoesInventoryDecisionResultMatchPending(const FAOAIInventoryDecisionResult& ExecutedDecisionResult) const
+bool UAOAIDecisionComponent::DoesInventoryDecisionResultMatchSubmitted(const FAOAIInventoryDecisionResult& ExecutedDecisionResult) const
 {
-	if (!PendingInventoryDecisionResult.bHasAction || !PendingInventoryDecisionResult.ActionTag.IsValid())
+	if (!CurrentSubmittedInventoryDecisionResult.bHasAction || !CurrentSubmittedInventoryDecisionResult.ActionTag.IsValid())
 	{
 		return false;
 	}
 
-	if (!PendingInventoryDecisionResult.ActionTag.MatchesTagExact(ExecutedDecisionResult.ActionTag))
+	if (!CurrentSubmittedInventoryDecisionResult.ActionTag.MatchesTagExact(ExecutedDecisionResult.ActionTag))
 	{
 		return false;
 	}
 
-	if (PendingInventoryDecisionResult.CandidateTag.IsValid() || ExecutedDecisionResult.CandidateTag.IsValid())
+	if (CurrentSubmittedInventoryDecisionResult.CandidateTag.IsValid() || ExecutedDecisionResult.CandidateTag.IsValid())
 	{
-		if (!PendingInventoryDecisionResult.CandidateTag.MatchesTagExact(ExecutedDecisionResult.CandidateTag))
+		if (!CurrentSubmittedInventoryDecisionResult.CandidateTag.MatchesTagExact(ExecutedDecisionResult.CandidateTag))
 		{
 			return false;
 		}
 	}
 
-	return PendingInventoryDecisionResult.UseCommand.CommandType == ExecutedDecisionResult.UseCommand.CommandType
-		&& PendingInventoryDecisionResult.UseCommand.QuickBarSlotIndex == ExecutedDecisionResult.UseCommand.QuickBarSlotIndex
-		&& PendingInventoryDecisionResult.UseCommand.QuickBarSlotIndices == ExecutedDecisionResult.UseCommand.QuickBarSlotIndices
-		&& PendingInventoryDecisionResult.UseCommand.AllowedInventoryComponentClasses == ExecutedDecisionResult.UseCommand.AllowedInventoryComponentClasses
-		&& PendingInventoryDecisionResult.UseCommand.ItemQuery.SemanticTag.MatchesTagExact(ExecutedDecisionResult.UseCommand.ItemQuery.SemanticTag)
-		&& PendingInventoryDecisionResult.UseCommand.ItemQuery.RequiredItemInstanceClass == ExecutedDecisionResult.UseCommand.ItemQuery.RequiredItemInstanceClass
-		&& PendingInventoryDecisionResult.UseCommand.ItemQuery.RequiredItemDefinitionClass == ExecutedDecisionResult.UseCommand.ItemQuery.RequiredItemDefinitionClass
-		&& PendingInventoryDecisionResult.UseCommand.ItemQuery.RequiredFragmentClasses == ExecutedDecisionResult.UseCommand.ItemQuery.RequiredFragmentClasses
-		&& PendingInventoryDecisionResult.UseCommand.ItemQuery.bRequireUsableFromInventory == ExecutedDecisionResult.UseCommand.ItemQuery.bRequireUsableFromInventory;
+	return CurrentSubmittedInventoryDecisionResult.UseCommand.CommandType == ExecutedDecisionResult.UseCommand.CommandType
+		&& CurrentSubmittedInventoryDecisionResult.UseCommand.QuickBarSlotIndex == ExecutedDecisionResult.UseCommand.QuickBarSlotIndex
+		&& CurrentSubmittedInventoryDecisionResult.UseCommand.QuickBarSlotIndices == ExecutedDecisionResult.UseCommand.QuickBarSlotIndices
+		&& CurrentSubmittedInventoryDecisionResult.UseCommand.AllowedInventoryComponentClasses == ExecutedDecisionResult.UseCommand.AllowedInventoryComponentClasses
+		&& CurrentSubmittedInventoryDecisionResult.UseCommand.ItemQuery.SemanticTag.MatchesTagExact(ExecutedDecisionResult.UseCommand.ItemQuery.SemanticTag)
+		&& CurrentSubmittedInventoryDecisionResult.UseCommand.ItemQuery.RequiredItemInstanceClass == ExecutedDecisionResult.UseCommand.ItemQuery.RequiredItemInstanceClass
+		&& CurrentSubmittedInventoryDecisionResult.UseCommand.ItemQuery.RequiredItemDefinitionClass == ExecutedDecisionResult.UseCommand.ItemQuery.RequiredItemDefinitionClass
+		&& CurrentSubmittedInventoryDecisionResult.UseCommand.ItemQuery.RequiredFragmentClasses == ExecutedDecisionResult.UseCommand.ItemQuery.RequiredFragmentClasses
+		&& CurrentSubmittedInventoryDecisionResult.UseCommand.ItemQuery.bRequireUsableFromInventory == ExecutedDecisionResult.UseCommand.ItemQuery.bRequireUsableFromInventory;
 }

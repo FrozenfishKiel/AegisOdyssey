@@ -16,6 +16,7 @@
 #include "AegisOdyssey/UI/ViewModel/MVVM_ItemHoverTooltip.h"
 #include "AegisOdyssey/UI/ViewModel/MVVM_LocalCombatState.h"
 #include "AegisOdyssey/UI/ViewModel/MVVM_TargetHealthBarCollection.h"
+#include "AegisOdyssey/UI/ViewModel/AIDebug/MVVM_AIDecisionDebug.h"
 #include "Net/UnrealNetwork.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MVVM_HUD)
@@ -452,6 +453,11 @@ void UMVVM_HUD::EnsureChildViewModels()
 	if (ItemHoverTooltipViewModel == nullptr)
 	{
 		ItemHoverTooltipViewModel = NewObject<UMVVM_ItemHoverTooltip>(this);
+	}
+
+	if (AIDecisionDebugViewModel == nullptr)
+	{
+		AIDecisionDebugViewModel = NewObject<UMVVM_AIDecisionDebug>(this);
 	}
 }
 

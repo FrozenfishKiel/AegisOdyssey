@@ -85,3 +85,13 @@ AegisOdyssey
 ## 最后怎么用这份 README
 
 如果你是第一次来看这个项目，比较推荐的读法不是“从上往下全看完”，而是先用上面的模块导航找到你关心的那条主线，再沿着对应的 `PROJECT_MAP -> 源码入口 -> Content/蓝图资产` 继续往下走。这个仓库的体量已经超过“靠记忆扫一遍就能全抓住”的阶段了，所以 README 的目标也不是代替源码，而是先把入口、边界和阅读顺序交代清楚，让你能更快找到真正该看的地方。只要你是从仓库根目录开始阅读，这份 README 里的所有路径都可以直接对应到仓库里的实际位置。
+## 全局控制台指令
+
+当前项目里已经接入的全局控制台指令主要有下面 3 条。它们都属于调试/排查入口，不是主玩法流程的一部分。
+
+- `AegisOdyssey.DumpLoadedAssets`
+  无参数。打印 `UAOAssetManager` 当前 `LoadedAssets` 池里已经加载且仍在内存中的资源，适合排查资源是否真的被加载进来。源码位置：[AOAssetManager.cpp](Source/AegisOdyssey/System/AOAssetManager.cpp)
+- `AegisOdyssey.AI.SetDecisionTreeEnabled <true|false>`
+  全局开关当前世界里 `UAOAILogicStateTreeComponentBase` 挂载的 AI 决策 StateTree。`true` 会对已有组件执行 `RestartLogic`，`false` 会执行 `StopLogic`。参数兼容 `true/false`、`1/0`、`on/off`。源码位置：[AOGlobalConsoleCommands.cpp](Source/AegisOdyssey/System/AOGlobalConsoleCommands.cpp)
+- `AegisOdyssey.AI.SetDebugPanelEnabled <true|false>`
+  全局开关当前世界的 AI 调试 Slate 面板。打开后，HUD 调试观察链会在 `Saved/AIDebug` 目录下为这一轮观察新建一份按时间命名的 `txt` 日志文件，并在观察期间持续追加每次快照，便于回看 AI 决策变化。参数同样兼容 `true/false`、`1/0`、`on/off`。源码位置：[AOGlobalConsoleCommands.cpp](Source/AegisOdyssey/System/AOGlobalConsoleCommands.cpp)

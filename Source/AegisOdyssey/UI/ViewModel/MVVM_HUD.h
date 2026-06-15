@@ -16,6 +16,7 @@ class AAOPlayerState;
 class UAOAbilitySystem;
 class UAbilitySystemComponent;
 class UAOSkillComponent;
+class UMVVM_AIDecisionDebug;
 class UMVVM_CombatFeedbackFeed;
 class UMVVM_CombatResources;
 class UMVVM_Crafting;
@@ -105,6 +106,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "AO|HUD")
 	UMVVM_ItemHoverTooltip* GetItemHoverTooltipViewModel() const { return ItemHoverTooltipViewModel; }
+
+	UFUNCTION(BlueprintPure, Category = "AO|HUD")
+	UMVVM_AIDecisionDebug* GetAIDecisionDebugViewModel() const { return AIDecisionDebugViewModel; }
 
 public:
 	// 以下是一组保留给现有 HUD 绑定的兼容接口。
@@ -322,6 +326,10 @@ private:
 	// HUD 全局唯一的物品悬浮信息框子 ViewModel。
 	UPROPERTY(Transient)
 	TObjectPtr<UMVVM_ItemHoverTooltip> ItemHoverTooltipViewModel = nullptr;
+
+	// HUD 内部使用的 AI 决策调试子 ViewModel。
+	UPROPERTY(Transient)
+	TObjectPtr<UMVVM_AIDecisionDebug> AIDecisionDebugViewModel = nullptr;
 
 	// HUD 观察源参数缓存。
 	FPlayerMainHUDViewModelParams PlayerViewModelParams;

@@ -7,7 +7,9 @@
 class UAOCombatMessageSubsystem;
 class UAOCraftingComponent;
 class UAOInventoryMessageSubsystem;
+class UAOAIDecisionComponent;
 class UAOSkillComponent;
+class UMVVM_AIDecisionDebug;
 class UMVVM_CombatFeedbackFeed;
 class UMVVM_CombatResources;
 class UMVVM_Crafting;
@@ -82,6 +84,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "AO|HUD")
 	UMVVM_ItemHoverTooltip* GetItemHoverTooltipViewModel() const;
 
+	// 返回 HUD 当前持有的 AI 决策调试 ViewModel。
+	// 这份 ViewModel 只面向调试 UI，不参与正式战斗或库存链路。
+	UFUNCTION(BlueprintPure, Category = "AO|HUD")
+	UMVVM_AIDecisionDebug* GetAIDecisionDebugViewModel() const;
+
+	// 仅在 AI 调试面板打开时启动观察刷新，避免把测试调试轮询常驻在正式 HUD 流程里。
+	void SetAIDebugObservationEnabled(bool bEnabled);
+	bool IsAIDebugObservationEnabled() const { return bAIDebugObservationEnabled; }
+
 private:
 	// 技能观察数据桥接。
 	void BindSkillObservationSource(UAOSkillComponent* SkillComponent);
@@ -100,6 +111,15 @@ private:
 	// 这条链把角色上的 CraftingComponent 绑定进 HUD 持有的 Crafting ViewModel。
 	void BindCraftingObservationSource(UAOCraftingComponent* CraftingComponent);
 	void UnbindCraftingObservationSource();
+
+	// AI 决策调试观察刷新。
+	// 当前版本使用“测试世界里只放一个 AI”这个最轻量前提，自动寻找本地玩家外的第一个 AI 决策组件。
+	void StartAIDebugLogSession();
+	void StopAIDebugLogSession();
+	void RefreshAIDebugObservation();
+	void ScheduleAIDebugObservationRefresh();
+	void ClearAIDebugObservationRefresh();
+	UAOAIDecisionComponent* FindSingleObservedAIDecisionComponent() const;
 
 	// 本地 HUD 过滤的“观察者锚点”。
 	// 当前单人测试里就是本地玩家 Pawn，后续多人也应该继续从这里统一收束，而不是让各个 Widget 自己找。
@@ -139,4 +159,10 @@ private:
 
 	TWeakObjectPtr<UAOCraftingComponent> BoundCraftingComponent;
 	FTimerHandle DefaultInitializationRetryTimerHandle;
+	FTimerHandle AIDebugObservationRefreshTimerHandle;
+	bool bAIDebugObservationEnabled = false;
+
+	// 当前这轮 AI 调试观察对应的日志文件路径。
+	// 每次重新开启调试都会新建一份按时间命名的 txt，会话内持续追加，不覆盖旧文件。
+	FString CurrentAIDebugSessionLogFilePath;
 };

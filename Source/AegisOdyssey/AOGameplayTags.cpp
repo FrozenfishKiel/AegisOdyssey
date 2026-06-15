@@ -34,6 +34,11 @@ namespace AOGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_ACTION_INVENTORY, "UI.Action.Inventory", "Inventory action");
 
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(HUD_Slot_QuickBar, "HUD.Slot.QuickBar", "Quick bar slot");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Item_Semantic_Weapon_Sword, "Item.Semantic.Weapon.Sword", "Item semantic tag: sword weapon");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Item_Semantic_Weapon_Spear, "Item.Semantic.Weapon.Spear", "Item semantic tag: spear weapon");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Item_Semantic_Consumable_HealthPotion, "Item.Semantic.Consumable.HealthPotion", "Item semantic tag: health potion");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Item_Semantic_Consumable_ManaPotion, "Item.Semantic.Consumable.ManaPotion", "Item semantic tag: mana potion");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Item_Semantic_Consumable_Food, "Item.Semantic.Consumable.Food", "Item semantic tag: food");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(AI_Intent_Attack, "AI.Intent.Attack", "AI attack intent");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(AI_Intent_Strafe, "AI.Intent.Strafe", "AI strafe intent");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(AI_Intent_Roll, "AI.Intent.Roll", "AI roll intent");

@@ -26,7 +26,7 @@ bool FSTC_AIDecisionValueInRange::TestCondition(FStateTreeExecutionContext& Cont
 	{
 		float Desire = 0.0f;
 		float Score = 0.0f;
-		const bool bHasMetrics = DecisionComponent->GetIntentMetrics(InstanceData.IntentTag, Desire, Score);
+		const bool bHasMetrics = DecisionComponent->GetIntentRuntimeMetrics(InstanceData.IntentTag, Desire, Score);
 		if (!bHasMetrics)
 		{
 			return false ^ bInvert;

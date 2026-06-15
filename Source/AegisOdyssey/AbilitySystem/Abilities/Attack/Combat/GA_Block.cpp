@@ -22,7 +22,7 @@ UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Ability_Block_Cooldown, "Ability.Block.Cooldow
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Ability_Block_Blocking, "Ability.Block.Blocking");
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Ability_Block_Parry, "Ability.Block.Parry");
 
-static const FGameplayTagContainer RollCooldownTags(TAG_Ability_Block_Cooldown);
+static const FGameplayTagContainer BlockCooldownTags(TAG_Ability_Block_Cooldown);
 
 
 UGA_Block::UGA_Block(const FObjectInitializer& ObjectInitializer)
@@ -255,7 +255,7 @@ void UGA_Block::ApplyCooldown(const FGameplayAbilitySpecHandle Handle, const FGa
 
 const FGameplayTagContainer* UGA_Block::GetCooldownTags() const
 {
-	return &RollCooldownTags;
+	return &BlockCooldownTags;
 }
 
 void UGA_Block::OnMontageCompleted()

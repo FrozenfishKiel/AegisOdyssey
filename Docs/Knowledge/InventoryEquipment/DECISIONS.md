@@ -150,3 +150,9 @@ aliases:
 4. 蓝图便捷入口是 `UAOMainUI::ConsumePendingInventoryAcquisition()`
 
 所以后续新系统要接“获得物品通知”，应接统一入包链，不应直接接 HUD。
+## 15. 2026-06-16 补充笔记
+
+1. [[Item Semantic Tags Shared By AI And Player 2026-06-16]]
+2. 当前 `UAOInventoryItemDefinition::SemanticTags` 已经是 AI 与玩家侧可共享的物品语义入口。
+3. `Item.Semantic.Weapon.Sword`、`Item.Semantic.Weapon.Spear`、`Item.Semantic.Consumable.HealthPotion`、`Item.Semantic.Consumable.ManaPotion`、`Item.Semantic.Consumable.Food` 已在全局标签表中定义。
+4. 具体物品资产仍需后续把这些标签实际填进 `SemanticTags`，否则定义层新增标签不会自动反映到运行时内容。

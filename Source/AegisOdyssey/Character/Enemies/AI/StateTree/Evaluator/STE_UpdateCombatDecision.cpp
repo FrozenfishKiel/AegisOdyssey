@@ -28,7 +28,7 @@ void ResetDecisionOutputs(FUpdateCombatDecisionInstanceData& InstanceData)
 	InstanceData.TacticalState = FAOAIDecisionTacticalState();
 }
 
-APawn* ResolveOwnerPawn(const FStateTreeExecutionContext& Context)
+APawn* ResolveCombatDecisionOwnerPawn(const FStateTreeExecutionContext& Context)
 {
 	if (AActor* OwnerActor = Cast<AActor>(Context.GetOwner()))
 	{
@@ -46,7 +46,7 @@ APawn* ResolveOwnerPawn(const FStateTreeExecutionContext& Context)
 	return nullptr;
 }
 
-bool DoesCurrentIntentMatchAnyTag(const FGameplayTag& CurrentIntentTag, const FGameplayTagContainer& IntentTags)
+bool DoesCombatDecisionCurrentIntentMatchAnyTag(const FGameplayTag& CurrentIntentTag, const FGameplayTagContainer& IntentTags)
 {
 	return CurrentIntentTag.IsValid() && !IntentTags.IsEmpty() && IntentTags.HasTag(CurrentIntentTag);
 }
@@ -72,7 +72,7 @@ bool ShouldOpenAdditiveInventoryWindow(const FGameplayTag& CurrentIntentTag)
 	return false;
 }
 
-float EvaluateResponseCurveFactor(const FAOAIDecisionResponseCurveFactor& Factor, const float RawInput)
+float EvaluateCombatDecisionResponseCurveFactor(const FAOAIDecisionResponseCurveFactor& Factor, const float RawInput)
 {
 	if (!Factor.bEnabled || FMath::IsNearlyZero(Factor.Weight))
 	{
@@ -93,7 +93,7 @@ float EvaluateResponseCurveFactor(const FAOAIDecisionResponseCurveFactor& Factor
 	return FinalValue * Factor.Weight;
 }
 
-float EvaluateAttributeIntervalFactor(const UAOAIDecisionComponent& DecisionComponent, const FAOAIDecisionAttributeIntervalFactor& Factor)
+float EvaluateCombatDecisionAttributeIntervalFactor(const UAOAIDecisionComponent& DecisionComponent, const FAOAIDecisionAttributeIntervalFactor& Factor)
 {
 	if (!Factor.bEnabled || FMath::IsNearlyZero(Factor.Weight) || !Factor.NumeratorAttribute.IsValid())
 	{
@@ -150,12 +150,12 @@ float ComputeIntentDesire(
 
 	float Desire = Definition.BaseDesire;
 	Desire += CadenceAlpha * Definition.CadenceWeight;
-	Desire += EvaluateResponseCurveFactor(Definition.DistanceFactor, DistanceRatio);
-	Desire += EvaluateResponseCurveFactor(Definition.RecentDamageFactor, RecentDamageRatio);
+	Desire += EvaluateCombatDecisionResponseCurveFactor(Definition.DistanceFactor, DistanceRatio);
+	Desire += EvaluateCombatDecisionResponseCurveFactor(Definition.RecentDamageFactor, RecentDamageRatio);
 
 	for (const FAOAIDecisionAttributeIntervalFactor& AttributeFactor : Definition.AttributeIntervalFactors)
 	{
-		Desire += EvaluateAttributeIntervalFactor(DecisionComponent, AttributeFactor);
+		Desire += EvaluateCombatDecisionAttributeIntervalFactor(DecisionComponent, AttributeFactor);
 	}
 
 	for (const FAOAIDecisionTagScoreFactor& TagFactor : Definition.TargetStateTagFactors)
@@ -306,7 +306,7 @@ FAOAIDecisionTacticalState BuildTacticalState(
 void FSTE_UpdateCombatDecision::Tick(FStateTreeExecutionContext& Context, const float DeltaTime) const
 {
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
-	APawn* OwnerPawn = ResolveOwnerPawn(Context);
+	APawn* OwnerPawn = ResolveCombatDecisionOwnerPawn(Context);
 	UAOAIDecisionComponent* DecisionComponent = OwnerPawn ? UAOAIDecisionComponent::FindAIDecisionComponent(OwnerPawn) : nullptr;
 
 	if (DecisionComponent == nullptr)

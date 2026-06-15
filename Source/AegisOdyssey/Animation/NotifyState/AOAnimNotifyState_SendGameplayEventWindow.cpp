@@ -10,7 +10,7 @@
 
 namespace
 {
-	void SendGameplayEventFromAnimation(AActor* OwnerActor, UAnimSequenceBase* Animation, const FGameplayTag& EventTag, float EventMagnitude)
+	void SendGameplayEventFromNotifyWindowAnimation(AActor* OwnerActor, UAnimSequenceBase* Animation, const FGameplayTag& EventTag, float EventMagnitude)
 	{
 		if (OwnerActor == nullptr || !EventTag.IsValid())
 		{
@@ -65,7 +65,7 @@ void UAOAnimNotifyState_SendGameplayEventWindow::NotifyBegin(
 		return;
 	}
 
-	SendGameplayEventFromAnimation(MeshComp->GetOwner(), Animation, BeginEventTag, TotalDuration);
+	SendGameplayEventFromNotifyWindowAnimation(MeshComp->GetOwner(), Animation, BeginEventTag, TotalDuration);
 }
 
 void UAOAnimNotifyState_SendGameplayEventWindow::NotifyEnd(
@@ -80,5 +80,5 @@ void UAOAnimNotifyState_SendGameplayEventWindow::NotifyEnd(
 		return;
 	}
 
-	SendGameplayEventFromAnimation(MeshComp->GetOwner(), Animation, EndEventTag, 0.0f);
+	SendGameplayEventFromNotifyWindowAnimation(MeshComp->GetOwner(), Animation, EndEventTag, 0.0f);
 }

@@ -11,7 +11,7 @@
 
 namespace
 {
-	void SendGameplayEventFromAnimation(AActor* OwnerActor, UAnimSequenceBase* Animation, const FGameplayTag& EventTag, float EventMagnitude)
+	void SendGameplayEventFromNotifyAnimation(AActor* OwnerActor, UAnimSequenceBase* Animation, const FGameplayTag& EventTag, float EventMagnitude)
 	{
 	if (OwnerActor == nullptr || !EventTag.IsValid())
 	{
@@ -58,5 +58,5 @@ void UAOAnimNotify_SendGameplayEvent::Notify(
 		return;
 	}
 
-	SendGameplayEventFromAnimation(MeshComp->GetOwner(), Animation, EventTag, 0.0f);
+	SendGameplayEventFromNotifyAnimation(MeshComp->GetOwner(), Animation, EventTag, 0.0f);
 }

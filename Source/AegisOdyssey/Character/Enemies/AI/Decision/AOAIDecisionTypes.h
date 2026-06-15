@@ -158,6 +158,7 @@ struct FAOAIDecisionQueueItem
 	int32 PayloadId = INDEX_NONE;
 };
 
+
 USTRUCT(BlueprintType)
 struct FAOAIDecisionIntentDefinition
 {

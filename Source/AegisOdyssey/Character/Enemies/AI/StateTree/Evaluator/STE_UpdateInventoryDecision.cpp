@@ -22,7 +22,7 @@ int32 ResolveInventorySlotIndexFromResolvedTarget(const FAOAIResolvedInventoryUs
 	return ResolvedTarget.bUsedQuickBarSlot ? ResolvedTarget.QuickBarSlotIndex : ResolvedTarget.SlotIndex;
 }
 
-APawn* ResolveOwnerPawn(const FStateTreeExecutionContext& Context)
+APawn* ResolveInventoryDecisionOwnerPawn(const FStateTreeExecutionContext& Context)
 {
 	if (AActor* OwnerActor = Cast<AActor>(Context.GetOwner()))
 	{
@@ -44,19 +44,15 @@ void ResetInventoryDecisionOutputs(FUpdateInventoryDecisionInstanceData& Instanc
 {
 	InstanceData.bHasCurrentSubmittedInventoryDecision = false;
 	InstanceData.CurrentSubmittedInventoryDecision = FAOAIInventoryDecisionResult();
-	InstanceData.bHasPendingInventoryDecision = false;
 	InstanceData.bHasAdditiveInventoryWindow = false;
-	InstanceData.bPendingInventoryDecisionIsAdditive = false;
-	InstanceData.PendingInventoryDecisionCoordinationMode = EAOAIInventoryActionCoordinationMode::Exclusive;
-	InstanceData.PendingInventoryDecision = FAOAIInventoryDecisionResult();
 }
 
-bool DoesCurrentIntentMatchAnyTag(const FGameplayTag& CurrentIntentTag, const FGameplayTagContainer& IntentTags)
+bool DoesInventoryDecisionCurrentIntentMatchAnyTag(const FGameplayTag& CurrentIntentTag, const FGameplayTagContainer& IntentTags)
 {
 	return CurrentIntentTag.IsValid() && !IntentTags.IsEmpty() && IntentTags.HasTag(CurrentIntentTag);
 }
 
-float EvaluateResponseCurveFactor(const FAOAIDecisionResponseCurveFactor& Factor, const float RawInput)
+float EvaluateInventoryDecisionResponseCurveFactor(const FAOAIDecisionResponseCurveFactor& Factor, const float RawInput)
 {
 	if (!Factor.bEnabled || FMath::IsNearlyZero(Factor.Weight))
 	{
@@ -77,7 +73,7 @@ float EvaluateResponseCurveFactor(const FAOAIDecisionResponseCurveFactor& Factor
 	return FinalValue * Factor.Weight;
 }
 
-float EvaluateAttributeIntervalFactor(const UAOAIDecisionComponent& DecisionComponent, const FAOAIDecisionAttributeIntervalFactor& Factor)
+float EvaluateInventoryDecisionAttributeIntervalFactor(const UAOAIDecisionComponent& DecisionComponent, const FAOAIDecisionAttributeIntervalFactor& Factor)
 {
 	if (!Factor.bEnabled || FMath::IsNearlyZero(Factor.Weight) || !Factor.NumeratorAttribute.IsValid())
 	{
@@ -131,13 +127,13 @@ bool CanInventoryActionCooperateWithTacticalState(
 	}
 
 	if (!Definition.RequiredMainIntentTags.IsEmpty()
-		&& !DoesCurrentIntentMatchAnyTag(TacticalState.CurrentMainIntentTag, Definition.RequiredMainIntentTags))
+		&& !DoesInventoryDecisionCurrentIntentMatchAnyTag(TacticalState.CurrentMainIntentTag, Definition.RequiredMainIntentTags))
 	{
 		return false;
 	}
 
 	if (!Definition.BlockedMainIntentTags.IsEmpty()
-		&& DoesCurrentIntentMatchAnyTag(TacticalState.CurrentMainIntentTag, Definition.BlockedMainIntentTags))
+		&& DoesInventoryDecisionCurrentIntentMatchAnyTag(TacticalState.CurrentMainIntentTag, Definition.BlockedMainIntentTags))
 	{
 		return false;
 	}
@@ -189,14 +185,14 @@ float ComputeInventoryActionDesire(
 
 	float Desire = Definition.BaseDesire;
 	Desire += CadenceAlpha * Definition.CadenceWeight;
-	Desire += EvaluateResponseCurveFactor(Definition.HealthRatioFactor, InventoryDecisionFacts.HealthRatio);
-	Desire += EvaluateResponseCurveFactor(Definition.StaminaRatioFactor, InventoryDecisionFacts.StaminaRatio);
-	Desire += EvaluateResponseCurveFactor(Definition.DistanceFactor, DistanceRatio);
-	Desire += EvaluateResponseCurveFactor(Definition.RecentDamageFactor, RecentDamageRatio);
+	Desire += EvaluateInventoryDecisionResponseCurveFactor(Definition.HealthRatioFactor, InventoryDecisionFacts.HealthRatio);
+	Desire += EvaluateInventoryDecisionResponseCurveFactor(Definition.StaminaRatioFactor, InventoryDecisionFacts.StaminaRatio);
+	Desire += EvaluateInventoryDecisionResponseCurveFactor(Definition.DistanceFactor, DistanceRatio);
+	Desire += EvaluateInventoryDecisionResponseCurveFactor(Definition.RecentDamageFactor, RecentDamageRatio);
 
 	for (const FAOAIDecisionAttributeIntervalFactor& AttributeFactor : Definition.AttributeIntervalFactors)
 	{
-		Desire += EvaluateAttributeIntervalFactor(DecisionComponent, AttributeFactor);
+		Desire += EvaluateInventoryDecisionAttributeIntervalFactor(DecisionComponent, AttributeFactor);
 	}
 
 	for (const FAOAIDecisionTagScoreFactor& TagFactor : Definition.TargetStateTagFactors)
@@ -426,6 +422,8 @@ float ComputeInventoryCandidateScore(
 	return FMath::Max(0.0f, Score);
 }
 
+// 在某个库存动作内部，从所有具体候选物品策略里挑出当前最值得执行的那一个。
+// 这里比较的是“候选分”，不是动作层 Desire/Score。
 const FAOAIInventoryDecisionCandidateDefinition* FindBestInventoryCandidate(
 	APawn* OwnerPawn,
 	const FAOAIInventoryDecisionFacts& InventoryDecisionFacts,
@@ -475,10 +473,17 @@ const FAOAIInventoryDecisionCandidateDefinition* FindBestInventoryCandidate(
 }
 }
 
+// 库存决策主评估循环。
+// 它负责：
+// 1. 收集当前库存决策事实；
+// 2. 汇总每个库存动作是否存在可用候选；
+// 3. 先做动作层 Desire/Score 评估；
+// 4. 再为胜出的动作挑选具体候选物品；
+// 5. 最后把评估结果同步回 UAOAIDecisionComponent。
 void FSTE_UpdateInventoryDecision::Tick(FStateTreeExecutionContext& Context, const float DeltaTime) const
 {
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
-	APawn* OwnerPawn = ResolveOwnerPawn(Context);
+	APawn* OwnerPawn = ResolveInventoryDecisionOwnerPawn(Context);
 	UAOAIDecisionComponent* DecisionComponent = OwnerPawn ? UAOAIDecisionComponent::FindAIDecisionComponent(OwnerPawn) : nullptr;
 
 	if (DecisionComponent == nullptr)
@@ -590,7 +595,7 @@ void FSTE_UpdateInventoryDecision::Tick(FStateTreeExecutionContext& Context, con
 		}
 	}
 
-	FAOAIInventoryDecisionResult PendingInventoryDecisionResult;
+	FAOAIInventoryDecisionResult EvaluationInventoryDecisionResult;
 	const FGameplayTag SelectedActionTag = BestScore <= 0.0f
 		? ResolveFallbackInventoryActionTag(
 			InventoryDecisionFacts,
@@ -616,25 +621,25 @@ void FSTE_UpdateInventoryDecision::Tick(FStateTreeExecutionContext& Context, con
 
 		if (RuntimeState != nullptr && CandidateDefinition != nullptr && CandidateScore > 0.0f)
 		{
-			PendingInventoryDecisionResult.bHasAction = true;
-			PendingInventoryDecisionResult.ActionTag = SelectedActionDefinition->ActionTag;
-			PendingInventoryDecisionResult.CandidateTag = CandidateDefinition->CandidateTag;
-			PendingInventoryDecisionResult.CoordinationMode = SelectedActionDefinition->CoordinationMode;
-			PendingInventoryDecisionResult.Desire = RuntimeState->Desire;
-			PendingInventoryDecisionResult.Score = RuntimeState->Score;
-			PendingInventoryDecisionResult.UseCommand = CandidateDefinition->UseCommand;
+			EvaluationInventoryDecisionResult.bHasAction = true;
+			EvaluationInventoryDecisionResult.ActionTag = SelectedActionDefinition->ActionTag;
+			EvaluationInventoryDecisionResult.CandidateTag = CandidateDefinition->CandidateTag;
+			EvaluationInventoryDecisionResult.CoordinationMode = SelectedActionDefinition->CoordinationMode;
+			EvaluationInventoryDecisionResult.Desire = RuntimeState->Desire;
+			EvaluationInventoryDecisionResult.Score = RuntimeState->Score;
+			EvaluationInventoryDecisionResult.UseCommand = CandidateDefinition->UseCommand;
 
 			if (ResolvedConcreteCandidate.ResolvedTarget.bUsedQuickBarSlot)
 			{
-				PendingInventoryDecisionResult.UseCommand.QuickBarSlotIndex =
+				EvaluationInventoryDecisionResult.UseCommand.QuickBarSlotIndex =
 					ResolvedConcreteCandidate.ResolvedTarget.QuickBarSlotIndex;
-				PendingInventoryDecisionResult.UseCommand.QuickBarSlotIndices.Reset();
-				PendingInventoryDecisionResult.UseCommand.QuickBarSlotIndices.Add(
+				EvaluationInventoryDecisionResult.UseCommand.QuickBarSlotIndices.Reset();
+				EvaluationInventoryDecisionResult.UseCommand.QuickBarSlotIndices.Add(
 					ResolvedConcreteCandidate.ResolvedTarget.QuickBarSlotIndex);
 			}
 
-			PendingInventoryDecisionResult.bHasResolvedTarget = true;
-			PendingInventoryDecisionResult.ResolvedTarget = ResolvedConcreteCandidate.ResolvedTarget;
+			EvaluationInventoryDecisionResult.bHasResolvedTarget = true;
+			EvaluationInventoryDecisionResult.ResolvedTarget = ResolvedConcreteCandidate.ResolvedTarget;
 		}
 	}
 
@@ -643,15 +648,9 @@ void FSTE_UpdateInventoryDecision::Tick(FStateTreeExecutionContext& Context, con
 		InventoryDecisionFacts,
 		CandidateFactsByActionTag,
 		InventoryRuntimeStates,
-		PendingInventoryDecisionResult);
+		EvaluationInventoryDecisionResult);
 
 	InstanceData.bHasCurrentSubmittedInventoryDecision =
 		DecisionComponent->GetCurrentSubmittedInventoryDecisionResult(InstanceData.CurrentSubmittedInventoryDecision);
 	InstanceData.bHasAdditiveInventoryWindow = InstanceData.TacticalState.bHasAdditiveInventoryWindow;
-	InstanceData.bHasPendingInventoryDecision = PendingInventoryDecisionResult.bHasAction;
-	InstanceData.PendingInventoryDecisionCoordinationMode = PendingInventoryDecisionResult.CoordinationMode;
-	InstanceData.bPendingInventoryDecisionIsAdditive =
-		InstanceData.bHasPendingInventoryDecision
-		&& PendingInventoryDecisionResult.CoordinationMode == EAOAIInventoryActionCoordinationMode::Additive;
-	InstanceData.PendingInventoryDecision = PendingInventoryDecisionResult;
 }
