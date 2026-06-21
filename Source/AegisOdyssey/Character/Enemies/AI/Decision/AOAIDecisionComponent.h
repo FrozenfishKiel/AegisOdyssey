@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -111,7 +111,7 @@ public:
 	const TArray<FAOAIDecisionIntentDefinition>& GetIntentDefinitions();
 
 	// 读取当前库存动作定义列表，供库存 Evaluator 自行评估。
-	const TArray<FAOAIInventoryActionDefinition>& GetInventoryActionDefinitions();
+	const TArray<FAOAIInventoryDesireDefinition>& GetInventoryDesireDefinitions();
 
 	// 读取当前缓存的战斗意图运行时状态。
 	const TMap<FGameplayTag, FAOAIDecisionIntentRuntimeState>& GetIntentRuntimeStates() const { return IntentRuntimeStates; }
@@ -149,7 +149,6 @@ public:
 	void CacheInventoryEvaluation(
 		float CurrentWorldTimeSeconds,
 		const FAOAIInventoryDecisionFacts& InInventoryDecisionFacts,
-		const TMap<FGameplayTag, FAOAIInventoryDecisionCandidateFacts>& InCandidateFactsByActionTag,
 		const TMap<FGameplayTag, FAOAIInventoryDecisionRuntimeState>& InInventoryRuntimeStates,
 		const FAOAIInventoryDecisionResult& InEvaluationInventoryDecisionResult);
 
@@ -361,7 +360,7 @@ private:
 
 	// 库存动作定义表。
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AO|AI|InventoryDecision|Config", meta = (AllowPrivateAccess = true))
-	TArray<FAOAIInventoryActionDefinition> InventoryActionDefinitions;
+	TArray<FAOAIInventoryDesireDefinition> InventoryDesireDefinitions;
 
 	// 战斗意图运行时状态缓存。
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AO|AI|Decision|Runtime", meta = (AllowPrivateAccess = true))
@@ -391,9 +390,6 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AO|AI|InventoryDecision|Runtime", meta = (AllowPrivateAccess = true))
 	FAOAIInventoryDecisionFacts InventoryDecisionFacts;
 
-	// 每个库存动作对应的候选可用性缓存。
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AO|AI|InventoryDecision|Runtime", meta = (AllowPrivateAccess = true))
-	TMap<FGameplayTag, FAOAIInventoryDecisionCandidateFacts> InventoryCandidateFactsByActionTag;
 
 	// 当前最新的库存评估结果缓存。
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AO|AI|InventoryDecision|Runtime", meta = (AllowPrivateAccess = true))

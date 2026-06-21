@@ -99,7 +99,6 @@ FString FAOAIDecisionDebugFileLogger::BuildSnapshotText(const FAOAIDecisionDebug
 	Lines.Add(FString::Printf(TEXT("Pending Submit Delay Seconds: %.3f"), DebugSnapshot.PendingSubmitDelaySeconds));
 	Lines.Add(FString::Printf(TEXT("Has Submitted Inventory Decision: %s"), DebugSnapshot.bHasCurrentSubmittedInventoryDecision ? TEXT("true") : TEXT("false")));
 	Lines.Add(FString::Printf(TEXT("Submitted Inventory Action: %s"), *BuildTagText(DebugSnapshot.CurrentSubmittedInventoryDecision.ActionTag)));
-	Lines.Add(FString::Printf(TEXT("Submitted Inventory Candidate: %s"), *BuildTagText(DebugSnapshot.CurrentSubmittedInventoryDecision.CandidateTag)));
 	Lines.Add(FString::Printf(TEXT("Submitted Inventory Desire: %.3f"), DebugSnapshot.CurrentSubmittedInventoryDecision.Desire));
 	Lines.Add(FString::Printf(TEXT("Submitted Inventory Score: %.3f"), DebugSnapshot.CurrentSubmittedInventoryDecision.Score));
 	Lines.Add(TEXT(""));

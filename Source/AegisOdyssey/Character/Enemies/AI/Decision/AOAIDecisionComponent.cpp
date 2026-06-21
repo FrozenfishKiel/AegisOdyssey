@@ -31,46 +31,6 @@ const AActor* ResolveDecisionOwnerActor(const AActor* Actor)
 	return Actor;
 }
 
-bool AreQuickBarSlotIndicesEqual(const TArray<int32>& Left, const TArray<int32>& Right)
-{
-	if (Left.Num() != Right.Num())
-	{
-		return false;
-	}
-
-	for (int32 Index = 0; Index < Left.Num(); ++Index)
-	{
-		if (Left[Index] != Right[Index])
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
-bool AreInventoryUseCommandsEqual(const FAOAIInventoryUseCommand& Left, const FAOAIInventoryUseCommand& Right)
-{
-	return Left.CommandType == Right.CommandType
-		&& Left.QuickBarSlotIndex == Right.QuickBarSlotIndex
-		&& Left.ItemQuery.SemanticTag.MatchesTagExact(Right.ItemQuery.SemanticTag)
-		&& Left.ItemQuery.RequiredItemInstanceClass == Right.ItemQuery.RequiredItemInstanceClass
-		&& Left.ItemQuery.RequiredItemDefinitionClass == Right.ItemQuery.RequiredItemDefinitionClass
-		&& Left.ItemQuery.RequiredFragmentClasses == Right.ItemQuery.RequiredFragmentClasses
-		&& Left.ItemQuery.bRequireUsableFromInventory == Right.ItemQuery.bRequireUsableFromInventory
-		&& Left.AllowedInventoryComponentClasses == Right.AllowedInventoryComponentClasses
-		&& AreQuickBarSlotIndicesEqual(Left.QuickBarSlotIndices, Right.QuickBarSlotIndices);
-}
-
-bool AreResolvedInventoryTargetsEqual(const FAOAIResolvedInventoryUseTarget& Left, const FAOAIResolvedInventoryUseTarget& Right)
-{
-	return Left.InventoryComponent == Right.InventoryComponent
-		&& Left.ItemInstance == Right.ItemInstance
-		&& Left.SlotIndex == Right.SlotIndex
-		&& Left.bUsedQuickBarSlot == Right.bUsedQuickBarSlot
-		&& Left.QuickBarSlotIndex == Right.QuickBarSlotIndex;
-}
-
 bool AreInventoryDecisionResultsEqual(const FAOAIInventoryDecisionResult& Left, const FAOAIInventoryDecisionResult& Right)
 {
 	if (Left.bHasAction != Right.bHasAction)
@@ -84,13 +44,8 @@ bool AreInventoryDecisionResultsEqual(const FAOAIInventoryDecisionResult& Left, 
 	}
 
 	return Left.ActionTag.MatchesTagExact(Right.ActionTag)
-		&& Left.CandidateTag.MatchesTagExact(Right.CandidateTag)
-		&& Left.CoordinationMode == Right.CoordinationMode
 		&& FMath::IsNearlyEqual(Left.Desire, Right.Desire)
-		&& FMath::IsNearlyEqual(Left.Score, Right.Score)
-		&& Left.bHasResolvedTarget == Right.bHasResolvedTarget
-		&& AreInventoryUseCommandsEqual(Left.UseCommand, Right.UseCommand)
-		&& AreResolvedInventoryTargetsEqual(Left.ResolvedTarget, Right.ResolvedTarget);
+		&& FMath::IsNearlyEqual(Left.Score, Right.Score);
 }
 
 }
@@ -133,10 +88,10 @@ const TArray<FAOAIDecisionIntentDefinition>& UAOAIDecisionComponent::GetIntentDe
 	return IntentDefinitions;
 }
 
-const TArray<FAOAIInventoryActionDefinition>& UAOAIDecisionComponent::GetInventoryActionDefinitions()
+const TArray<FAOAIInventoryDesireDefinition>& UAOAIDecisionComponent::GetInventoryDesireDefinitions()
 {
 	EnsureIntentDefinitionsInitialized();
-	return InventoryActionDefinitions;
+	return InventoryDesireDefinitions;
 }
 
 void UAOAIDecisionComponent::RefreshObservationContext()
@@ -175,12 +130,10 @@ void UAOAIDecisionComponent::CacheCombatEvaluation(
 void UAOAIDecisionComponent::CacheInventoryEvaluation(
 	const float CurrentWorldTimeSeconds,
 	const FAOAIInventoryDecisionFacts& InInventoryDecisionFacts,
-	const TMap<FGameplayTag, FAOAIInventoryDecisionCandidateFacts>& InCandidateFactsByActionTag,
 	const TMap<FGameplayTag, FAOAIInventoryDecisionRuntimeState>& InInventoryRuntimeStates,
 	const FAOAIInventoryDecisionResult& InEvaluationInventoryDecisionResult)
 {
 	InventoryDecisionFacts = InInventoryDecisionFacts;
-	InventoryCandidateFactsByActionTag = InCandidateFactsByActionTag;
 	InventoryRuntimeStates = InInventoryRuntimeStates;
 	SetCurrentEvaluationInventoryDecisionResult(InEvaluationInventoryDecisionResult);
 	LastInventoryEvaluationTimeSeconds = CurrentWorldTimeSeconds;
@@ -413,7 +366,6 @@ void UAOAIDecisionComponent::ResetDecisionState()
 	EnsureIntentDefinitionsInitialized();
 	CombatFacts = FAOAIDecisionCombatFacts();
 	InventoryDecisionFacts = FAOAIInventoryDecisionFacts();
-	InventoryCandidateFactsByActionTag.Reset();
 	TacticalState = FAOAIDecisionTacticalState();
 	PendingActionDirection = FVector::ZeroVector;
 	bHasPendingActionDirection = false;
@@ -632,7 +584,7 @@ void UAOAIDecisionComponent::ApplyDecisionProfileIfNeeded()
 	}
 
 	IntentDefinitions = DecisionProfile->IntentDefinitions;
-	InventoryActionDefinitions = DecisionProfile->InventoryActionDefinitions;
+	InventoryDesireDefinitions = DecisionProfile->InventoryDesireDefinitions;
 }
 
 void UAOAIDecisionComponent::SyncRuntimeStatesWithDefinitions()
@@ -666,15 +618,15 @@ void UAOAIDecisionComponent::SyncInventoryRuntimeStatesWithDefinitions()
 {
 	TSet<FGameplayTag> ValidActionTags;
 
-	for (const FAOAIInventoryActionDefinition& Definition : InventoryActionDefinitions)
+	for (const FAOAIInventoryDesireDefinition& Definition : InventoryDesireDefinitions)
 	{
-		if (!Definition.ActionTag.IsValid() || ValidActionTags.Contains(Definition.ActionTag))
+		if (!Definition.DesiredTag.IsValid() || ValidActionTags.Contains(Definition.DesiredTag))
 		{
 			continue;
 		}
 
-		ValidActionTags.Add(Definition.ActionTag);
-		InventoryRuntimeStates.FindOrAdd(Definition.ActionTag);
+		ValidActionTags.Add(Definition.DesiredTag);
+		InventoryRuntimeStates.FindOrAdd(Definition.DesiredTag);
 	}
 
 	TArray<FGameplayTag> ExistingActionTags;
@@ -946,9 +898,9 @@ float UAOAIDecisionComponent::GetRecentDamageDebugWindowSeconds() const
 		bFoundWindowSetting = true;
 	}
 
-	for (const FAOAIInventoryActionDefinition& Definition : InventoryActionDefinitions)
+	for (const FAOAIInventoryDesireDefinition& Definition : InventoryDesireDefinitions)
 	{
-		if (!Definition.ActionTag.IsValid())
+		if (!Definition.DesiredTag.IsValid())
 		{
 			continue;
 		}
@@ -995,26 +947,5 @@ bool UAOAIDecisionComponent::DoesInventoryDecisionResultMatchSubmitted(const FAO
 		return false;
 	}
 
-	if (!CurrentSubmittedInventoryDecisionResult.ActionTag.MatchesTagExact(ExecutedDecisionResult.ActionTag))
-	{
-		return false;
-	}
-
-	if (CurrentSubmittedInventoryDecisionResult.CandidateTag.IsValid() || ExecutedDecisionResult.CandidateTag.IsValid())
-	{
-		if (!CurrentSubmittedInventoryDecisionResult.CandidateTag.MatchesTagExact(ExecutedDecisionResult.CandidateTag))
-		{
-			return false;
-		}
-	}
-
-	return CurrentSubmittedInventoryDecisionResult.UseCommand.CommandType == ExecutedDecisionResult.UseCommand.CommandType
-		&& CurrentSubmittedInventoryDecisionResult.UseCommand.QuickBarSlotIndex == ExecutedDecisionResult.UseCommand.QuickBarSlotIndex
-		&& CurrentSubmittedInventoryDecisionResult.UseCommand.QuickBarSlotIndices == ExecutedDecisionResult.UseCommand.QuickBarSlotIndices
-		&& CurrentSubmittedInventoryDecisionResult.UseCommand.AllowedInventoryComponentClasses == ExecutedDecisionResult.UseCommand.AllowedInventoryComponentClasses
-		&& CurrentSubmittedInventoryDecisionResult.UseCommand.ItemQuery.SemanticTag.MatchesTagExact(ExecutedDecisionResult.UseCommand.ItemQuery.SemanticTag)
-		&& CurrentSubmittedInventoryDecisionResult.UseCommand.ItemQuery.RequiredItemInstanceClass == ExecutedDecisionResult.UseCommand.ItemQuery.RequiredItemInstanceClass
-		&& CurrentSubmittedInventoryDecisionResult.UseCommand.ItemQuery.RequiredItemDefinitionClass == ExecutedDecisionResult.UseCommand.ItemQuery.RequiredItemDefinitionClass
-		&& CurrentSubmittedInventoryDecisionResult.UseCommand.ItemQuery.RequiredFragmentClasses == ExecutedDecisionResult.UseCommand.ItemQuery.RequiredFragmentClasses
-		&& CurrentSubmittedInventoryDecisionResult.UseCommand.ItemQuery.bRequireUsableFromInventory == ExecutedDecisionResult.UseCommand.ItemQuery.bRequireUsableFromInventory;
+	return CurrentSubmittedInventoryDecisionResult.ActionTag.MatchesTagExact(ExecutedDecisionResult.ActionTag);
 }

@@ -29,25 +29,33 @@ EStateTreeRunStatus FSTT_UseResolvedInventoryItem::EnterState(
 	FAOAIInventoryUseCommand ResolvedUseCommand;
 	if (!ResolveUseCommand(Context, UserPawn, InstanceData, ResolvedDecisionResult, ResolvedUseCommand))
 	{
-		UE_LOG(LogStateTree, Warning, TEXT("FSTT_UseResolvedInventoryItem::EnterState: Failed to resolve use command."));
+		UE_LOG(
+			LogStateTree,
+			Warning,
+			TEXT("FSTT_UseResolvedInventoryItem::EnterState: Failed to resolve use command. PreferPending=%s InputHasDecision=%s InputActionTag=%s ConfigCommandType=%d ConfigSemanticTag=%s"),
+			InstanceData.bPreferDecisionPendingCommand ? TEXT("true") : TEXT("false"),
+			InstanceData.CurrentSubmittedInventoryDecision.bHasAction ? TEXT("true") : TEXT("false"),
+			*InstanceData.CurrentSubmittedInventoryDecision.ActionTag.ToString(),
+			static_cast<int32>(InstanceData.UseCommand.CommandType),
+			*InstanceData.UseCommand.ItemQuery.SemanticTag.ToString());
 		return EStateTreeRunStatus::Failed;
 	}
 
-	if (ResolvedDecisionResult.bHasResolvedTarget)
-	{
-		InstanceData.bUseSucceeded = UAOAIInventoryRuntimeUseLibrary::TryExecuteResolvedTarget(
-			UserPawn,
-			ResolvedDecisionResult.ResolvedTarget,
-			InstanceData.ExecutionResult);
-	}
-	else
-	{
-		InstanceData.bUseSucceeded =
-			UAOAIInventoryRuntimeUseLibrary::TryExecuteUseCommand(UserPawn, ResolvedUseCommand, InstanceData.ExecutionResult);
-	}
+	InstanceData.bUseSucceeded =
+		UAOAIInventoryRuntimeUseLibrary::TryExecuteUseCommand(UserPawn, ResolvedUseCommand, InstanceData.ExecutionResult);
 
 	if (!InstanceData.bUseSucceeded)
 	{
+		UE_LOG(
+			LogStateTree,
+			Warning,
+			TEXT("FSTT_UseResolvedInventoryItem::EnterState: Use command execution failed. ActionTag=%s CommandType=%d SemanticTag=%s AllowedInventoryClassCount=%d QuickBarSlotIndex=%d QuickBarSlotCount=%d"),
+			*ResolvedDecisionResult.ActionTag.ToString(),
+			static_cast<int32>(ResolvedUseCommand.CommandType),
+			*ResolvedUseCommand.ItemQuery.SemanticTag.ToString(),
+			ResolvedUseCommand.AllowedInventoryComponentClasses.Num(),
+			ResolvedUseCommand.QuickBarSlotIndex,
+			ResolvedUseCommand.QuickBarSlotIndices.Num());
 		return EStateTreeRunStatus::Failed;
 	}
 
@@ -89,14 +97,17 @@ bool FSTT_UseResolvedInventoryItem::ResolveUseCommand(
 	if (!InstanceData.bPreferDecisionPendingCommand)
 	{
 		OutResolvedDecisionResult.bHasAction = true;
-		OutResolvedDecisionResult.UseCommand = OutUseCommand;
+		OutResolvedDecisionResult.ActionTag = OutUseCommand.ItemQuery.SemanticTag;
 		return true;
 	}
 
 	if (InstanceData.CurrentSubmittedInventoryDecision.bHasAction)
 	{
 		OutResolvedDecisionResult = InstanceData.CurrentSubmittedInventoryDecision;
-		OutUseCommand = OutResolvedDecisionResult.UseCommand;
+		if (OutResolvedDecisionResult.ActionTag.IsValid())
+		{
+			OutUseCommand.ItemQuery.SemanticTag = OutResolvedDecisionResult.ActionTag;
+		}
 		return true;
 	}
 
@@ -104,7 +115,10 @@ bool FSTT_UseResolvedInventoryItem::ResolveUseCommand(
 	{
 		if (DecisionComponent->GetCurrentSubmittedInventoryDecisionResult(OutResolvedDecisionResult))
 		{
-			OutUseCommand = OutResolvedDecisionResult.UseCommand;
+			if (OutResolvedDecisionResult.ActionTag.IsValid())
+			{
+				OutUseCommand.ItemQuery.SemanticTag = OutResolvedDecisionResult.ActionTag;
+			}
 			return true;
 		}
 	}

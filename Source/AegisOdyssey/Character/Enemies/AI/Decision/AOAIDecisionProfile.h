@@ -15,13 +15,10 @@ class AEGISODYSSEY_API UAOAIDecisionProfile : public UPrimaryDataAsset
 
 public:
 	// 主战斗意图配置表。
-	// 这里定义 AI 会参与评估的主意图，以及每个意图的基础欲望、距离因子、冷却和切换参数。
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AO|AI|Decision")
 	TArray<FAOAIDecisionIntentDefinition> IntentDefinitions;
 
-	// 库存动作配置表。
-	// 这里定义 AI 在什么战术上下文下考虑“使用库存”，以及每种库存动作下面有哪些具体候选物品策略。
-	// 如果这里为空，库存 Evaluator 将不会产出任何有效库存决策结果。
+	// STE 只从这里读取“想要什么”的语义标签配置，不读取库存位置或候选物。
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AO|AI|InventoryDecision")
-	TArray<FAOAIInventoryActionDefinition> InventoryActionDefinitions;
+	TArray<FAOAIInventoryDesireDefinition> InventoryDesireDefinitions;
 };
