@@ -11,6 +11,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 	"AegisOdyssey.AI.DecisionQueue.RejectsNonAuthorityMutation",
 	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
+// 验证队列按提交时间和入队顺序出队，并在容量用尽时拒绝一条独立决策。
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 	FAIDecisionQueueKeepsFIFOAndDropsOverflowTest,
 	"AegisOdyssey.AI.DecisionQueue.KeepsFIFOAndDropsOverflow",
@@ -66,6 +67,8 @@ bool FAIDecisionQueueRejectsNonAuthorityMutationTest::RunTest(const FString& Par
 	return true;
 }
 
+// 角色建立后，用互不重复的来源填满队列并尝试加入第六条。
+// 然后跨过实际提交时间逐条出队，核对队头、顺序和清空后的状态。
 bool FAIDecisionQueueKeepsFIFOAndDropsOverflowTest::RunTest(const FString& Parameters)
 {
 	(void)Parameters;
@@ -77,25 +80,26 @@ bool FAIDecisionQueueKeepsFIFOAndDropsOverflowTest::RunTest(const FString& Param
 		return false;
 	}
 
-	const TArray<FGameplayTag> InputTags = {
-		AOGameplayTags::AI_Intent_Attack,
-		AOGameplayTags::AI_Intent_Strafe,
-		AOGameplayTags::AI_Intent_Roll,
-		AOGameplayTags::AI_Decision_Inventory_UseItem,
-		AOGameplayTags::AI_Intent_Attack,
-		AOGameplayTags::AI_Intent_Strafe
+	// 道具共用使用决策标签，以物品语义区分来源。这样第六条只能因容量被拒绝。
+	const TArray<FAOAIDecisionQueueItem> InputDecisions = {
+		{ AOGameplayTags::AI_Intent_Attack, AOGameplayTags::AI_Intent_Attack, 0.0f },
+		{ AOGameplayTags::AI_Intent_Strafe, AOGameplayTags::AI_Intent_Strafe, 0.0f },
+		{ AOGameplayTags::AI_Intent_Roll, AOGameplayTags::AI_Intent_Roll, 0.0f },
+		{ AOGameplayTags::AI_Decision_Inventory_UseItem, AOGameplayTags::Item_Semantic_Consumable_HealthPotion, 0.0f },
+		{ AOGameplayTags::AI_Decision_Inventory_UseItem, AOGameplayTags::Item_Semantic_Consumable_ManaPotion, 0.0f },
+		{ AOGameplayTags::AI_Decision_Inventory_UseItem, AOGameplayTags::Item_Semantic_Consumable_Food, 0.0f }
 	};
 
 	for (int32 Index = 0; Index < 5; ++Index)
 	{
 		TestTrue(
 			FString::Printf(TEXT("第 %d 个合法决策应能成功入队。"), Index + 1),
-			DecisionComponent->EnqueueDecisionTag(InputTags[Index], 0.0f));
+			DecisionComponent->EnqueueDecisionItem(InputDecisions[Index]));
 	}
 
 	TestFalse(
 		TEXT("固定容量 5 的队列满后应直接丢弃新决策。"),
-		DecisionComponent->EnqueueDecisionTag(InputTags[5], 0.0f));
+		DecisionComponent->EnqueueDecisionItem(InputDecisions[5]));
 
 	TestEqual(TEXT("队列容量应固定锁为 5。"), DecisionComponent->GetDecisionQueueCount(), 5);
 	TestTrue(TEXT("队列在有内容时应暴露待提交标签状态。"), DecisionComponent->HasPendingDecisionTag());
@@ -120,22 +124,16 @@ bool FAIDecisionQueueKeepsFIFOAndDropsOverflowTest::RunTest(const FString& Param
 		TEXT("第一次提交后新的队头应切到第二条入队结果。"),
 		DecisionComponent->GetCurrentQueuedDecisionTag().MatchesTagExact(AOGameplayTags::AI_Intent_Strafe));
 
-	const TArray<FGameplayTag> ExpectedRemainingOrder = {
-		AOGameplayTags::AI_Intent_Strafe,
-		AOGameplayTags::AI_Intent_Roll,
-		AOGameplayTags::AI_Decision_Inventory_UseItem,
-		AOGameplayTags::AI_Intent_Attack
-	};
-
-	for (int32 Index = 0; Index < ExpectedRemainingOrder.Num(); ++Index)
+	for (int32 Index = 1; Index < 5; ++Index)
 	{
-		const float CurrentTimeSeconds = 1.0f + static_cast<float>(Index);
+		const float CurrentTimeSeconds = DecisionComponent->GetNextQueuedDecisionSubmitTimeSeconds();
 		TestTrue(
-			FString::Printf(TEXT("第 %d 次追加提交应成功。"), Index + 2),
+			FString::Printf(TEXT("第 %d 次提交应成功。"), Index + 1),
 			DecisionComponent->TrySubmitNextDecision(CurrentTimeSeconds, SubmittedDecision));
 		TestTrue(
-			FString::Printf(TEXT("第 %d 次提交仍应严格遵守 FIFO。"), Index + 2),
-			SubmittedDecision.DecisionTag.MatchesTagExact(ExpectedRemainingOrder[Index]));
+			FString::Printf(TEXT("第 %d 次提交的决策和来源均应遵守 FIFO。"), Index + 1),
+			SubmittedDecision.DecisionTag.MatchesTagExact(InputDecisions[Index].DecisionTag) &&
+			SubmittedDecision.SourceTag.MatchesTagExact(InputDecisions[Index].SourceTag));
 	}
 
 	TestEqual(TEXT("队列内的第五项提交完成后应清空。"), DecisionComponent->GetDecisionQueueCount(), 0);

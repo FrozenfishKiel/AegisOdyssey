@@ -36,6 +36,7 @@ public:
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 	virtual APawn* SpawnDefaultPawnAtTransform_Implementation(AController* NewPlayer, const FTransform& SpawnTransform) override;
 	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
+	// 角色重生失败后检查控制器是否可以重试，并在日志里记录无法重试的原因。
 	virtual void FailedToRestartPlayer(AController* NewPlayer) override;
 	virtual void GenericPlayerInitialization(AController* C) override;
 	virtual void InitializeHUDForPlayer_Implementation(APlayerController* NewPlayer) override;

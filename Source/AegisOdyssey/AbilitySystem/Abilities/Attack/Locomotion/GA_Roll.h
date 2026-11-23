@@ -29,30 +29,38 @@ struct FRollTargetData : public FGameplayAbilityTargetData
 	{
 	}
 
+	// 各方向资源为空时表示该方向未配置，能力选中缺失的资源会记录原因。
+	// 向前翻滚的动画资源，也是能力无法归到其他方向时的默认选择。
 	UPROPERTY(EditAnywhere, Category = "Config")
-	UAnimMontage* ForwardMontage;
+	UAnimMontage* ForwardMontage = nullptr;
 
-	// 八方向翻滚资源。
+	// 向后翻滚的动画资源，角色没有方向输入时也由能力选中。
 	UPROPERTY(EditAnywhere, Category = "Config")
-	UAnimMontage* BackwardMontage;
+	UAnimMontage* BackwardMontage = nullptr;
 
+	// 向左横向闪避的动画资源，选中左侧方向时读取。
 	UPROPERTY(EditAnywhere, Category = "Config")
-	UAnimMontage* LeftMontage;
+	UAnimMontage* LeftMontage = nullptr;
 
+	// 向右横向闪避的动画资源，选中右侧方向时读取。
 	UPROPERTY(EditAnywhere, Category = "Config")
-	UAnimMontage* RightMontage;
+	UAnimMontage* RightMontage = nullptr;
 
+	// 向左前方翻滚的动画资源，供能力匹配左前斜向输入。
 	UPROPERTY(EditAnywhere, Category = "Config")
-	UAnimMontage* ForwardLeftMontage;
+	UAnimMontage* ForwardLeftMontage = nullptr;
 
+	// 向右前方翻滚的动画资源，供能力匹配右前斜向输入。
 	UPROPERTY(EditAnywhere, Category = "Config")
-	UAnimMontage* ForwardRightMontage;
+	UAnimMontage* ForwardRightMontage = nullptr;
 
+	// 向左后方翻滚的动画资源，供能力匹配左后斜向输入。
 	UPROPERTY(EditAnywhere, Category = "Config")
-	UAnimMontage* BackwardLeftMontage;
+	UAnimMontage* BackwardLeftMontage = nullptr;
 
+	// 向右后方翻滚的动画资源，供能力匹配右后斜向输入。
 	UPROPERTY(EditAnywhere, Category = "Config")
-	UAnimMontage* BackwardRightMontage;
+	UAnimMontage* BackwardRightMontage = nullptr;
 	
 	// 输入来源标签，方便上层区分这次翻滚是由哪种输入语义触发的。
 	UPROPERTY(BlueprintReadWrite, Category = "LightAttack")
@@ -85,10 +93,7 @@ struct FRollTargetData : public FGameplayAbilityTargetData
 	UPROPERTY(BlueprintReadWrite, Category = "LightAttack")
 	FVector MoveInputDirection;
 
-	/**
-	 * 获取脚本结构体类型
-	 * @return 返回FLightAttackTargetData的静态结构体
-	 */
+	// GAS 通过反射类型识别目标数据，接收方据此确认可以按翻滚数据读取。
 	virtual UScriptStruct* GetScriptStruct() const override
 	{
 		return FRollTargetData::StaticStruct();

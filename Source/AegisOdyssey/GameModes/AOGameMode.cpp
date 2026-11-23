@@ -279,10 +279,10 @@ void AAOGameMode::HandleStartingNewPlayer_Implementation(APlayerController* NewP
 	}
 }
 
+// 先确认控制器有可生成的 Pawn。玩家通过重生资格检查后才安排下一帧重试，非玩家控制器可以直接安排。
+// 无法重试时记录控制器和原因，最后交还引擎处理本次失败。
 void AAOGameMode::FailedToRestartPlayer(AController* NewPlayer)
 {
-	//尝试重新生成玩家失败
-
 	if (UClass* PawnClass = GetDefaultPawnClassForController(NewPlayer))
 	{
 		if (APlayerController* NewPC = Cast<APlayerController>(NewPlayer))
@@ -293,7 +293,7 @@ void AAOGameMode::FailedToRestartPlayer(AController* NewPlayer)
 			}
 			else
 			{
-				UE_LOG(LogTemp, Verbose, TEXT("服务器未找到控制器"), *GetPathNameSafe(NewPlayer));
+				UE_LOG(LogTemp, Verbose, TEXT("服务器当前不允许控制器 %s 重生"), *GetPathNameSafe(NewPlayer));
 			}
 		}
 		else
@@ -303,8 +303,7 @@ void AAOGameMode::FailedToRestartPlayer(AController* NewPlayer)
 	}
 	else
 	{
-		UE_LOG(LogTemp, Verbose, TEXT("服务器未找到当前的PawnData"), *GetPathNameSafe(NewPlayer));
-
+		UE_LOG(LogTemp, Verbose, TEXT("服务器找不到控制器 %s 的 Pawn 类"), *GetPathNameSafe(NewPlayer));
 	}
 	
 	Super::FailedToRestartPlayer(NewPlayer);

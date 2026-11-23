@@ -17,11 +17,13 @@ struct FPlayHeavyAttackMontageInstanceData
 	UPROPERTY(EditAnywhere, Category = "Config")
 	FGameplayTag InputTag;
 
+	// 重击动画节点的可选角色网格绑定，空值表示节点未配置网格。
 	UPROPERTY(EditAnywhere, Category = "Config")
-	USkeletalMeshComponent* SkeletalMesh;
+	USkeletalMeshComponent* SkeletalMesh = nullptr;
 
+	// 本次重击播放的蒙太奇，由节点传给能力，空值表示无显式动画。
 	UPROPERTY(EditAnywhere, Category = "Config")
-	UAnimMontage* Montage;
+	UAnimMontage* Montage = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Config")
 	float PlayRate = 1.0f;

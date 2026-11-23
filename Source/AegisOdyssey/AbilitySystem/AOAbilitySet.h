@@ -89,8 +89,8 @@ public:
 
 	void TakeFromAbilitySystem(UAOAbilitySystem* AOASC);
 
-	// stack-aware 版本只解决“某些 GameplayEffect 不能整条删，而应该按层回收”的场景。
-	// 当前先给正式装备系统使用，不改动武器和技能等其他 AbilitySet 使用方的默认回收语义。
+	// 武器或正式装备卸下时，由服务器撤销这批授予的能力和效果。
+	// 支持叠层的效果按运行时层数回收，结束后清空授予句柄。
 	void TakeFromAbilitySystemStackAware(UAOAbilitySystem* AOASC);
 
 protected:

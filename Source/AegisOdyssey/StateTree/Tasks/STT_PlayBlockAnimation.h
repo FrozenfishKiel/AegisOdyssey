@@ -1,10 +1,10 @@
 ﻿#pragma once
 #include "CoreMinimal.h"
+#include "AegisOdyssey/Character/AOHeroComponent.h"
 #include "GameplayAbilitySpecHandle.h"
 #include "StateTreeTaskBase.h"
 #include "STT_PlayBlockAnimation.generated.h"
 
-enum EInputType : uint8;
 class UGameplayAbility;
 class UAbilitySystemComponent;
 
@@ -16,20 +16,25 @@ struct FPlayBlockAnimationMontageInstanceData
 	UPROPERTY(EditAnywhere, Category = "Config")
 	FGameplayTag InputTag;
 
+	// 传给格挡能力的输入阶段，None 表示本节点未指定输入阶段。
 	UPROPERTY()
-	TEnumAsByte<EInputType> InputType;
+	TEnumAsByte<EInputType> InputType = EInputType::None;
 	
+	// 格挡动画节点的可选角色网格绑定，空值表示节点未配置网格。
 	UPROPERTY(EditAnywhere, Category = "Config")
-	USkeletalMeshComponent* SkeletalMesh;
+	USkeletalMeshComponent* SkeletalMesh = nullptr;
 
+	// 格挡起手的蒙太奇，空值使能力直接进入持续格挡。
 	UPROPERTY(EditAnywhere, Category = "Config")
-	UAnimMontage* StartBlockMontage;
+	UAnimMontage* StartBlockMontage = nullptr;
 	
+	// 持续格挡的蒙太奇，空值使能力结束格挡。
 	UPROPERTY(EditAnywhere, Category = "Config")
-	UAnimMontage* LoopBlockMontage;
+	UAnimMontage* LoopBlockMontage = nullptr;
 
+	// 格挡收尾的蒙太奇，空值时能力会请求结束。
 	UPROPERTY(EditAnywhere, Category = "Config")
-	UAnimMontage* EndBlockMontage;
+	UAnimMontage* EndBlockMontage = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Config")
 	float PlayRate = 1.0f;

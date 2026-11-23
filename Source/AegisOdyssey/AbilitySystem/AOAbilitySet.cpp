@@ -171,6 +171,8 @@ void FAOAbilitySet_GrantedHandles::TakeFromAbilitySystem(UAOAbilitySystem* AOASC
 	GameplayEffectHandles.Reset();
 }
 
+// 只在服务器回收授予记录。先移除有效能力，再按引擎认定的叠层方式回收效果，最后清空句柄。
+// 有效效果支持多层时按层回收，其余情况按句柄移除整条效果。
 void FAOAbilitySet_GrantedHandles::TakeFromAbilitySystemStackAware(UAOAbilitySystem* AOASC)
 {
 	check(AOASC);
@@ -199,11 +201,12 @@ void FAOAbilitySet_GrantedHandles::TakeFromAbilitySystemStackAware(UAOAbilitySys
 
 		// 可堆叠来源效果在卸下时要按层回收，
 		// 避免把同类 GE 的整条活动实例直接误删。
+		// UE 5.8 的公开查询会把瞬时效果判为不叠层。
 		if (const FActiveGameplayEffect* ActiveGameplayEffect = AOASC->GetActiveGameplayEffect(Handle))
 		{
 			const UGameplayEffect* GameplayEffect = ActiveGameplayEffect->Spec.Def;
 			if (GameplayEffect != nullptr &&
-				GameplayEffect->StackingType != EGameplayEffectStackingType::None &&
+				GameplayEffect->GetStackingType() != EGameplayEffectStackingType::None &&
 				GameplayEffect->GetStackLimitCount() > 1)
 			{
 				StacksToRemove = ActiveGameplayEffect->Spec.GetStackCount();
